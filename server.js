@@ -48,11 +48,12 @@ if (mongoURL == null) {
 		mongoURLLabel += mongoHost + ':' + mongoPort + '/' + mongoDatabase;
 		mongoURL += mongoHost + ':' +  mongoPort + '/' + mongoDatabase;
 	}
-	}
-	var db = null,
-		dbDetails = new Object();
+}
 
-	var initDb = function(callback) {
+var db = null,
+	dbDetails = new Object();
+
+var initDb = function(callback) {
 	if (mongoURL == null) return;
 
 	var mongodb = require('mongodb');
@@ -71,7 +72,7 @@ if (mongoURL == null) {
 
 		console.log('Connected to MongoDB at: %s', mongoURL);
 	});
-	};
+};
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -87,6 +88,9 @@ app.use('/users', require('./users/users.controller'));
 // global error handler
 app.use(errorHandler);
 
+initDb(function(err){
+	console.log('Error connecting to Mongo. Message:\n'+err);
+});
 
 // start server
 const server = app.listen(port, function () {
