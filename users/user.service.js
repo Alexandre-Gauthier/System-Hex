@@ -1,5 +1,10 @@
 ﻿// users hardcoded for simplicity, store in a db for production applications
-const users = [{ id: 1, username: 'test', password: 'test', firstName: 'Test', lastName: 'User' },{ id: 2, username: 'test2', password: '123', firstName: 'Test', lastName: 'User' }];
+//const users = [{ id: 1, username: 'test', password: 'test', firstName: 'Test', lastName: 'User' },{ id: 2, username: 'test2', password: '123', firstName: 'Test', lastName: 'User' }];
+const users = [];
+db.collection('quotes').find().toArray((err, result) => {
+    if (err) return console.log(err)
+    users = result;
+});
 
 module.exports = {
     authenticate,
