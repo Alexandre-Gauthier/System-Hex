@@ -75,7 +75,7 @@ var initDb = function(callback) {
 		return;
 		}
 
-		db = conn;
+		db = conn.db('system-hex');
 		dbDetails.databaseName = db.databaseName;
 		dbDetails.url = mongoURLLabel;
 		dbDetails.type = 'MongoDB';
@@ -110,7 +110,7 @@ const server = app.listen(port, function () {
 /*
 MongoClient.connect(config, (err, client) => {
 	if (err) return console.log(err)
-	db = client.db('system-hex') // whatever your database name is
+	db = client.db('system-hex')
 	if(db!= null){
 		const server = app.listen(port, function () {
 			console.log('Server listening on port ' + port);
