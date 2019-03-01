@@ -25,21 +25,11 @@ app.use(errorHandler);
 
 
 // start server
-const port = 3000;
-MongoClient.connect(config, (err, client) => {
-	if (err) return console.log(err)
-	db = client.db('system-hex') // whatever your database name is
-	if(db!= null){
-		const server = app.listen(port, function () {
-			console.log('Server listening on port ' + port);
-		});
-	}
-})
+const port = 8080;
+const server = app.listen(port, function () {
+	console.log('Server listening on port ' + port);
+});
 
 app.get('/server',(req,res)=>{
-	console.log(req.user.id);
-	db.collection('quotes').find().toArray((err, result) => {
-		if (err) return console.log(err)
-		res.send(result);
-	});
+	console.log('Hello there')
 });
