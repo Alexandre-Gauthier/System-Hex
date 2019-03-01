@@ -7,6 +7,7 @@ const basicAuth = require('./_helpers/basic-auth');
 const errorHandler = require('./_helpers/error-handler');
 
 const MongoClient = require('mongodb').MongoClient
+const config = require('./config');
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
     ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0',
