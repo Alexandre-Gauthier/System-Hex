@@ -14,6 +14,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
 
+
 // use basic HTTP auth to secure the api
 app.use(basicAuth);
 
@@ -32,4 +33,5 @@ const server = app.listen(port, function () {
 
 app.get('/server',(req,res)=>{
 	console.log('Hello there')
+	res.send('Hello there')
 });
