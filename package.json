@@ -1,0 +1,25 @@
+{
+  "name": "system-hex",
+  "version": "1.0.0",
+  "description": "Server System-Hex",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alekusando/System-Hex.git"
+  },
+  "author": "Alexandre Gauthier",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Alekusando/System-Hex/issues"
+  },
+  "homepage": "https://github.com/Alekusando/System-Hex#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "mongodb": "^3.1.13"
+  }
+}
