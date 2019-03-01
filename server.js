@@ -66,7 +66,7 @@ var db = null,
 var initDb = function(callback) {
 	if (mongoURL == null) return;
 
-	var mongodb = require('mongodb');
+	var mongodb = require('mongodb').MongoClient;
 	if (mongodb == null) return;
 
 	mongodb.connect(mongoURL, function(err, conn) {
