@@ -1,5 +1,5 @@
-const serverUser = "userSystem"
+const serverUser = "systemHex"
 const serverPwd = "Lancelot2018"
-const serverHost = "http://mongodb-systemhex.7e14.starter-us-west-2.openshiftapps.com/"
-const appName = "server-system-hex"
-module.exports = "mongodb://"+serverUser+":"+serverPwd+"@"+serverHost+"/"+appName;
+const serverHost = "system-hex-t3whh.mongodb.net"
+const appName = "test?retryWrites=true"
+module.exports = "mongodb+srv://"+serverUser+":"+serverPwd+"@"+serverHost+"/"+appName;

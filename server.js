@@ -13,6 +13,7 @@ var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
     mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL,
     mongoURLLabel = "";
 
+	/*
 if (mongoURL == null) {
 	var mongoHost, mongoPort, mongoDatabase, mongoPassword, mongoUser;
 	// If using plane old env vars via service discovery
@@ -72,7 +73,7 @@ var initDb = function(callback) {
 
 		console.log('Connected to MongoDB at: %s', mongoURL);
 	});
-};
+};*/
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -92,12 +93,27 @@ initDb(function(err){
 	console.log('Error connecting to Mongo. Message:\n'+err);
 });
 
+/*
 // start server
 const server = app.listen(port, function () {
 	console.log('Server listening on port ' + port);
-});
+});*/
+
+MongoClient.connect(config, (err, client) => {
+	if (err) return console.log(err)
+	db = client.db('system-hex') // whatever your database name is
+	if(db!= null){
+		const server = app.listen(port, function () {
+			console.log('Server listening on port ' + port);
+		});
+	}
+})
 
 app.get('/server',(req,res)=>{
-	console.log('Hello there')
-	res.send('Hello there')
+	/*console.log('Hello there')
+	res.send('Hello there')*/
+	db.collection('quotes').find().toArray((err, result) => {
+		if (err) return console.log(err)
+		res.send(result);
+	});
 });
