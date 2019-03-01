@@ -37,6 +37,26 @@ var initDb = function(callback) {
 		dbDetails.type = 'MongoDB';
 
 		console.log('Connected to MongoDB at: %s', mongoURL);
+
+		db.collection('users').find().toArray((err, result) => {
+			if (err) return console.log(err)
+			users = result;
+		});
+
+		// use basic HTTP auth to secure the api
+		app.use(basicAuth);
+
+		// api routes
+		app.use('/users', require('./users/users.controller'));
+
+		// global error handler
+		app.use(errorHandler);
+
+
+		// start server
+		const server = app.listen(port, function () {
+			console.log('Server listening on port ' + port);
+		});
 	});
 };
 
@@ -48,20 +68,7 @@ initDb(function(err){
 	console.log('Error connecting to Mongo. Message:\n'+err);
 });
 
-// use basic HTTP auth to secure the api
-app.use(basicAuth);
 
-// api routes
-app.use('/users', require('./users/users.controller'));
-
-// global error handler
-app.use(errorHandler);
-
-
-// start server
-const server = app.listen(port, function () {
-	console.log('Server listening on port ' + port);
-});
 
 app.get('/server',(req,res)=>{
 	db.collection('quotes').find().toArray((err, result) => {
