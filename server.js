@@ -89,11 +89,11 @@ app.use('/users', require('./users/users.controller'));
 // global error handler
 app.use(errorHandler);
 
+/*
 initDb(function(err){
 	console.log('Error connecting to Mongo. Message:\n'+err);
 });
 
-/*
 // start server
 const server = app.listen(port, function () {
 	console.log('Server listening on port ' + port);
