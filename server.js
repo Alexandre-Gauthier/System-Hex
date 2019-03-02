@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
 
 const basicAuth = require('./_helpers/basic-auth');
 const errorHandler = require('./_helpers/error-handler');
@@ -52,7 +54,6 @@ var initDb = function(callback) {
 		// global error handler
 		app.use(errorHandler);
 
-
 		// start server
 		const server = app.listen(port, function () {
 			console.log('Server listening on port ' + port);
@@ -63,16 +64,50 @@ var initDb = function(callback) {
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
+app.use(cookieParser());
 
-initDb(function(err){
-	console.log('Error connecting to Mongo. Message:\n'+err);
+app.use(session({
+    key: 'user_sid',
+    secret: 'somerandonstuffs',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        expires: 600000
+    }
+}));
+
+app.use((req, res, next) => {
+    if (req.cookies.user_sid && !req.session.user) {
+        res.clearCookie('user_sid');
+    }
+    next();
 });
 
+let sessionChecker = (req, res, next) => {
+    if (req.session.user && req.cookies.user_sid) {
+        res.redirect('/dashboard');
+    } else {
+        next();
+    }
+};
 
+// route for user logout
+app.get('/logout', (req, res) => {
+    if (req.session.user && req.cookies.user_sid) {
+        res.clearCookie('user_sid');
+        res.redirect('/');
+    } else {
+        res.redirect('/login');
+    }
+});
 
-app.get('/server',(req,res)=>{
+app.get('/login',(req,res)=>{
 	db.collection('quotes').find().toArray((err, result) => {
 		if (err) return console.log(err)
 		res.send(result);
 	});
+});
+
+initDb(function(err){
+	console.log('Error connecting to Mongo. Message:\n'+err);
 });
