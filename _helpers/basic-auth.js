@@ -1,6 +1,6 @@
 const userService = require('../users/user.service');
 
-module.exports = getUser;
+exports.getUser = auth;
 
 async function basicAuth(req, res, next) {
     // make authenticate path public
@@ -28,7 +28,7 @@ async function basicAuth(req, res, next) {
     next();
 }
 
-async function getUser(username,password){
+async function auth(username,password){
     const user = await userService.authenticate({ username, password });
     return user;
 }

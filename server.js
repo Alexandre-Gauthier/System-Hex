@@ -41,12 +41,12 @@ var initDb = function(callback) {
 		dbDetails.type = 'MongoDB';
 
 		console.log('Connected to MongoDB at: %s', mongoURL);
-/*
+
 		db.collection('users').find().toArray((err, result) => {
 			if (err) return console.log(err)
 			users = result;
 		});
-
+/*
 
 		// use basic HTTP auth to secure the api
 		app.use(basicAuth);
