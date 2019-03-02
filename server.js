@@ -8,15 +8,14 @@ var session = require('express-session');
 const userLog = require('./models/basic-auth').auth;
 const initDb = require("./models/db").initDb;
 const getDb = require("./models/db").getDb;
-const getUsers = require("./models/db").getUsers;
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
-
 app.use(cookieParser());
+app.use(express.static('public'));
 
 app.use(session({
     key: 'user_sid',
@@ -65,7 +64,17 @@ app.route('/login')
 			req.session.user = user;
 			res.redirect('/observation');
 		}
-    });
+	});
+
+// route for user logout
+app.get('/logout', (req, res) => {
+    if (req.session.user && req.cookies.user_sid) {
+        res.clearCookie('user_sid');
+        res.redirect('/');
+    } else {
+        res.redirect('/login');
+    }
+});
 
 app.get('/observation', (req, res) => {
 	if (req.session.user && req.cookies.user_sid) {
