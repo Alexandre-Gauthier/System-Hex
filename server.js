@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 
 var sessionChecker = (req, res, next) => {
     if (req.session.user && req.cookies.user_sid) {
-        res.redirect('/dashboard');
+        res.redirect('/observation');
     } else {
         next();
     }
@@ -55,13 +55,14 @@ app.route('/login')
     .post((req, res) => {
         var username = req.body.username,
 			password = req.body.password;
+		console.log('here')
 
 		let user = userLog(username,password);
 		console.log(user)
 		if (!user) {
 			res.redirect('/login');
 		}else{
-			req.session.user = user.dataValues;
+			req.session.user = user;
 			res.redirect('/observation');
 		}
     });
