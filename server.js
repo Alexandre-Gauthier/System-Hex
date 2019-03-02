@@ -5,8 +5,7 @@ const bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 
-const userService = require('../users/user.service');
-
+const userLog = require('./_helpers/basic-auth');
 /*
 const basicAuth = require('./_helpers/basic-auth');
 const errorHandler = require('./_helpers/error-handler');*/
@@ -109,7 +108,7 @@ app.route('/login')
         var username = req.body.username,
 			password = req.body.password;
 
-		const user = await userService.authenticate({ username, password });
+		let user = userLog.getUser(username,password);
 		if (!user) {
 			res.redirect('/login');
 		}else{
