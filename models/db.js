@@ -9,7 +9,7 @@ module.exports = {
 	getUsers
 };
 
-const initDb = (callback)=> {
+function initDb(callback) {
 	if(_db){
 		console.warn("Trying to init DB again!");
         return callback(null, _db);
@@ -26,7 +26,7 @@ const initDb = (callback)=> {
 
 };
 
-const getDb = () =>{
+function getDb(){
     assert.ok(_db, "Db has not been initialized. Please called init first.");
     return _db;
 }
