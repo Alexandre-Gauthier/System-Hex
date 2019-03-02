@@ -31,7 +31,7 @@ function getDb(){
     return _db;
 }
 
-const getUsers = () =>{
+function getUsers(){
 	let users = [];
 	if(_db){
 		_db.collection('users').find().toArray((err, result) => {
