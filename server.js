@@ -94,7 +94,7 @@ app.get('/crossroad', (req, res) => {
 });
 
 app.get('/crossroad/varTest', (req,res)=>{
-    if (req.session.user && req.cookies.user_sid) {
+    if (req.session.user) {
 		res.send(req.session.rand);
 	} else {
 		res.redirect('/login');
