@@ -13,6 +13,10 @@ body{
 	font-family: 'M PLUS Rounded 1c', sans-serif;
 }
 
+a{
+	text-decoration: none;
+}
+
 .outer_form{
 	position: relative;
 	margin: auto;
@@ -20,17 +24,21 @@ body{
 	right: 0;
 	bottom: 0;
 	left: 0;
-	width: 300px;
 	height: 90%;
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	justify-content: space-around;
+	column-gap: 30px;
 }
 
 .outer_form h1{
 	text-align:center;
 	font-family: 'M PLUS Rounded 1c', sans-serif;
 	color:#f2e7d0;
+}
+
+.inner_form{
+
 }
 
 .center_form{
@@ -77,4 +85,34 @@ body{
 	background-color: #92ad73;
 	color: #60704a;
 	border: 2px solid #788c5a;
+}
+
+.button_observation{
+	background-color: #81a061;
+	color: #60704a;
+	border: 2px solid #788c5a;
+	padding: 20px;
+}
+
+.inner_form.link:hover h1{
+	color:#f4f2d9;
+}
+
+.inner_form:hover .button_observation{
+	background-color: #92ad73;
+	color: #60704a;
+	border: 2px solid #788c5a;
+}
+
+.button_creation{
+	background-color: #ad5342;
+	color: #703634;
+	border: 2px solid #703634;
+	padding: 20px;
+}
+
+.inner_form:hover .button_creation{
+	background-color: #bc604f;
+	color: #703634;
+	border: 2px solid #703634;
 }

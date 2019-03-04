@@ -34,13 +34,17 @@ app.use((req, res, next) => {
     next();
 });
 
-var sessionChecker = (req, res, next) => {
+let sessionChecker = (req, res, next) => {
     if (req.session.user && req.cookies.user_sid) {
-        res.redirect('/observation');
+        res.redirect('/crossroad');
     } else {
         next();
     }
 };
+
+let sess;
+
+// Route
 
 app.get('/', sessionChecker, (req, res) => {
     res.redirect('/login');
@@ -62,7 +66,7 @@ app.route('/login')
 			res.redirect('/login');
 		}else{
 			req.session.user = user;
-			res.redirect('/observation');
+			res.redirect('/crossroad');
 		}
 	});
 
@@ -76,9 +80,9 @@ app.get('/logout', (req, res) => {
     }
 });
 
-app.get('/observation', (req, res) => {
+app.get('/crossroad', (req, res) => {
 	if (req.session.user && req.cookies.user_sid) {
-		res.sendFile(__dirname + '/public/observation.html');
+		res.sendFile(__dirname + '/public/crossroad.html');
 	} else {
 		res.redirect('/login');
 	}
