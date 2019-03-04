@@ -9,7 +9,7 @@ async function auth(username,password){
 async function authenticate({ username, password }) {
     let users = getUsers();
     let user = users.find(u => u.username === username && u.password === password);
-    console.log(user)
+    console.log(users)
     if (user) {
         let { password, ...userWithoutPassword } = user;
         return userWithoutPassword;
