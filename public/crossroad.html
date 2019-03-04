@@ -15,7 +15,7 @@
 		request.onload = function () {
 			let data = JSON.parse(this.response);
 			if (request.status >= 200 && request.status < 400) {
-				console.log(data);
+				console.log(data.toString());
 			} else {
 				console.log('error');
 			}
