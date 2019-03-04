@@ -94,7 +94,7 @@ app.get('/crossroad', (req, res) => {
 });
 
 app.get('/varTest', (req,res)=>{
-    res.send(req.session.rand);
+    res.send('hello');
 })
 
 initDb(function(err){
