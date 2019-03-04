@@ -4,9 +4,11 @@ module.exports = {auth};
 
 async function auth(username,password){
     let user = await authenticate({ username, password });
+    console.log('auth')
     return user;
 }
 async function authenticate({ username, password }) {
+    console.log('authenticate',username,password);
     let users = getUsers();
     let user = users.find(u => u.username === username && u.password === password);
     console.log(users)
