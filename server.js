@@ -70,7 +70,7 @@ app.route('/login')
 			res.redirect('/login');
 		}else{
             req.session.user = user;
-            req.session.rand = Math.random()*100;
+            req.session.rand = 'hello';
 			res.redirect('/crossroad');
 		}
 	});
@@ -94,7 +94,7 @@ app.get('/crossroad', (req, res) => {
 });
 
 app.get('/varTest', (req,res)=>{
-    res.send('hello');
+    res.send(req.session.rand);
 })
 
 initDb(function(err){
