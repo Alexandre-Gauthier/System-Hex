@@ -89,7 +89,7 @@ app.get('/crossroad', (req, res) => {
 	}
 });
 
-app.get('/varTest', (req,res)=>{
+app.get('/crossroad/varTest', (req,res)=>{
     if (req.session.user && req.cookies.user_sid) {
 		res.send(req.session.rand);
 	} else {
