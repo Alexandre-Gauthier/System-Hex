@@ -65,7 +65,8 @@ app.route('/login')
 		if (!user) {
 			res.redirect('/login');
 		}else{
-			req.session.user = user;
+            req.session.user = user;
+            req.session.rand = Math.random()*100;
 			res.redirect('/crossroad');
 		}
 	});
@@ -87,6 +88,14 @@ app.get('/crossroad', (req, res) => {
 		res.redirect('/login');
 	}
 });
+
+app.get('/varTest', (req,res)=>{
+    if (req.session.user && req.cookies.user_sid) {
+		res.send(req.session.rand);
+	} else {
+		res.redirect('/login');
+	}
+})
 
 initDb(function(err){
 	const server = app.listen(port, function () {

@@ -7,6 +7,21 @@
 	<title>System-Hex - Crossroad</title>
 	<link href="https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c:700" rel="stylesheet">
 	<link rel="stylesheet" href="css/global.css">
+	<script>
+		var request = new XMLHttpRequest();
+
+		request.open('GET', 'http://system-hex-systemhex.7e14.starter-us-west-2.openshiftapps.com/varTest', true);
+
+		request.onload = function () {
+			if (request.status >= 200 && request.status < 400) {
+				console.log(this.response);
+			} else {
+				console.log('error');
+			}
+		}
+
+		request.send();
+	</script>
 </head>
 <body>
 	<div class="outer_form">
