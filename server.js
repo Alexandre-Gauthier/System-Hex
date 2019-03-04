@@ -47,7 +47,11 @@ let sess;
 // Route
 
 app.get('/', sessionChecker, (req, res) => {
-    res.redirect('/login');
+    if (req.session.user && req.cookies.user_sid) {
+        res.redirect('/crossroad');
+    } else {
+        res.redirect('/login');
+    }
 });
 
 app.route('/login')
