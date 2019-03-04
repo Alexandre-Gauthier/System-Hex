@@ -93,12 +93,8 @@ app.get('/crossroad', (req, res) => {
 	}
 });
 
-app.get('/crossroad/varTest', (req,res)=>{
-    if (req.session.user) {
-		res.send(req.session.rand);
-	} else {
-		res.redirect('/login');
-	}
+app.get('/varTest', (req,res)=>{
+    res.send(req.session.rand);
 })
 
 initDb(function(err){
