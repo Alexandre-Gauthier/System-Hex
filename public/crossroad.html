@@ -8,13 +8,14 @@
 	<link href="https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c:700" rel="stylesheet">
 	<link rel="stylesheet" href="css/global.css">
 	<script>
-		var request = new XMLHttpRequest();
+		let request = new XMLHttpRequest();
 
 		request.open('GET', '/varTest', true);
 
 		request.onload = function () {
+			let data = JSON.parse(this.response);
 			if (request.status >= 200 && request.status < 400) {
-				console.log(this.response);
+				console.log(data);
 			} else {
 				console.log('error');
 			}
