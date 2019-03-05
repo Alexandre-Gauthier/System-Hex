@@ -2,7 +2,6 @@ const client = require('mongodb').MongoClient;
 const config = require("./config");
 
 let _db;
-let users = [];
 
 module.exports = {
     getDb,
@@ -36,12 +35,9 @@ async function getUsers(){
 	console.log('db_getUsers',_db)
 	if(_db){
 		console.log('db_getUsers_Inside')
-		users = await _db.collection('users').find().toArray((err, result) => {
+		return _db.collection('users').find().toArray((err, result) => {
 			if (err) return console.log(err)
-			console.log('collection',result)
 			return result;
 		});
 	}
-	console.log('db_getUsers',users)
-	return users;
 }
