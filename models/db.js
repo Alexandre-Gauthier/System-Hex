@@ -2,6 +2,7 @@ const client = require('mongodb').MongoClient;
 const config = require("./config");
 
 let _db;
+let users = [];
 
 module.exports = {
     getDb,
@@ -32,7 +33,6 @@ function getDb(){
 }
 
 function getUsers(){
-	let users = [];
 	console.log('db_getUsers',_db)
 	if(_db){
 		_db.collection('users').find().toArray((err, result) => {
