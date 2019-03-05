@@ -37,6 +37,7 @@ function getUsers(callback){
 		console.log('db_getUsers_Inside')
 		_db.collection('users').find().toArray((err, result) => {
 			if (err) return console.log(err)
+			console.log('db_getUsers_Inside',result)
 			callback(result)
 		});
 	}
