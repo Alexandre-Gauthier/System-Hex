@@ -42,8 +42,6 @@ let sessionChecker = (req, res, next) => {
     }
 };
 
-let sess;
-
 // Route
 
 app.get('/', sessionChecker, (req, res) => {
@@ -63,14 +61,16 @@ app.route('/login')
         var username = req.body.username,
 			password = req.body.password;
 
-		let user = userLog(username,password);
-		console.log('login_route',user)
-		if (!user) {
-			res.redirect('/login');
-		}else{
-            req.session.user = user;
-			res.redirect('/crossroad');
-		}
+
+		userLog(username,password,(user)=>{
+            console.log('login_route',user)
+            if (!user) {
+                res.redirect('/login');
+            }else{
+                req.session.user = user;
+                res.redirect('/crossroad');
+            }
+        });
 	});
 
 // route for user logout
