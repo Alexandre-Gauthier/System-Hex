@@ -63,7 +63,7 @@ app.route('/login')
         var username = req.body.username,
 			password = req.body.password;
 
-		let user = await userLog(username,password);
+		let user = userLog(username,password);
 		console.log('login_route',user)
 		if (!user) {
 			res.redirect('/login');
