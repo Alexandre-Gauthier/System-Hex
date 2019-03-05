@@ -33,11 +33,13 @@ function getDb(){
 
 function getUsers(){
 	let users = [];
+	console.log('db_getUsers',_db)
 	if(_db){
 		_db.collection('users').find().toArray((err, result) => {
 			if (err) return console.log(err)
 			users = result;
 		});
 	}
+	console.log('db_getUsers',users)
 	return users;
 }

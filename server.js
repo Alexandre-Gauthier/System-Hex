@@ -62,10 +62,9 @@ app.route('/login')
     .post((req, res) => {
         var username = req.body.username,
 			password = req.body.password;
-		console.log('here')
 
 		let user = userLog(username,password);
-		console.log(user)
+		console.log('login_route',user)
 		if (!user) {
 			res.redirect('/login');
 		}else{
