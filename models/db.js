@@ -37,6 +37,7 @@ function getUsers(){
 	if(_db){
 		_db.collection('users').find().toArray((err, result) => {
 			if (err) return console.log(err)
+			console.log('collection',result)
 			users = result;
 		});
 	}
