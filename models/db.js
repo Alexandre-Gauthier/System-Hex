@@ -31,13 +31,17 @@ function getDb(){
     return _db;
 }
 
-async function getUsers(){
+function getUsers(){
+	let users = [];
 	console.log('db_getUsers',_db)
 	if(_db){
 		console.log('db_getUsers_Inside')
-		return _db.collection('users').find().toArray((err, result) => {
+		_db.collection('users').find().toArray((err, result) => {
 			if (err) return console.log(err)
-			return result;
+			users = result;
+
 		});
 	}
+	console.log('db_getUsers',users)
+	return users;
 }
