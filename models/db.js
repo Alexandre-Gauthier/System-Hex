@@ -33,7 +33,6 @@ function getDb(){
 }
 
 function getUsers(callback){
-	console.log('db_getUsers',_db)
 	if(_db){
 		console.log('db_getUsers_Inside')
 		_db.collection('users').find().toArray((err, result) => {

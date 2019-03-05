@@ -11,6 +11,7 @@ function auth(username,password,callback){
 function authenticate( username, password, callback ) {
     console.log('authenticate',username,password);
     getUsers((users)=>{
+        console.log(users)
         let user = users.find(u => u.username === username && u.password === password);
         console.log('authenticate',users)
         if (user) {
