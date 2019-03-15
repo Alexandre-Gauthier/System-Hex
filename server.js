@@ -61,13 +61,13 @@ app.route('/login')
         var username = req.body.username,
 			password = req.body.password;
 
-
 		userLog(username,password,(user)=>{
             console.log('login_route',user)
             if (!user) {
                 res.redirect('/login');
             }else{
                 req.session.user = user;
+                req.session.rand = Math.random()*100;
                 res.redirect('/crossroad');
             }
         });
@@ -92,7 +92,11 @@ app.get('/crossroad', (req, res) => {
 });
 
 app.get('/varTest', (req,res)=>{
-    res.send(req.session.user);
+    if (req.session.user && req.cookies.user_sid) {
+        res.send(req.session.rand);
+    } else {
+        res.send('Unable to get info');
+    }
 })
 
 initDb(function(err){

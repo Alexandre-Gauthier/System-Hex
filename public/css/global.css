@@ -17,6 +17,12 @@ a{
 	text-decoration: none;
 }
 
+h1{
+	text-align:center;
+	font-family: 'M PLUS Rounded 1c', sans-serif;
+	color:#f2e7d0;
+}
+
 .outer_form{
 	position: relative;
 	margin: auto;
@@ -25,29 +31,41 @@ a{
 	bottom: 0;
 	left: 0;
 	height: 90%;
+	padding:0 20px 20px 20px;
+	box-sizing: border-box;
+}
+
+.center_flex{
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
 	column-gap: 30px;
 }
 
-.outer_form h1{
-	text-align:center;
-	font-family: 'M PLUS Rounded 1c', sans-serif;
-	color:#f2e7d0;
+.display_evenly{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	column-gap: 30px;
 }
 
-.inner_form{
-
-}
 
 .center_form{
+	min-width: 250px;
 	width: 300px;
+	max-width: 400px;
 	height: auto;
+	margin-left: 10px;
+	padding:10px;
 
-	background-color: #f2e7d0;
-	border-radius: 10px;
-	border: 2px solid #8e8a6b;
+	background-color: #f2e7d1;
+	border-radius: 15px;
+	border: 4px solid #8e7f6b;
+	box-sizing: border-box;
+}
+
+.outer_form > :first-child .center_form{
+	margin-left: 0px;
 }
 
 .center_form label{
@@ -59,12 +77,12 @@ a{
 	position: relative;
 	width: 90%;
 	height: 25px;
-	border-radius: 5px;
-	border: 1px solid #c4c09f;
+	border-radius: 10px;
+	border: 1px solid #e5e4d3;
 	margin: 30px auto;
 	text-align:center;
 	font-family: 'M PLUS Rounded 1c', sans-serif;
-	color:#8e8a6b;
+	color:#8e7f6b;
 }
 
 .center_form button{
@@ -87,15 +105,16 @@ a{
 	border: 2px solid #788c5a;
 }
 
+/***************************************************************** Crossroad ********************************************************************/
+a > .inner_form:hover h1{
+	color:#f4f2d9;
+}
+
 .button_observation{
 	background-color: #81a061;
 	color: #60704a;
 	border: 2px solid #788c5a;
 	padding: 20px;
-}
-
-.inner_form.link:hover h1{
-	color:#f4f2d9;
 }
 
 .inner_form:hover .button_observation{
@@ -115,4 +134,141 @@ a{
 	background-color: #bc604f;
 	color: #703634;
 	border: 2px solid #703634;
+}
+
+/************************************************* Dashboard ***********************************************************/
+.header_bar{
+	height: 70px;
+	width:100%;
+	justify-content: space-around;
+	padding:10px 20px;
+	box-sizing: border-box;
+}
+
+.header_bar .header_title{
+	float:left;
+	/* margin-left:10px; */
+}
+
+.header_bar .header_menu{
+	float:right;
+	display: flex;
+	justify-content: space-between;
+}
+
+.button_square{
+	width:50px;
+	height:50px;
+	box-sizing: border-box;
+	background-color: #81a061;
+	color: #60704a;
+	border: 4px solid #788c5a;
+	padding: 5px;
+	border-radius: 10px;
+	margin-left:5px;
+}
+
+.button_square.save{
+	background-color: #dea34e;
+	color: #a56a2d;
+	border-color: #a56a2d;
+}
+
+.button_square.save:hover{
+	background-color: #e8ad58;
+	color: #b27433;
+	border-color: #b27433;
+}
+
+.button_square.delete{
+	background-color: #6d6a6b;
+	color: #3f3738;
+	border-color: #3f3738;
+}
+
+.button_square.delete:hover{
+	background-color: #757172;
+	color: #474040;
+	border-color: #474040;
+}
+
+.button_square.close{
+	background-color: #ae5342;
+	color: #703635;
+	border-color: #703635;
+}
+
+.button_square.close:hover{
+	background-color: #bc604f;
+	color: #703634;
+	border-color: #703634;
+}
+
+.full_height{
+	height:100%;
+}
+
+.full_width{
+	width:100%;
+}
+
+.half_width{
+	min-width: 150px;
+	width:200px;
+	max-width: 250px;
+}
+
+.display_flex{
+	display: flex;
+}
+
+.center_form h2{
+	color: #8e8a6b;
+}
+
+.center_form h2:after{
+	content:"";
+	display:block;
+	width:100%;
+	background-color: #8e8a6b;
+	height: 4px;
+	border-radius: 2px;
+}
+
+.center_form h3:not(.first):before{
+	content:"";
+	display:block;
+	width:100%;
+	background-color: #8e8a6b;
+	height: 4px;
+	border-radius: 2px;
+}
+
+.center_form h3{
+	color: #82a061;
+	font-size: 22px;
+	margin-left:0px;
+}
+
+.center_form h4{
+	color: #82a061;
+	font-size: 20px;
+	margin-left:15px;
+}
+
+.center_form h4:before{
+	content: "";
+	display:block;
+	width:100%;
+	background-color: #8e8a6b;
+	height: 4px;
+	border-radius: 2px;
+	margin-top: 10px;
+}
+
+.center_form .form_line{
+	margin-left:20px;
+	font-size: 20px;
+	display: flex;
+	color: #8e8a6b;
 }
