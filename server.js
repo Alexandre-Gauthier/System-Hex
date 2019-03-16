@@ -103,6 +103,7 @@ app.get('/chooseSystemData', (req, res) => {
 	if (req.session.user && req.cookies.user_sid) {
         console.log(req.session.user);
         getSystems(req.session.user.id,(systems)=>{
+            console.log(systems)
             res.send(systems);
         });
 	} else {

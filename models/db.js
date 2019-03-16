@@ -44,8 +44,6 @@ function getUsers(callback){
 
 function getSystems(userID,callback){
 	if(_db){
-		console.log('Get systems in collections');
-		console.log(userID);
 		_db.collection('systems').find({userId: userID}).toArray((err, result) => {
 			console.log('Systems:', result);
 			if (err) return console.log(err);

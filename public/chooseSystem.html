@@ -9,20 +9,23 @@
 	<link rel="stylesheet" href="css/global.css">
 	<script src="js/inputs.js"></script>
 	<script>
-		let request = new XMLHttpRequest();
-		request.open('GET', '/chooseSystemData', true);
-		request.onload = () => {
-			console.log(this.response)
-			let data = JSON.parse(this.response);
-			if (request.status >= 200 && request.status < 400) {
-				data.forEach(result=>{
-					console.log(result);
-				});
-			} else {
-				console.log('error');
+		window.onload = () =>{
+			let request = new XMLHttpRequest();
+			request.open('GET', '/chooseSystemData', true);
+			request.onload = () => {
+				console.log(this.response)
+				let data = JSON.parse(this.response);
+				if (request.status >= 200 && request.status < 400) {
+					data.forEach(result=>{
+						console.log(result);
+					});
+				} else {
+					console.log('error');
+				}
 			}
+			request.send();
 		}
-		request.send();
+
 	</script>
 </head>
 <body>
