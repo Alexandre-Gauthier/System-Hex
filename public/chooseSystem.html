@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>System-Hex - Systèmes</title>
+	<link href="https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c:700" rel="stylesheet">
+	<link rel="stylesheet" href="css/global.css">
+	<script src="js/inputs.js"></script>
+	<script>
+		const get = () => {
+			return new Promise((resolve, reject) => {
+				var req = new XMLHttpRequest();
+				req.open('GET', '/chooseSystemData');
+				req.onload = () => resolve(req.response);
+			});
+		}
+		get().then((data) => {
+			var parsed = JSON.parse(data);
+			console.log(parsed);
+		});
+	</script>
+</head>
+<body>
+	<div class="outer_form center_flex">
+		<div class="inner_form">
+			<h1>Vos systèmes</h1>
+			<div class="center_form">
+				<form action="/system_choice" method="post">
+					<select name="" id="">
+						<option value="">Système 1</option>
+					</select>
+					<button type="submit">Ouvrir</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

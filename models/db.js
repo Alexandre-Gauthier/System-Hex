@@ -7,7 +7,8 @@ let users = [];
 module.exports = {
     getDb,
 	initDb,
-	getUsers
+	getUsers,
+	getSystems
 };
 
 function initDb(callback) {
@@ -34,10 +35,17 @@ function getDb(){
 
 function getUsers(callback){
 	if(_db){
-		console.log('db_getUsers_Inside')
 		_db.collection('users').find().toArray((err, result) => {
 			if (err) return console.log(err)
-			console.log('db_getUsers_Inside',result)
+			callback(result)
+		});
+	}
+}
+
+function getSystems(userID,callback){
+	if(_db){
+		_db.collection('systems').find({userId: userID}).toArray((err, result) => {
+			if (err) return console.log(err)
 			callback(result)
 		});
 	}

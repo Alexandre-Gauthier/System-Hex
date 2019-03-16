@@ -7,11 +7,14 @@
 	<title>System-Hex - Creation</title>
 	<link href="https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c:700" rel="stylesheet">
 	<link rel="stylesheet" href="css/global.css">
+	<script src="js/inputs.js"></script>
+	<script src="js/dialog.js"></script>
+	<script src="js/dashboardAction.js"></script>
 </head>
 <body>
 	<div class="header_bar">
 		<div class="header_title">
-			<h1>Titre Système</h1>
+			<input type="text" class="titleInput" id="titleToken" name="titleToken" placeholder="Titre" maxlength="20">
 		</div>
 		<div class="header_menu">
 			<a href="#">
@@ -31,27 +34,89 @@
 			<div class="center_form full_height full_width">
 				<h2>Configuration du système</h2>
 				<h3 class="first">Configuration des tuiles</h3>
-				<div class="form_line"><p>Couleur : </p><p>#82a061</p></div>
-				<div class="form_line"><p>Bordure : </p><p>#82a061</p></div>
+				<div class="form_line"><p>Couleur : </p><input type="text" class="lineInput" id="colorBGTile" name="colorBGTile" placeholder="ffffff" maxlength="6"></div>
+				<div class="form_line"><p>Bordure : </p><input type="text" class="lineInput" id="colorBorderTile" name="colorBorderTile" placeholder="ffffff" maxlength="6"></div>
 				<h4>Attributs</h4>
+				<a href="/addAttribut?obj=tile" class="add_button">+</a>
 				<h4>Méthodes</h4>
+				<a href="/addMethod?obj=tile" class="add_button">+</a>
 				<h3>Configuration de la planche</h3>
+				<div class="form_line"><p>Couleur : </p><input type="text" class="lineInput" id="colorBGBoard" name="colorBGBoard" placeholder="ffffff" maxlength="6"></div>
+				<h4>Attributs</h4>
+				<a href="/addAttribut?obj=board" class="add_button">+</a>
+				<h4>Méthodes</h4>
+				<a href="/addMethod?obj=board" class="add_button">+</a>
+			</div>
+		</div>
+
+		<div class="inner_form full_height display_flex full_width">
+			<div class="center_form full_height full_width" style="display: block">
+				<div class="config_header">
+					<div class="button_square save"></div>
+					<input type="text" class="titleInput" id="titleToken" name="titleToken" placeholder="Titre" maxlength="20">
+				</div>
+				<h3>Configuration</h3>
+				<div class="form_line"><p>Couleur : </p><input type="text" class="lineInput" id="colorBGToken" name="colorBGToken" placeholder="ffffff" maxlength="6"></div>
+				<div class="form_line"><p>Bordure : </p><input type="text" class="lineInput" id="colorBorderToken" name="colorBorderToken" placeholder="ffffff" maxlength="6"></div>
+				<div class="form_line">
+					<p>Image : </p>
+					<input type="file" name="file" id="file" class="inputfile" accept="image/png" />
+					<label for="file" id="labelFile">choisir</label>
+
+				</div>
+				<h3>Attributs</h3>
+					<div id="listTokens" class="list" >
+						<a href="#" id="myBtn">Durabilité</a>
+						<a href="/showAttribute?token=1?id=2">Humidité</a>
+					</div>
+				<a href="/addAttribut?obj=token&id=1" class="add_button">+</a>
+				<h3>Méthodes</h3>
+				<a href="/addMethod?obj=token&id=1" class="add_button">+</a>
 			</div>
 		</div>
 
 		<div class="inner_form full_height display_flex full_width">
 			<div class="center_form full_height full_width">
-
-			</div>
-		</div>
-
-		<div class="inner_form full_height display_flex full_width">
-			<div class="center_form full_height full_width">
+				<h2>Jetons</h2>
+				<input class="boxInput" type="text" id="searchTokens" name="searchTokens" placeholder="Rechercher">
+				<div id="listTokens" class="list" >
+					<a href="/showToken?id=1">Arbre</a>
+					<a href="/showToken?id=2">Eau</a>
+				</div>
+				<a href="/addToken" class="add_button">+</a>
 			</div>
 			<div class="center_form full_height half_width">
-					<h2>Effets</h2>
+				<h2>Effets</h2>
+				<a href="/addEffect" class="add_button">+</a>
 			</div>
 		</div>
+	</div>
+
+	<!-- The Modal -->
+	<div id="dialogNewAttributes" class="modal">
+		<!-- Modal content -->
+		<div class="modal-content">
+			<form action="/addAttribute" method="post">
+				<div class="modal-header">
+					<input type="text" class="titleInput" id="titleToken" name="titleToken" placeholder="Titre" maxlength="20">
+					<span id="closeBtn">&times;</span>
+				</div>
+				<div class="modal-body">
+					<input type="text" class="titleInput" id="titleToken" name="titleToken" placeholder="Valeur" maxlength="20">
+				</div>
+
+				<div class="modal-footer">
+					<div class="center_flex">
+						<button class="button_square save" type="submit"></button>
+						<a href="/deleteAttribute">
+							<div class="button_square delete"></div>
+						</a>
+					</div>
+				</div>
+			</form>
+
+		</div>
+
 	</div>
 </body>
 </html>

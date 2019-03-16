@@ -8,6 +8,7 @@ var session = require('express-session');
 const userLog = require('./models/basic-auth').auth;
 const initDb = require("./models/db").initDb;
 const getDb = require("./models/db").getDb;
+const getSystems = require("./models/db").getUsers;
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080;
 
@@ -62,7 +63,6 @@ app.route('/login')
 			password = req.body.password;
 
 		userLog(username,password,(user)=>{
-            console.log('login_route',user)
             if (!user) {
                 res.redirect('/login');
             }else{
@@ -91,13 +91,23 @@ app.get('/crossroad', (req, res) => {
 	}
 });
 
-app.get('/varTest', (req,res)=>{
-    if (req.session.user && req.cookies.user_sid) {
-        res.send(req.session.rand);
-    } else {
-        res.send('Unable to get info');
-    }
-})
+app.get('/chooseSystem', (req, res) => {
+	if (req.session.user && req.cookies.user_sid) {
+		res.sendFile(__dirname + '/public/chooseSystem.html');
+	} else {
+		res.redirect('/login');
+	}
+});
+
+app.get('/chooseSystemData', (req, res) => {
+	if (req.session.user && req.cookies.user_sid) {
+        getSystems(req.session.user.id,(systems)=>{
+            res.send(systems);
+        });
+	} else {
+		res.redirect('/login');
+	}
+});
 
 initDb(function(err){
 	const server = app.listen(port, function () {
