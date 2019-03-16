@@ -104,8 +104,7 @@ app.get('/chooseSystemData', (req, res) => {
         console.log(req.session.user);
         getSystems(req.session.user.id,(systems)=>{
             console.log(systems)
-            console.log(res);
-            res.json(systems);
+            res.json('hello');
         });
 	} else {
 		res.redirect('/login');
