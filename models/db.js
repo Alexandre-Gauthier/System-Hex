@@ -42,12 +42,12 @@ function getUsers(callback){
 	}
 }
 
-function getSystems(userID,callback){
+function getSystems(userID,res,callback){
 	if(_db){
 		_db.collection('systems').find({userId: userID}).toArray((err, result) => {
 			console.log('Systems:', result);
 			if (err) return console.log(err);
-			callback(result);
+			callback(result,res);
 		});
 	}
 }
