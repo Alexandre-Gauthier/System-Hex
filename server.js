@@ -8,7 +8,7 @@ var session = require('express-session');
 const userLog = require('./models/basic-auth').auth;
 const initDb = require("./models/db").initDb;
 const getDb = require("./models/db").getDb;
-const getSystems = require("./models/db").getUsers;
+const getSystems = require("./models/db").getSystems;
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080;
 
