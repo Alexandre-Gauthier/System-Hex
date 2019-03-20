@@ -18,10 +18,8 @@
 				if(request.readyState === 4){
 					let data = JSON.parse(request.response);
 					if (request.status >= 200 && request.status < 400) {
-						data.forEach(result=>{
-							result.systems.forEach(system=>{
-								addOption(system.id,system.title);
-							});
+						data.systems.forEach(system=>{
+							addOption(system.id,system.title);
 						});
 					} else {
 						console.log('error');
@@ -49,7 +47,6 @@
 			<div class="center_form">
 				<form action="/system_choice" method="post">
 					<select name="system" id="selection_systems">
-						<option value="">Système 1</option>
 					</select>
 					<button type="submit">Ouvrir</button>
 				</form>
