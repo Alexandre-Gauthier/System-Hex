@@ -110,7 +110,7 @@ app.get('/chooseSystemData', (req, res) => {
 	}
 });
 
-add.post('/system_choice', (req,res) =>{
+app.post('/system_choice', (req,res) =>{
     if (req.session.user && req.cookies.user_sid) {
         getSystem(req.session.user.id,req.body.system,(system)=>{
             res.sendFile(__dirname + '/public/dashboard.html');
