@@ -8,8 +8,7 @@ module.exports = {
     getDb,
 	initDb,
 	getUsers,
-	getSystems,
-	getSystem
+	getSystems
 };
 
 function initDb(callback) {
@@ -45,7 +44,7 @@ function getUsers(callback){
 
 function getSystems(userID,callback){
 	if(_db){
-		_db.collection('systems').findone({userId: userID},{systems:1},(err, result) => {
+		_db.collection('systems').find({userId: userID},{systems:1}).toArray((err, result) => {
 			if (err) return console.log(err);
 			callback(result);
 		});
@@ -54,7 +53,7 @@ function getSystems(userID,callback){
 
 function getSystem(userID,systemID,callback){
 	if(_db){
-		_db.collection('systems').findone({userId: userID,"systems.id":systemID},{'systems.$': 1},(err, result) => {
+		_db.collection('systems').find({userId: userID,"systems.id":systemID},{"systems.$":1}).toArray((err, result) => {
 			if (err) return console.log(err);
 			callback(result);
 		});
