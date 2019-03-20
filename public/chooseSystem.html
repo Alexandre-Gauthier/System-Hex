@@ -9,8 +9,9 @@
 	<link rel="stylesheet" href="css/global.css">
 	<script src="js/inputs.js"></script>
 	<script>
+		let parent = null;
 		window.onload = () =>{
-			let parent = document.querySelector("#selection_systems");
+			parent = document.querySelector("#selection_systems");
 			let request = new XMLHttpRequest();
 			request.open('GET', '/chooseSystemData', true);
 			request.onload = () => {
