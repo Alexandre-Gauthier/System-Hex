@@ -13,12 +13,9 @@
 			let request = new XMLHttpRequest();
 			request.open('GET', '/chooseSystemData', true);
 			request.onload = () => {
-				console.log(this.response)
-				console.log(request.response)
 				if(request.readyState === 4){
-					console.log(this.response)
 					console.log(request.response)
-					let data = JSON.parse(this.response);
+					let data = JSON.parse(request.response);
 					if (request.status >= 200 && request.status < 400) {
 						data.forEach(result=>{
 							console.log(result);
