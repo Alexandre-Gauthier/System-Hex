@@ -8,7 +8,8 @@ module.exports = {
     getDb,
 	initDb,
 	getUsers,
-	getSystems
+	getSystems,
+	getSystem
 };
 
 function initDb(callback) {
