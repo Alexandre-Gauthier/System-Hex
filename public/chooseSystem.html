@@ -9,16 +9,18 @@
 	<link rel="stylesheet" href="css/global.css">
 	<script src="js/inputs.js"></script>
 	<script>
+		let parent = document.querySelector("#selection_systems");
 		window.onload = () =>{
 			let request = new XMLHttpRequest();
 			request.open('GET', '/chooseSystemData', true);
 			request.onload = () => {
 				if(request.readyState === 4){
-					console.log(request.response)
 					let data = JSON.parse(request.response);
 					if (request.status >= 200 && request.status < 400) {
 						data.forEach(result=>{
-							console.log(result);
+							result.systems.forEach(system=>{
+								addOption(system.id,system.title);
+							});
 						});
 					} else {
 						console.log('error');
@@ -26,6 +28,15 @@
 				}
 			}
 			request.send(null);
+		}
+
+		const addOption = (id,name) =>{
+			let node = document.createElement("option");
+			node.setAttribute("value",id);
+			let txt = document.createTextNode(name);
+			node.appendChild(txt);
+
+			parent.appendChild(node);
 		}
 
 	</script>
@@ -36,7 +47,7 @@
 			<h1>Vos systèmes</h1>
 			<div class="center_form">
 				<form action="/system_choice" method="post">
-					<select name="" id="">
+					<select name="system" id="selection_systems">
 						<option value="">Système 1</option>
 					</select>
 					<button type="submit">Ouvrir</button>
