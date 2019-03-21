@@ -110,13 +110,22 @@ app.get('/chooseSystemData', (req, res) => {
 	}
 });
 
-app.post('/system_choice', (req,res) =>{
+app.post('/systemChoice', (req,res) =>{
     if (req.session.user && req.cookies.user_sid) {
         getSystem(req.session.user.id,req.body.system,(system)=>{
+            req.session.system = system;
             res.sendFile(__dirname + '/public/dashboard.html');
         });
 	} else {
 		res.redirect('/login');
+	}
+});
+
+app.get('/systemChoiceData',(req, res) => {
+	if (req.session.user && req.cookies.user_sid && req.session.system) {
+        res.json(req.session.system);
+	} else {
+		res.redirect('/chooseSystem');
 	}
 });
 

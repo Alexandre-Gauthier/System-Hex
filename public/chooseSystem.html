@@ -7,48 +7,15 @@
 	<title>System-Hex - Systèmes</title>
 	<link href="https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c:700" rel="stylesheet">
 	<link rel="stylesheet" href="css/global.css">
-	<script src="js/inputs.js"></script>
-	<script>
-		let parent = null;
-		window.onload = () =>{
-			parent = document.querySelector("#selection_systems");
-			let request = new XMLHttpRequest();
-			request.open('GET', '/chooseSystemData', true);
-			request.onload = () => {
-				if(request.readyState === 4){
-					let data = JSON.parse(request.response);
-					if (request.status >= 200 && request.status < 400) {
-
-						data.forEach(result=>{
-							result.systems.forEach(system=>{
-								addOption(system.id,system.title);
-							});
-						});
-					} else {
-						console.log('error');
-					}
-				}
-			}
-			request.send(null);
-		}
-
-		const addOption = (id,name) =>{
-			let node = document.createElement("option");
-			node.setAttribute("value",id);
-			let txt = document.createTextNode(name);
-			node.appendChild(txt);
-
-			parent.appendChild(node);
-		}
-
-	</script>
+	<script src="js/commonAction.js"></script>
+	<script src="js/chooseSystemAction.js"></script>
 </head>
 <body>
 	<div class="outer_form center_flex">
 		<div class="inner_form">
 			<h1>Vos systèmes</h1>
 			<div class="center_form">
-				<form action="/system_choice" method="post">
+				<form action="/systemChoice" method="post">
 					<select name="system" id="selection_systems">
 					</select>
 					<button type="submit">Ouvrir</button>
