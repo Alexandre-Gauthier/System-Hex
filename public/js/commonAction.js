@@ -8,6 +8,7 @@ const getApi = (route,action) =>{
 			if (request.status >= 200 && request.status < 400) {
 				console.log('Connection complete');
 				let data = JSON.parse(request.response);
+				console.log('Response:',data);
 				data.forEach(result=>{
 					action(result);
 				});
