@@ -114,6 +114,7 @@ app.post('/systemChoice', (req,res) =>{
     if (req.session.user && req.cookies.user_sid) {
         getSystem(req.session.user.id,req.body.system,(system)=>{
             req.session.system = system;
+            console.log(req.session.system);
             res.sendFile(__dirname + '/public/dashboard.html');
         });
 	} else {
@@ -123,6 +124,7 @@ app.post('/systemChoice', (req,res) =>{
 
 app.get('/systemChoiceData',(req, res) => {
 	if (req.session.user && req.cookies.user_sid && req.session.system) {
+        console.log(req.session.system);
         res.json(req.session.system);
 	} else {
 		res.redirect('/chooseSystem');
