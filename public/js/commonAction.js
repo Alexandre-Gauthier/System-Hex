@@ -9,9 +9,7 @@ const getApi = (route,action) =>{
 				console.log('Connection complete');
 				let data = JSON.parse(request.response);
 				console.log('Response:',data);
-				data.forEach(result=>{
-					action(result);
-				});
+				action(data);
 			} else {
 				console.log('error');
 			}

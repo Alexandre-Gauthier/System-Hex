@@ -47,7 +47,7 @@ function getSystems(userID,callback){
 	if(_db){
 		_db.collection('systems').find({userId: userID},{systems:1}).toArray((err, result) => {
 			if (err) return console.log(err);
-			callback(result);
+			callback(result[0]);
 		});
 	}
 }
