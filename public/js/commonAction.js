@@ -1,9 +1,12 @@
 const getApi = (route,action) =>{
 	let request = new XMLHttpRequest();
+	console.log('Connecting to',route);
 	request.open('GET', '/'+route, true);
 	request.onload = () => {
 		if(request.readyState === 4){
+			console.log('Connection ready');
 			if (request.status >= 200 && request.status < 400) {
+				console.log('Connection complete');
 				let data = JSON.parse(request.response);
 				data.forEach(result=>{
 					action(result);
