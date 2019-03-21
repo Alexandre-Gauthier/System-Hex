@@ -55,10 +55,15 @@ function getSystems(userID,callback){
 function getSystem(userID,systemID,callback){
 	if(_db){
 		console.log('SystemId',systemID);
-		_db.collection('systems').find({userId: userID,"systems.id": { $eq : systemID }}).toArray((err, result) => {
+		_db.collection('systems').find({userId: userID},{systems:1}).toArray((err, result) => {
 			console.log(result)
 			if (err) return console.log(err);
-			callback(result);
+			result.forEach(system => {
+				console.log(system)
+				if(system.id == systemID){
+					callback(system);
+				}
+			});
 		});
 	}
 }
