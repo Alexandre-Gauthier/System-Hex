@@ -58,13 +58,14 @@ function getSystem(userID,systemID,callback){
 		_db.collection('systems').find({userId: userID},{systems:1}).toArray((err, result) => {
 			console.log('Result:',result)
 			if (err) return console.log(err);
+			let response = null;
 			result[0].systems.forEach(system => {
 				console.log('System',system)
 				if(system.id == systemID){
-					callback(system);
+					response = system;
 				}
 			});
-			callback(result);
+			callback(response);
 		});
 	}
 }
