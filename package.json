@@ -4,7 +4,8 @@
   "description": "Server System-Hex",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "babel-compile" : "babel app --out-file public/js/bundle.js",
+    "babel-watch" : "babel app --watch --out-file public/js/bundle.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,9 @@
   },
   "homepage": "https://github.com/Alekusando/System-Hex#readme",
   "dependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
     "bcrypt": "^3.0.4",
     "body-parser": "^1.18.3",
     "cookie-parser": "^1.4.4",
