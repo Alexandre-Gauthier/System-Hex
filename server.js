@@ -6,10 +6,7 @@ var cookieParser = require('cookie-parser');
 var session = require('express-session');
 
 const userLog = require('./models/basic-auth').auth;
-const initDb = require("./models/db").initDb;
-const getDb = require("./models/db").getDb;
-const getSystems = require("./models/db").getSystems;
-const getSystem = require("./models/db").getSystem;
+const db = require("./models/db");
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080;
 
@@ -102,7 +99,7 @@ app.get('/chooseSystem', (req, res) => {
 
 app.get('/chooseSystemData', (req, res) => {
 	if (req.session.user && req.cookies.user_sid) {
-        getSystems(req.session.user.id,(systems)=>{
+        db.getSystems(req.session.user.id,(systems)=>{
             res.json(systems);
         });
 	} else {
@@ -112,7 +109,7 @@ app.get('/chooseSystemData', (req, res) => {
 
 app.post('/systemChoice', (req,res) =>{
     if (req.session.user && req.cookies.user_sid) {
-        getSystem(req.session.user.id,req.body.system,(system)=>{
+        db.getSystem(req.session.user.id,req.body.system,(system)=>{
             req.session.system = system;
             res.sendFile(__dirname + '/public/dashboard.html');
         });
@@ -129,7 +126,7 @@ app.get('/systemChoiceData',(req, res) => {
 	}
 });
 
-initDb(function(err){
+db.initDb(function(err){
 	const server = app.listen(port, function () {
 		console.log('Server listening on port ' + port);
 	});

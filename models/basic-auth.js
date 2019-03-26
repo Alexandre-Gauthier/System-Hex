@@ -1,4 +1,4 @@
-const getUsers = require("./db").getUsers;
+const db = require("./db");
 
 module.exports = {auth};
 
@@ -8,7 +8,7 @@ function auth(username,password,callback){
 }
 
 function authenticate( username, password, callback ) {
-    getUsers((users)=>{
+    db.getUsers((users)=>{
         let user = users.find(u => u.username === username && u.password === password);
         if (user) {
             let { password, ...userWithoutPassword } = user;
