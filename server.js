@@ -6,7 +6,7 @@ var cookieParser = require('cookie-parser');
 var session = require('express-session');
 
 const userLog = require('./models/basic-auth').auth;
-const MongoDB = require("./db");
+const MongoDB = require("./models/db");
 const db = new MongoDB();
 
 
