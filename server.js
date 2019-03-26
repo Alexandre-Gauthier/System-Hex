@@ -6,7 +6,9 @@ var cookieParser = require('cookie-parser');
 var session = require('express-session');
 
 const userLog = require('./models/basic-auth').auth;
-const db = require("./models/db");
+const cDB = require("./db");
+const db = new MongoDB();
+
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080;
 

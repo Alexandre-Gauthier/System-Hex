@@ -1,4 +1,5 @@
-const db = require("./db");
+const cDB = require("./db");
+const db = new MongoDB();
 
 module.exports = {auth};
 
