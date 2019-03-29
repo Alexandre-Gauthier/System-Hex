@@ -14,7 +14,8 @@ function authenticate( username, password, callback ) {
         if (user) {
             let { password, ...userWithoutPassword } = user;
             callback(userWithoutPassword)
-            //return userWithoutPassword;
+        }else{
+            console.log('USERNAME OR PASSWORD INVALID')
         }
     });
 

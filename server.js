@@ -91,14 +91,6 @@ app.get('/crossroad', (req, res) => {
 	}
 });
 
-app.get('/chooseSystem', (req, res) => {
-	if (req.session.user && req.cookies.user_sid) {
-		res.sendFile(__dirname + '/public/chooseSystem.html');
-	} else {
-		res.redirect('/login');
-	}
-});
-
 app.get('/chooseSystemData', (req, res) => {
 	if (req.session.user && req.cookies.user_sid) {
         db.getSystems(req.session.user.id,(systems)=>{

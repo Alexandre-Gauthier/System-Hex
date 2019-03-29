@@ -380,6 +380,7 @@ a > .inner_form:hover h1{
 .list a{
 	color: #8e8a6b;
 	font-size: 25px;
+	cursor: pointer;
 }
 
 .list a:hover{

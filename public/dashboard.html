@@ -13,7 +13,7 @@
 <body>
 	<div class="header_bar">
 		<div class="header_title">
-			<input type="text" class="titleInput" id="titleToken" name="titleToken" placeholder="Titre" maxlength="20">
+			<input type="text" class="titleInput" id="titleSystem" name="titleSystem" placeholder="Titre" maxlength="20">
 		</div>
 		<div class="header_menu">
 			<a href="#">
@@ -48,8 +48,10 @@
 			</div>
 		</div>
 
+
 		<div class="inner_form full_height display_flex full_width">
-			<div class="center_form full_height full_width" style="display: block">
+			<!-- Formulaire Tokens -->
+			<div class="center_form full_height full_width" id="formToken" style="display: none">
 				<div class="config_header">
 					<div class="button_square save"></div>
 					<input type="text" class="titleInput" id="titleToken" name="titleToken" placeholder="Titre" maxlength="20">
@@ -64,28 +66,40 @@
 
 				</div>
 				<h3>Attributs</h3>
-					<div id="listTokens" class="list" >
-						<a href="#" id="myBtn">Durabilité</a>
-						<a href="/showAttribute?token=1?id=2">Humidité</a>
+					<div id="listTokenAttributes" class="list" >
 					</div>
 				<a href="/addAttribut?obj=token&id=1" class="add_button">+</a>
 				<h3>Méthodes</h3>
+				<div id="listTokenMethods" class="list" >
+				</div>
 				<a href="/addMethod?obj=token&id=1" class="add_button">+</a>
 			</div>
+
+			<!-- Formulaire Effect -->
+			<div class="center_form full_height full_width" id="formEffect" style="display: none">
+				<div class="config_header">
+					<input type="text" class="titleInput" id="titleEffect" name="titleEffect" placeholder="Titre" maxlength="20">
+				</div>
+				<h3>Attributs</h3>
+					<div id="listEffectAttributes" class="list" >
+					</div>
+				<a href="/addAttribut?obj=token&id=1" class="add_button">+</a>
+			</div>
 		</div>
+
 
 		<div class="inner_form full_height display_flex full_width">
 			<div class="center_form full_height full_width">
 				<h2>Jetons</h2>
 				<input class="boxInput" type="text" id="searchTokens" name="searchTokens" placeholder="Rechercher">
 				<div id="listTokens" class="list" >
-					<a href="/showToken?id=1">Arbre</a>
-					<a href="/showToken?id=2">Eau</a>
 				</div>
 				<a href="/addToken" class="add_button">+</a>
 			</div>
 			<div class="center_form full_height half_width">
 				<h2>Effets</h2>
+				<div id="listEffects" class="list" >
+				</div>
 				<a href="/addEffect" class="add_button">+</a>
 			</div>
 		</div>

@@ -4,8 +4,10 @@
   "description": "Server System-Hex",
   "main": "index.js",
   "scripts": {
-    "babel-compile" : "babel app --out-file public/js/bundle.js",
-    "babel-watch" : "babel app --watch --out-file public/js/bundle.js"
+    "babel-compile": "babel app --out-file public/js/bundle.js",
+    "babel-watch": "babel app --watch --out-file public/js/bundle.js",
+    "start":"nodemon server.js",
+    "start-watch": "npm run start | npm run babel-watch"
   },
   "repository": {
     "type": "git",
@@ -28,5 +30,8 @@
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "mongodb": "^3.1.13"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.10"
   }
 }
