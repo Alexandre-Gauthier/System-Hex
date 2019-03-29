@@ -122,12 +122,34 @@ app.get('/systemChoiceData',(req, res) => {
 
 app.post('/deleteTokenAttribute', (req,res)=>{
     if (req.session.user && req.cookies.user_sid) {
-        console.log(req.session.system.tokens[req.body.indexToken].attributes[req.body.keyAttribute]);
-        res.send('Hello');
+        let newSystem = req.session.system;
+        let token = findElement(newSystem.tokens,'name',req.body.keyToken);
+        console.log(token)
+        token.attributes.splice(findElement(token.attributes,'name',req.body.keyAttribute,false),1);
+        console.log(token)
+
+        db.getSystems(req.session.user.id,(result)=>{
+            result.systems[findElement(result.systems,'id',req.session.system.id,false)] = newSystem;
+            console.log(result)
+
+            db.updateSystem(req.session.user.id,result,(data)=>{
+                res.send('Delete');
+            });
+        });
+
     }else {
 		res.redirect('/login');
 	}
 });
+
+
+const findElement = (array,key,value,element=true) =>{
+    for(let i = 0; i < array.length;i++){
+        if(array[i][key] == value){
+            return element?array[i]:i;
+        }
+    }
+}
 
 db.initDb(function(err){
 	const server = app.listen(port, function () {

@@ -55,26 +55,18 @@ module.exports = class MongoDB{
 
 	getSystem(userID,systemID,callback){
 		if(_db){
-			_db.collection('systems').find({userId: userID,'systems.id':parseInt(systemID)},{projection:{_id: 0,systems:1}}).toArray((err, result) => {
+			let sysID = parseInt(systemID);
+			_db.collection('systems').findOne({userId: userID,'systems.id':sysID},{projection:{_id: 0,systems:{$elemMatch: {id:sysID}}}},(err, result) => {
 				if (err) return console.log(err);
-				// let response = null;
-				// result[0].systems.forEach(system => {
-				// 	if(system.id == systemID){
-				// 		response = system;
-				// 	}
-				// });
-
-				// callback(response);
-				console.log(result)
-				callback(result[0])
+				callback(result.systems[0])
 			});
 		}
 	}
 
-	deleteAttribute(userID,systemID,tokenID,attributeKey,callback){
+	updateSystem(userID,newSystem,callback){
 		if(_db){
-			let SEARCH = {userId:userID};
-			_db.collection('systems').deleteOne(SEARCH,(err,result)=>{
+			console.log('here')
+			_db.collection('systems').replaceOne({userId: userID},newSystem,(err,result)=>{
 				if (err) return console.log(err);
 				callback(result);
 			});

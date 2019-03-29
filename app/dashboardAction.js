@@ -41,68 +41,62 @@ const fillList = (id,array, onclick=null) =>{
 	}
 }
 
-const addAttributes = (id,json,index) =>{
+const addAttributes = (id,array,token) =>{
 	let parent = document.querySelector(id);
+
 	while (parent.firstChild) {
 		parent.removeChild(parent.firstChild);
 	}
-	for(let key in json){
+	for(let i = 0; i < array.length;i++){
+		let item = array[i];
 		let newElem = document.createElement('a');
-		let txt = document.createTextNode(key);
+		let txt = document.createTextNode(item.name);
 		newElem.appendChild(txt);
 		newElem.setAttribute('href','#');
 		newElem.setAttribute('class','modalBtn');
 		newElem.onclick = () =>{
-			showAttribute(json,key,newElem,index);
+			showAttribute(item,i,newElem,token);
 		}
 
 		parent.appendChild(newElem);
 	}
-	// dialogScript();
+
 }
 
-const showAttribute = (container, key, node, index) =>{
+const showAttribute = (attribute, index,node, token) =>{
 	let modal = document.getElementById('dialogNewAttributes');
-	fillInput('#titleAttribute',key);
-	let value = container[key];
-	fillInput('#valueAttribute',value);
+	fillInput('#titleAttribute',attribute.name);
+	fillInput('#valueAttribute',attribute.value);
 
 	modal.querySelector('#modalBtnDelete').onclick = () =>{
-		deleteAttribute(container,key,node,index);
+		deleteAttribute(attribute,index,node,token);
 	}
 
 	modal.querySelector('#modalBtnSave').onclick = () =>{
-		saveAttribute(container,key,node,index);
+		saveAttribute(attribute,node,token);
 	}
 
 	modal.style.display = "block";
 }
 
-const deleteAttribute = (container,key,node,index) =>{
-
+const deleteAttribute = (attribute,index,node,token) =>{
 	if (confirm('Voulez-vous vraiment supprimer cet Attributs?')) {
-		delete container[key];
+		token.attributes.splice(index,1);
 		node.remove();
 		document.getElementById('dialogNewAttributes').style.display = "none";
 
-		let params = {indexToken:index,keyAttribute:key}
+		let params = {keyToken:token.name,keyAttribute:attribute.name}
 		postApi('deleteTokenAttribute',(res)=>{alert(res);},params);
 	}
 }
 
-const saveAttribute = (container,key,node) =>{
+const saveAttribute = (attribute,node,token) =>{
 	let title = document.querySelector('#titleAttribute').value;
 	let value = document.querySelector('#valueAttribute').value
-	if(key == title){
-		container[key] = value;
-	}else{
-		container[title] = value;
-		delete container[key];
-		node.innerHTML = title;
-		node.onclick = () =>{
-			showAttribute(container,title,node);
-		}
-	}
+	attribute.name = title;
+	attribute.value = value;
+	node.innerHTML = title;
+
 	document.getElementById('dialogNewAttributes').style.display = "none";
 }
 
@@ -122,7 +116,7 @@ const showToken = (index) =>{
 	fillInput('#titleToken',token.name);
 	fillInput('#colorBGToken',token.Color);
 	fillInput('#colorBorderToken',token.Border);
-	addAttributes('#listTokenAttributes',token.attributes,index);
+	addAttributes('#listTokenAttributes',token.attributes,token);
 	fillList('#listTokenMethods',token.methods);
 }
 
@@ -139,5 +133,5 @@ const showEffect = (index) =>{
 
 	let effect = system.effects[index];
 	fillInput('#titleEffect',effect.name);
-	addAttributes('#listEffectAttributes',effect.attributes);
+	// addAttributes('#listEffectAttributes',effect.attributes);
 }
