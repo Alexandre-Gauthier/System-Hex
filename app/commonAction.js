@@ -23,6 +23,27 @@ const getApi = (route,action) =>{
 	request.send(null);
 }
 
+const postApi = (route,action,params) =>{
+	let request = new XMLHttpRequest();
+	console.log('Posting to',route);
+	request.open('POST', '/'+route, true);
+	request.setRequestHeader('Content-type', 'application/json');
+
+	request.onreadystatechange = function() {
+		if(request.readyState === 4){
+			console.log('Post ready');
+			if (request.status >= 200 && request.status < 400) {
+				console.log('Post complete');
+				action(request.responseText);
+			} else {
+				console.log('error');
+			}
+		}
+	}
+
+	request.send(JSON.stringify(params));
+}
+
 function setInputFilter(textbox, inputFilter) {
 	["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function(event) {
 	  textbox.addEventListener(event, function() {

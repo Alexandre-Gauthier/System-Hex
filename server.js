@@ -120,6 +120,15 @@ app.get('/systemChoiceData',(req, res) => {
 	}
 });
 
+app.post('/deleteTokenAttribute', (req,res)=>{
+    if (req.session.user && req.cookies.user_sid) {
+        console.log(req.session.system.tokens[req.body.indexToken].attributes[req.body.keyAttribute]);
+        res.send('Hello');
+    }else {
+		res.redirect('/login');
+	}
+});
+
 db.initDb(function(err){
 	const server = app.listen(port, function () {
 		console.log('Server listening on port ' + port);

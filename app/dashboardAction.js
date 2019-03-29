@@ -22,6 +22,9 @@ const fillInput = (id,value) =>{
 
 const fillList = (id,array, onclick=null) =>{
 	let parent = document.querySelector(id);
+	while (parent.firstChild) {
+		parent.removeChild(parent.firstChild);
+	}
 	for(let i = 0; i < array.length;i++){
 		let item = array[i];
 
@@ -38,29 +41,69 @@ const fillList = (id,array, onclick=null) =>{
 	}
 }
 
-const addAttributes = (id,json, onclick = null) =>{
+const addAttributes = (id,json,index) =>{
 	let parent = document.querySelector(id);
+	while (parent.firstChild) {
+		parent.removeChild(parent.firstChild);
+	}
 	for(let key in json){
 		let newElem = document.createElement('a');
 		let txt = document.createTextNode(key);
 		newElem.appendChild(txt);
 		newElem.setAttribute('href','#');
 		newElem.setAttribute('class','modalBtn');
-
-		if(onclick){
-			newElem.onclick = () =>{
-				onclick(i);
-			}
+		newElem.onclick = () =>{
+			showAttribute(json,key,newElem,index);
 		}
+
 		parent.appendChild(newElem);
 	}
-	dialogScript();
+	// dialogScript();
 }
 
-const showAttribute = (container, key) =>{
+const showAttribute = (container, key, node, index) =>{
 	let modal = document.getElementById('dialogNewAttributes');
-	
+	fillInput('#titleAttribute',key);
+	let value = container[key];
+	fillInput('#valueAttribute',value);
+
+	modal.querySelector('#modalBtnDelete').onclick = () =>{
+		deleteAttribute(container,key,node,index);
+	}
+
+	modal.querySelector('#modalBtnSave').onclick = () =>{
+		saveAttribute(container,key,node,index);
+	}
+
 	modal.style.display = "block";
+}
+
+const deleteAttribute = (container,key,node,index) =>{
+
+	if (confirm('Voulez-vous vraiment supprimer cet Attributs?')) {
+		delete container[key];
+		node.remove();
+		document.getElementById('dialogNewAttributes').style.display = "none";
+
+		let params = {indexToken:index,keyAttribute:key}
+		postApi('deleteTokenAttribute',(res)=>{alert(res);},params);
+	}
+}
+
+const saveAttribute = (container,key,node) =>{
+	let title = document.querySelector('#titleAttribute').value;
+	let value = document.querySelector('#valueAttribute').value
+	if(key == title){
+		container[key] = value;
+	}else{
+		container[title] = value;
+		delete container[key];
+		node.innerHTML = title;
+		node.onclick = () =>{
+			showAttribute(container,title,node);
+		}
+	}
+	document.getElementById('dialogNewAttributes').style.display = "none";
 }
 
 const showToken = (index) =>{
@@ -79,7 +122,7 @@ const showToken = (index) =>{
 	fillInput('#titleToken',token.name);
 	fillInput('#colorBGToken',token.Color);
 	fillInput('#colorBorderToken',token.Border);
-	addAttributes('#listTokenAttributes',token.attributes);
+	addAttributes('#listTokenAttributes',token.attributes,index);
 	fillList('#listTokenMethods',token.methods);
 }
 
@@ -96,4 +139,5 @@ const showEffect = (index) =>{
 
 	let effect = system.effects[index];
 	fillInput('#titleEffect',effect.name);
+	addAttributes('#listEffectAttributes',effect.attributes);
 }

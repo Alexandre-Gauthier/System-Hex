@@ -109,24 +109,26 @@
 	<div id="dialogNewAttributes" class="modal">
 		<!-- Modal content -->
 		<div class="modal-content">
-			<form action="/addAttribute" method="post">
-				<div class="modal-header">
-					<input type="text" class="titleInput" id="titleToken" name="titleToken" placeholder="Titre" maxlength="20">
-					<span id="closeBtn">&times;</span>
-				</div>
-				<div class="modal-body">
-					<input type="text" class="titleInput" id="titleToken" name="titleToken" placeholder="Valeur" maxlength="20">
-				</div>
+			<div class="modal-header">
+				<input type="text" class="titleInput" id="titleAttribute" name="titleToken" placeholder="Titre" maxlength="20">
+				<span id="closeBtn">&times;</span>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" id="containerAttribute" >
+				<input type="text" class="titleInput" id="valueAttribute" name="titleToken" placeholder="Valeur" maxlength="20">
+			</div>
 
-				<div class="modal-footer">
-					<div class="center_flex">
-						<button class="button_square save" type="submit"></button>
-						<a href="/deleteAttribute">
-							<div class="button_square delete"></div>
-						</a>
-					</div>
+			<div class="modal-footer">
+				<div class="center_flex">
+					<!-- <button class="button_square save" type="submit"></button> -->
+					<a id="modalBtnSave">
+						<div class="button_square save"></div>
+					</a>
+					<a id="modalBtnDelete">
+						<div class="button_square delete"></div>
+					</a>
 				</div>
-			</form>
+			</div>
 
 		</div>
 

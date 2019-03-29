@@ -6,7 +6,7 @@
   "scripts": {
     "babel-compile": "babel app --out-file public/js/bundle.js",
     "babel-watch": "babel app --watch --out-file public/js/bundle.js",
-    "start":"nodemon server.js",
+    "start": "nodemon server.js",
     "start-watch": "npm run start | npm run babel-watch"
   },
   "repository": {

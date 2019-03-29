@@ -26,15 +26,6 @@ module.exports = class MongoDB{
 				return callback(err);
 			})
 
-		// client.connect(config.connectionString, function(err, conn) {
-		// 	if (err) {return callback(err);}
-
-
-		// 	_db = conn.db('system-hex');
-
-		// 	console.log('Connected to MongoDB at: %s', config.connectionString);
-		// 	return callback(null,_db);
-		// });
 	}
 
 	getDb(){
@@ -64,15 +55,28 @@ module.exports = class MongoDB{
 
 	getSystem(userID,systemID,callback){
 		if(_db){
-			_db.collection('systems').find({userId: userID},{systems:1}).toArray((err, result) => {
+			_db.collection('systems').find({userId: userID,'systems.id':parseInt(systemID)},{projection:{_id: 0,systems:1}}).toArray((err, result) => {
 				if (err) return console.log(err);
-				let response = null;
-				result[0].systems.forEach(system => {
-					if(system.id == systemID){
-						response = system;
-					}
-				});
-				callback(response);
+				// let response = null;
+				// result[0].systems.forEach(system => {
+				// 	if(system.id == systemID){
+				// 		response = system;
+				// 	}
+				// });
+
+				// callback(response);
+				console.log(result)
+				callback(result[0])
+			});
+		}
+	}
+
+	deleteAttribute(userID,systemID,tokenID,attributeKey,callback){
+		if(_db){
+			let SEARCH = {userId:userID};
+			_db.collection('systems').deleteOne(SEARCH,(err,result)=>{
+				if (err) return console.log(err);
+				callback(result);
 			});
 		}
 	}
