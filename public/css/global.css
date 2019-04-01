@@ -40,6 +40,16 @@ h1{
 	align-items: center;
 	justify-content: space-around;
 	column-gap: 30px;
+	margin: 10px auto;
+}
+
+.center_flex.form_bottom:before{
+	content:"";
+	display:block;
+	width:100%;
+	background-color: #8e8a6b;
+	height: 2px;
+	border-radius: 1px;
 }
 
 .display_evenly{
@@ -63,6 +73,7 @@ h1{
 	border: 4px solid #8e7f6b;
 	box-sizing: border-box;
 
+	position: relative;
 	overflow:auto;
 }
 
@@ -287,6 +298,7 @@ a > .inner_form:hover h1{
 	text-align: center;
 	width:100%;
 	display: inline-block;
+	cursor: pointer;
 }
 
 .center_form .add_button::before,
@@ -381,11 +393,17 @@ a > .inner_form:hover h1{
 .list a{
 	color: #8e8a6b;
 	font-size: 25px;
+	margin: 0 auto;
 	cursor: pointer;
 }
 
 .list a:hover{
 	color: #a79981;
+}
+
+.sublist a{
+	font-size: 20px;
+	margin-left: 25px;
 }
 
 /* Input File */
