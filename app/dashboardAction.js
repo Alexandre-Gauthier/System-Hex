@@ -20,6 +20,27 @@ const getSystem = () =>{
 
 		fillList('#listEffects',system.effects,showEffect);
 		document.querySelector('#addEffect').onclick = createEffect;
+
+		$('#colorBGTile').colpick({
+			colorScheme:'light',
+			onChange:function(hsb,hex,rgb,el,bySetColor) {
+				$(el).val(hex);
+			}
+		});
+
+		$('#colorBorderTile').colpick({
+			colorScheme:'light',
+			onChange:function(hsb,hex,rgb,el,bySetColor) {
+				$(el).val(hex);
+			}
+		});
+
+		$('#colorBGBoard').colpick({
+			colorScheme:'light',
+			onChange:function(hsb,hex,rgb,el,bySetColor) {
+				$(el).val(hex);
+			}
+		});
 	});
 
 }
@@ -183,6 +204,22 @@ const showToken = (index) =>{
 		changeBtn('#tokenView',token.Color,token.Border);
 		addOnClickSaveItem('#tokenBtnSave',token,'tokens','#titleToken','#listTokens','#colorBGToken','#colorBorderToken');
 		addOnClickdeleteElement('#tokenBtnDelete',token,'tokens','deleteToken',system.tokens,'#listTokens');
+
+		$('#colorBGToken').colpick({
+			colorScheme:'light',
+			onChange:function(hsb,hex,rgb,el,bySetColor) {
+				$(el).val(hex);
+				changeBtn('#tokenView',hex,document.querySelector('#colorBorderToken').value);
+			}
+		});
+
+		$('#colorBorderToken').colpick({
+			colorScheme:'light',
+			onChange:function(hsb,hex,rgb,el,bySetColor) {
+				$(el).val(hex);
+				changeBtn('#tokenView',document.querySelector('#colorBGToken').value,hex);
+			}
+		});
 	}else{
 		formToken.style.display = 'none';
 	}
