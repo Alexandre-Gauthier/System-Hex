@@ -1,4 +1,5 @@
 let system = null;
+let modal = null;
 
 const getSystem = () =>{
 	getApi('systemChoiceData',(result)=>{
@@ -7,12 +8,20 @@ const getSystem = () =>{
 
 		fillInput('#colorBGTile',system.tile.Color);
 		fillInput('#colorBorderTile',system.tile.Border);
+		addAttributes('#listTileAttributes',system.tile.attributes,system.tile,'tile');
+		addOnClickModal('#addTileAttribute','#listTileAttributes',system.tile,'tile');
 
 		fillInput('#colorBGBoard',system.board.Color);
+		addAttributes('#listBoardAttributes',system.board.attributes,system.board,'board');
+		addOnClickModal('#addBoardAttribute','#listBoardAttributes',system.board,'board');
 
 		fillList('#listTokens',system.tokens,showToken);
+		document.querySelector('#addToken').onclick = createToken;
+
 		fillList('#listEffects',system.effects,showEffect);
+		document.querySelector('#addEffect').onclick = createEffect;
 	});
+
 }
 
 const fillInput = (id,value) =>{
@@ -27,77 +36,133 @@ const fillList = (id,array, onclick=null) =>{
 	}
 	for(let i = 0; i < array.length;i++){
 		let item = array[i];
-
-		let newElem = document.createElement('a');
-		let txt = document.createTextNode(item.name);
-		newElem.appendChild(txt);
-
-		if(onclick){
-			newElem.onclick = () =>{
-				onclick(i);
-			}
-		}
-		parent.appendChild(newElem);
+		addElement(id,i,item,onclick);
 	}
 }
 
-const addAttributes = (id,array,token) =>{
+const addElement = (id,index,item,onclick) =>{
+	let parent = document.querySelector(id);
+	let newElem = document.createElement('a');
+	let txt = document.createTextNode(item.name);
+	newElem.appendChild(txt);
+
+	if(onclick){
+		newElem.onclick = () =>{
+			onclick(index);
+		}
+	}
+	parent.appendChild(newElem);
+}
+
+const addAttributes = (id,array,element,type='tokens') =>{
 	let parent = document.querySelector(id);
 
 	while (parent.firstChild) {
 		parent.removeChild(parent.firstChild);
 	}
 	for(let i = 0; i < array.length;i++){
-		let item = array[i];
-		let newElem = document.createElement('a');
-		let txt = document.createTextNode(item.name);
-		newElem.appendChild(txt);
-		newElem.setAttribute('href','#');
-		newElem.setAttribute('class','modalBtn');
-		newElem.onclick = () =>{
-			showAttribute(item,i,newElem,token);
-		}
-
-		parent.appendChild(newElem);
+		let attribute = array[i];
+		addAttribute(id,attribute,element,type);
 	}
-
 }
 
-const showAttribute = (attribute, index,node, token) =>{
-	let modal = document.getElementById('dialogNewAttributes');
+const addAttribute = (id,attribute,element,type) =>{
+	let parent = document.querySelector(id);
+	let newElem = document.createElement('a');
+	let txt = document.createTextNode(attribute.name);
+	newElem.appendChild(txt);
+	newElem.setAttribute('href','#');
+	newElem.setAttribute('class','modalBtn');
+	newElem.onclick = () =>{
+		showAttribute(attribute,newElem,element,type);
+	}
+
+	parent.appendChild(newElem);
+}
+
+const showAttribute = (attribute,node, element,type) =>{
 	fillInput('#titleAttribute',attribute.name);
 	fillInput('#valueAttribute',attribute.value);
+	modal.querySelector('#modalBtnDelete').style.display = 'block';
 
 	modal.querySelector('#modalBtnDelete').onclick = () =>{
-		deleteAttribute(attribute,index,node,token);
+		deleteAttribute(attribute,node,element,type);
 	}
 
 	modal.querySelector('#modalBtnSave').onclick = () =>{
-		saveAttribute(attribute,node,token);
+		saveAttribute(attribute,node,element,type);
 	}
 
-	modal.style.display = "block";
+	showModal();
 }
 
-const deleteAttribute = (attribute,index,node,token) =>{
+const deleteAttribute = (attribute,node,element,type) =>{
 	if (confirm('Voulez-vous vraiment supprimer cet Attributs?')) {
-		token.attributes.splice(index,1);
-		node.remove();
-		document.getElementById('dialogNewAttributes').style.display = "none";
-
-		let params = {keyToken:token.name,keyAttribute:attribute.name}
-		postApi('deleteTokenAttribute',(res)=>{alert(res);},params);
+		updateAPI(element,type,'delete',{keyAttribute:attribute.name},(res)=>{
+			element.attributes.splice(findElement(element.attributes,'name',attribute.name,false),1);
+			node.remove();
+			hideModal();
+		})
 	}
 }
 
-const saveAttribute = (attribute,node,token) =>{
+const saveAttribute = (attribute,node,element,type) =>{
 	let title = document.querySelector('#titleAttribute').value;
 	let value = document.querySelector('#valueAttribute').value
-	attribute.name = title;
-	attribute.value = value;
-	node.innerHTML = title;
+	let oldTitle = attribute.name;
+	let newAttribute = {name:title,value:value};
 
-	document.getElementById('dialogNewAttributes').style.display = "none";
+	updateAPI(element,type,'save',{keyAttribute:oldTitle ,attribute:newAttribute},(res)=>{
+		attribute.name = title;
+		attribute.value = value;
+		node.innerHTML = title;
+
+		hideModal();
+	})
+}
+
+const createAttribute = (id,element,type) =>{
+	let title = document.querySelector('#titleAttribute').value;
+	let value = document.querySelector('#valueAttribute').value
+	let attribute = {name:title,value:value}
+
+	updateAPI(element,type,'add',{attribute:attribute},(res)=>{
+		element.attributes.push(attribute);
+		addAttribute(id,attribute,element,type);
+		hideModal();
+	})
+}
+
+const createToken = () =>{
+	let tokenName = prompt("Entrez un nom pour le Jeton","Jeton");
+	if (tokenName != null && tokenName != "") {
+		updateAPI({name:tokenName},'newToken','addToken',{},(res)=>{
+			let templateToken = {"name":tokenName,
+                    "Color":"",
+                    "Border":"",
+                    "Img":"",
+                    "attributes":[],
+					"methods":[]};
+			system.tokens.push(templateToken);
+			addElement('#listTokens',system.tokens.length-1,templateToken,showToken);
+
+			showToken(system.tokens.length-1);
+		})
+	}
+}
+
+const createEffect = () =>{
+	let effectName = prompt("Entrez un nom pour l'Effet","Effet");
+	if (effectName != null && effectName != "") {
+		updateAPI({name:effectName},'newEffect','addEffect',{},(res)=>{
+			let templateEffect = {"name":effectName,
+                    "attributes":[]};
+			system.effects.push(templateEffect);
+			addElement('#listEffects',system.effects.length-1,templateEffect,showEffect);
+
+			showEffect(system.effects.length-1);
+		})
+	}
 }
 
 const showToken = (index) =>{
@@ -107,17 +172,34 @@ const showToken = (index) =>{
 	if(display == 'none'){
 		formToken.style.display = 'block';
 		formEffect.style.display = 'none';
+		let token = system.tokens[index];
+		addOnClickModal('#addTokenAttribute','#listTokenAttributes',token,'tokens');
+
+		fillInput('#titleToken',token.name);
+		fillInput('#colorBGToken',token.Color);
+		fillInput('#colorBorderToken',token.Border);
+		addAttributes('#listTokenAttributes',token.attributes,token);
+		fillList('#listTokenMethods',token.methods);
+		changeBtn('#tokenView',token.Color,token.Border);
+		addOnClickSaveItem('#tokenBtnSave',token,'tokens','#titleToken','#listTokens','#colorBGToken','#colorBorderToken');
+		addOnClickdeleteElement('#tokenBtnDelete',token,'tokens','deleteToken',system.tokens,'#listTokens');
 	}else{
 		formToken.style.display = 'none';
 	}
+}
 
-	let token = system.tokens[index];
-
-	fillInput('#titleToken',token.name);
-	fillInput('#colorBGToken',token.Color);
-	fillInput('#colorBorderToken',token.Border);
-	addAttributes('#listTokenAttributes',token.attributes,token);
-	fillList('#listTokenMethods',token.methods);
+const changeBtn = (id,bg,border) =>{
+	let btn = document.querySelector(id);
+	if(bg){
+		btn.style.backgroundColor = '#'+bg;
+	}else{
+		btn.style.backgroundColor = 'transparent';
+	}
+	if(border){
+		btn.style.borderColor = '#'+border;
+	}else{
+		btn.style.borderColor = 'transparent';
+	}
 }
 
 const showEffect = (index) =>{
@@ -127,11 +209,106 @@ const showEffect = (index) =>{
 	if(display == 'none'){
 		formEffect.style.display = 'block';
 		formToken.style.display = 'none';
+		let effect = system.effects[index];
+		addOnClickModal('#addEffectAttribute','#listEffectAttributes',effect,'effects');
+
+		fillInput('#titleEffect',effect.name);
+		addAttributes('#listEffectAttributes',effect.attributes,effect,'effects');
+		addOnClickSaveItem('#effectBtnSave',effect,'effects','#titleEffect','#listEffects');
+		addOnClickdeleteElement('#effectBtnDelete',effect,'effects','deleteEffect',system.effects,'#listEffects');
 	}else{
 		formEffect.style.display = 'none';
 	}
+}
 
-	let effect = system.effects[index];
-	fillInput('#titleEffect',effect.name);
-	// addAttributes('#listEffectAttributes',effect.attributes);
+const addOnClickModal = (id,listnode,item,type) =>{
+	document.querySelector(id).onclick = () =>{
+		modal.querySelector('#modalBtnDelete').style.display = 'none';
+		modal.querySelector('#modalBtnSave').onclick = () =>{
+			createAttribute(listnode,item,type);
+		}
+		showModal();
+	}
+}
+
+const addOnClickdeleteElement = (id,item,type,action,list,container) =>{
+	document.querySelector(id).onclick = () =>{
+		if (confirm('Voulez-vous vraiment supprimer cet Attributs?')) {
+			updateAPI(item,type,action,{},(res)=>{
+				list.splice(findElement(list,'name',item.name,false),1);
+				let node = findNode(document.querySelector(container),item.name);
+				node.remove();
+				formToken.style.display = 'none';
+				formEffect.style.display = 'none';
+			})
+		}
+	}
+}
+
+const addOnClickSaveItem = (id,item,type,nameId,container,colorId=null,borderId=null) =>{
+	document.querySelector(id).onclick = () =>{
+		let oldTitle = {name:item.name};
+
+		let data = {name:document.querySelector(nameId).value};
+
+		if(colorId){
+			data.Color = document.querySelector(colorId).value;
+		}
+		if(borderId){
+			data.Border = document.querySelector(borderId).value;
+		}
+
+		updateAPI(oldTitle,type,'saveItem',data,(res)=>{
+
+			item.name = document.querySelector(nameId).value;
+			if(colorId){
+				item.Color = document.querySelector(colorId).value;
+			}
+			if(borderId){
+				item.Border = document.querySelector(borderId).value;
+			}
+			let node = findNode(document.querySelector(container),oldTitle.name);
+			node.innerHTML = item.name;
+			formToken.style.display = 'none';
+			formEffect.style.display = 'none';
+		});
+	}
+}
+
+const updateAPI = (item,type,action,data,callback) =>{
+	let params = {keyToken:item.name,data:data,type:type,action:action}
+	postApi('updateAttribute',(res)=>{
+		if(res == action){
+			callback(res);
+		}else{
+			alert(res);
+		}
+	},params);
+}
+
+const showModal = () =>{
+	modal.style.display = "block";
+}
+
+const hideModal = () =>{
+	fillInput('#titleAttribute','');
+	fillInput('#valueAttribute','');
+	modal.style.display = "none";
+}
+
+const findElement = (array,key,value,element=true) =>{
+    for(let i = 0; i < array.length;i++){
+        if(array[i][key] == value){
+            return element?array[i]:i;
+        }
+    }
+}
+
+const findNode = (container,value) =>{
+	var childs = container.childNodes;
+	for(let i = 0; i < childs.length;i++){
+		if(childs[i].innerHTML == value){
+			return childs[i];
+		}
+	}
 }

@@ -33,46 +33,53 @@
 			<div class="center_form full_height full_width">
 				<h2>Configuration du système</h2>
 				<h3 class="first">Configuration des tuiles</h3>
-				<div class="form_line"><p>Couleur : </p><input type="text" class="lineInput" id="colorBGTile" name="colorBGTile" placeholder="ffffff" maxlength="6"></div>
-				<div class="form_line"><p>Bordure : </p><input type="text" class="lineInput" id="colorBorderTile" name="colorBorderTile" placeholder="ffffff" maxlength="6"></div>
+					<div class="form_line"><p>Couleur : </p><input type="text" class="lineInput" id="colorBGTile" name="colorBGTile" placeholder="ffffff" maxlength="6"></div>
+					<div class="form_line"><p>Bordure : </p><input type="text" class="lineInput" id="colorBorderTile" name="colorBorderTile" placeholder="ffffff" maxlength="6"></div>
 				<h4>Attributs</h4>
-				<a href="/addAttribut?obj=tile" class="add_button">+</a>
+					<div id="listTileAttributes" class="list sublist" ></div>
+					<a id="addTileAttribute" class="add_button">+</a>
 				<h4>Méthodes</h4>
-				<a href="/addMethod?obj=tile" class="add_button">+</a>
+					<a class="add_button">+</a>
 				<h3>Configuration de la planche</h3>
-				<div class="form_line"><p>Couleur : </p><input type="text" class="lineInput" id="colorBGBoard" name="colorBGBoard" placeholder="ffffff" maxlength="6"></div>
+					<div class="form_line"><p>Couleur : </p><input type="text" class="lineInput" id="colorBGBoard" name="colorBGBoard" placeholder="ffffff" maxlength="6"></div>
 				<h4>Attributs</h4>
-				<a href="/addAttribut?obj=board" class="add_button">+</a>
+					<div id="listBoardAttributes" class="list sublist" ></div>
+					<a id="addBoardAttribute" class="add_button">+</a>
 				<h4>Méthodes</h4>
-				<a href="/addMethod?obj=board" class="add_button">+</a>
+					<a class="add_button">+</a>
 			</div>
 		</div>
-
 
 		<div class="inner_form full_height display_flex full_width">
 			<!-- Formulaire Tokens -->
 			<div class="center_form full_height full_width" id="formToken" style="display: none">
 				<div class="config_header">
-					<div class="button_square save"></div>
+					<div id="tokenView" class="button_square"></div>
 					<input type="text" class="titleInput" id="titleToken" name="titleToken" placeholder="Titre" maxlength="20">
 				</div>
 				<h3>Configuration</h3>
-				<div class="form_line"><p>Couleur : </p><input type="text" class="lineInput" id="colorBGToken" name="colorBGToken" placeholder="ffffff" maxlength="6"></div>
-				<div class="form_line"><p>Bordure : </p><input type="text" class="lineInput" id="colorBorderToken" name="colorBorderToken" placeholder="ffffff" maxlength="6"></div>
-				<div class="form_line">
+					<div class="form_line"><p>Couleur : </p><input type="text" class="lineInput" id="colorBGToken" name="colorBGToken" placeholder="ffffff" maxlength="6"></div>
+					<div class="form_line"><p>Bordure : </p><input type="text" class="lineInput" id="colorBorderToken" name="colorBorderToken" placeholder="ffffff" maxlength="6"></div>
+				<!-- <div class="form_line">
 					<p>Image : </p>
 					<input type="file" name="file" id="file" class="inputfile" accept="image/png" />
 					<label for="file" id="labelFile">choisir</label>
-
+				</div> -->
+				<div class="center_flex form_bottom">
+					<a id="tokenBtnSave">
+						<div class="button_square save"></div>
+					</a>
+					<a id="tokenBtnDelete">
+						<div class="button_square delete"></div>
+					</a>
 				</div>
 				<h3>Attributs</h3>
-					<div id="listTokenAttributes" class="list" >
-					</div>
-				<a href="/addAttribut?obj=token&id=1" class="add_button">+</a>
+					<div id="listTokenAttributes" class="list sublist" ></div>
+					<a id="addTokenAttribute" class="add_button">+</a>
 				<h3>Méthodes</h3>
-				<div id="listTokenMethods" class="list" >
-				</div>
-				<a href="/addMethod?obj=token&id=1" class="add_button">+</a>
+					<div id="listTokenMethods" class="list sublist" ></div>
+					<a href="/addMethod?obj=token&id=1" class="add_button">+</a>
+
 			</div>
 
 			<!-- Formulaire Effect -->
@@ -80,10 +87,18 @@
 				<div class="config_header">
 					<input type="text" class="titleInput" id="titleEffect" name="titleEffect" placeholder="Titre" maxlength="20">
 				</div>
+				<div class="center_flex form_bottom">
+					<a id="effectBtnSave">
+						<div class="button_square save"></div>
+					</a>
+					<a id="effectBtnDelete">
+						<div class="button_square delete"></div>
+					</a>
+				</div>
 				<h3>Attributs</h3>
-					<div id="listEffectAttributes" class="list" >
-					</div>
-				<a href="/addAttribut?obj=token&id=1" class="add_button">+</a>
+					<div id="listEffectAttributes" class="list sublist" ></div>
+					<a id="addEffectAttribute" class="add_button">+</a>
+
 			</div>
 		</div>
 
@@ -91,16 +106,14 @@
 		<div class="inner_form full_height display_flex full_width">
 			<div class="center_form full_height full_width">
 				<h2>Jetons</h2>
-				<input class="boxInput" type="text" id="searchTokens" name="searchTokens" placeholder="Rechercher">
-				<div id="listTokens" class="list" >
-				</div>
-				<a href="/addToken" class="add_button">+</a>
+				<!-- <input class="boxInput" type="text" id="searchTokens" name="searchTokens" placeholder="Rechercher"> -->
+					<div id="listTokens" class="list" ></div>
+					<a id="addToken" class="add_button">+</a>
 			</div>
 			<div class="center_form full_height half_width">
 				<h2>Effets</h2>
-				<div id="listEffects" class="list" >
-				</div>
-				<a href="/addEffect" class="add_button">+</a>
+					<div id="listEffects" class="list" ></div>
+					<a id="addEffect" class="add_button">+</a>
 			</div>
 		</div>
 	</div>
@@ -110,12 +123,12 @@
 		<!-- Modal content -->
 		<div class="modal-content">
 			<div class="modal-header">
-				<input type="text" class="titleInput" id="titleAttribute" name="titleToken" placeholder="Titre" maxlength="20">
+				<input type="text" class="titleInput" id="titleAttribute" name="titleAttribute" placeholder="Titre" maxlength="20">
 				<span id="closeBtn">&times;</span>
 			</div>
 			<div class="modal-body">
 				<input type="hidden" id="containerAttribute" >
-				<input type="text" class="titleInput" id="valueAttribute" name="titleToken" placeholder="Valeur" maxlength="20">
+				<input type="text" class="titleInput" id="valueAttribute" name="valueAttribute" placeholder="Valeur" maxlength="20">
 			</div>
 
 			<div class="modal-footer">

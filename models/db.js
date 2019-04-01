@@ -65,7 +65,6 @@ module.exports = class MongoDB{
 
 	updateSystem(userID,newSystem,callback){
 		if(_db){
-			console.log('here')
 			_db.collection('systems').replaceOne({userId: userID},newSystem,(err,result)=>{
 				if (err) return console.log(err);
 				callback(result);

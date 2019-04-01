@@ -120,27 +120,131 @@ app.get('/systemChoiceData',(req, res) => {
 	}
 });
 
-app.post('/deleteTokenAttribute', (req,res)=>{
+app.post('/updateAttribute', (req,res)=>{
     if (req.session.user && req.cookies.user_sid) {
-        let newSystem = req.session.system;
-        let token = findElement(newSystem.tokens,'name',req.body.keyToken);
-        console.log(token)
-        token.attributes.splice(findElement(token.attributes,'name',req.body.keyAttribute,false),1);
-        console.log(token)
+        updateAttributes(req,res,(item)=>{
+            let system = req.session.system;
+            switch(req.body.action){
+            case 'delete':
+                item.attributes.splice(findElement(item.attributes,'name',req.body.data.keyAttribute,false),1);
+                break;
+            case 'deleteEffect':
+                system.effects.splice(findElement(system.effects,'name',req.body.keyToken,false),1);
+                break;
+            case 'deleteToken':
+                system.tokens.splice(findElement(system.tokens,'name',req.body.keyToken,false),1);
+                break;
+            case 'add':
+                if(!findElement(item.attributes,'name',req.body.data.attribute.name)){
+                    item.attributes.push(req.body.data.attribute);
+                }else{
+                    res.send('ELEMENT_ALREADY_EXIST');
+                    return false;
+                }
+                break;
+            case 'save':
+                if(req.body.data.keyAttribute == req.body.data.attribute.name || !findElement(item.attributes,'name',req.body.data.attribute.name)){
+                    let attribute = item.attributes[findElement(item.attributes,'name',req.body.data.keyAttribute,false)];
+                    attribute.name = req.body.data.attribute.name;
+                    attribute.value = req.body.data.attribute.value;
+                }else{
+                    res.send('ELEMENT_ALREADY_EXIST');
+                    return false;
+                }
+                break;
+            case 'saveItem':
+                if(req.body.keyToken == req.body.data.name || (!findElement(req.session.system.tokens,'name',req.body.data.name) &&
+                !findElement(req.session.system.effects,'name',req.body.data.name))
+                ){
+                    item.name = req.body.data.name;
+                    if(req.body.data.Color != 'undefined'){
+                        item.Color = req.body.data.Color;
+                    }
+                    if(req.body.data.Border != 'undefined'){
+                        item.Border = req.body.data.Border;
+                    }
+                }else{
+                    res.send('ELEMENT_ALREADY_EXIST');
+                    return false;
+                }
 
-        db.getSystems(req.session.user.id,(result)=>{
-            result.systems[findElement(result.systems,'id',req.session.system.id,false)] = newSystem;
-            console.log(result)
+                break;
+            case 'addToken':
 
-            db.updateSystem(req.session.user.id,result,(data)=>{
-                res.send('Delete');
-            });
+                if(!findElement(system.tokens,'name',req.body.keyToken) &&
+                !findElement(system.effects,'name',req.body.keyToken)
+                ){
+                    let templateToken = {"name":req.body.keyToken,
+                    "Color":"",
+                    "Border":"",
+                    "Img":"",
+                    "attributes":[],
+                    "methods":[]};
+
+                    system.tokens.push(templateToken);
+                }else{
+                    res.send('ELEMENT_ALREADY_EXIST');
+                    return false;
+                }
+                break;
+            case 'addEffect':
+                if(!findElement(system.tokens,'name',req.body.keyToken) &&
+                !findElement(system.effects,'name',req.body.keyToken)
+                ){
+                    let templateEffect = {"name":req.body.keyToken,
+                    "attributes":[]};
+
+                    system.effects.push(templateEffect);
+                }else{
+                    res.send('ELEMENT_ALREADY_EXIST');
+                    return false;
+                }
+                break;
+            }
+            return true;
         });
-
     }else {
 		res.redirect('/login');
 	}
 });
+
+const updateAttributes = (req,res, action) =>{
+    let newSystem = req.session.system;
+    let array = null;
+    let item = null;
+    let canContinu = true;
+
+    switch(req.body.type){
+    case 'tokens':
+        item = findElement(newSystem.tokens,'name',req.body.keyToken);
+        break;
+    case 'effects':
+        item = findElement(newSystem.effects,'name',req.body.keyToken);
+        break;
+    case 'tile':
+        item = newSystem.tile;
+        break;
+    case 'board':
+        item = newSystem.board;
+        break;
+    case 'newToken':
+        item = newSystem.tokens;
+        break;
+    case 'newEffect':
+        item = newSystem.effects;
+        break;
+    }
+
+    if(action(item,canContinu)){
+        db.getSystems(req.session.user.id,(result)=>{
+            result.systems[findElement(result.systems,'id',req.session.system.id,false)] = newSystem;
+
+            db.updateSystem(req.session.user.id,result,(data)=>{
+                res.send(req.body.action);
+            });
+        });
+    }
+}
 
 
 const findElement = (array,key,value,element=true) =>{

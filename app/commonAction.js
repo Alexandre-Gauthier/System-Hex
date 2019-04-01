@@ -1,17 +1,15 @@
 window.onload = () =>{
+	modal = document.getElementById('dialogNewAttributes');
 	dialogScript();
 	inputScript();
 }
 
 const getApi = (route,action) =>{
 	let request = new XMLHttpRequest();
-	console.log('Connecting to',route);
 	request.open('GET', '/'+route, true);
 	request.onload = () => {
 		if(request.readyState === 4){
-			console.log('Connection ready');
 			if (request.status >= 200 && request.status < 400) {
-				console.log('Connection complete');
 				let data = JSON.parse(request.response);
 				console.log('Response:',data);
 				action(data);
@@ -25,15 +23,12 @@ const getApi = (route,action) =>{
 
 const postApi = (route,action,params) =>{
 	let request = new XMLHttpRequest();
-	console.log('Posting to',route);
 	request.open('POST', '/'+route, true);
 	request.setRequestHeader('Content-type', 'application/json');
 
 	request.onreadystatechange = function() {
 		if(request.readyState === 4){
-			console.log('Post ready');
 			if (request.status >= 200 && request.status < 400) {
-				console.log('Post complete');
 				action(request.responseText);
 			} else {
 				console.log('error');
@@ -61,7 +56,6 @@ function setInputFilter(textbox, inputFilter) {
 
 const dialogScript = () =>{
 	// Get the modal
-	let modal = document.getElementById('dialogNewAttributes');
 	if(modal){
 		// Get the button that opens the modal
 		var btns = document.querySelectorAll(".modalBtn");
@@ -70,22 +64,24 @@ const dialogScript = () =>{
 		var span = document.querySelector("#closeBtn");
 
 		// When the user clicks the button, open the modal
-		btns.forEach(btn=>{
-			btn.onclick = ()=> {
-				modal.style.display = "block";
-			}
-		})
+		// btns.forEach(btn=>{
+		// 	btn.onclick = ()=> {
+		// 		modal.style.display = "block";
+		// 	}
+		// })
 
 
 		// When the user clicks on <span> (x), close the modal
 		span.onclick = function() {
 			modal.style.display = "none";
+			hideModal();
 		}
 
 		// When the user clicks anywhere outside of the modal, close it
 		window.onclick = function(event) {
 			if (event.target == modal) {
 				modal.style.display = "none";
+				hideModal();
 			}
 		}
 	}
