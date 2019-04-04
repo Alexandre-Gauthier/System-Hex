@@ -20,7 +20,7 @@
 		</div>
 		<div class="header_menu">
 			<a href="#">
-				<div class="button_square save"></div>
+				<div id="systemBtnSave" class="button_square save"></div>
 			</a>
 			<a href="#">
 				<div class="button_square delete"></div>
@@ -35,6 +35,10 @@
 		<div class="inner_form full_height display_flex full_width">
 			<div class="center_form full_height full_width">
 				<h2>Configuration du système</h2>
+				<div class="config_header">
+					<div id="tokenView" class="button_square"></div>
+					<input type="text" class="titleInput" id="titleToken" name="titleToken" placeholder="Titre" maxlength="20">
+				</div>
 				<h3 class="first">Configuration des tuiles</h3>
 					<div class="form_line"><p>Couleur : </p><input type="text" class="lineInput" id="colorBGTile" name="colorBGTile" placeholder="ffffff" maxlength="6"></div>
 					<div class="form_line"><p>Bordure : </p><input type="text" class="lineInput" id="colorBorderTile" name="colorBorderTile" placeholder="ffffff" maxlength="6"></div>

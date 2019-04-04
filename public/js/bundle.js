@@ -155,6 +155,7 @@ let modal = null;
 const getSystem = () => {
 	getApi('systemChoiceData', result => {
 		system = result;
+		addOnClickSaveSystem('#systemBtnSave');
 		fillInput('#titleSystem', system.title);
 
 		fillInput('#colorBGTile', system.tile.Color);
@@ -224,7 +225,7 @@ const addElement = (id, index, item, onclick) => {
 	parent.appendChild(newElem);
 };
 
-const addAttributes = (id, array, element, type = 'tokens') => {
+const addAttributes = (id, array, element, type = 'token') => {
 	let parent = document.querySelector(id);
 
 	while (parent.firstChild) {
@@ -268,7 +269,7 @@ const showAttribute = (attribute, node, element, type) => {
 
 const deleteAttribute = (attribute, node, element, type) => {
 	if (confirm('Voulez-vous vraiment supprimer cet Attributs?')) {
-		updateAPI(element, type, 'delete', { keyAttribute: attribute.name }, res => {
+		updateAPI(element.name, type, 'deleteAttribute', { keyAttribute: attribute.name }, res => {
 			element.attributes.splice(findElement(element.attributes, 'name', attribute.name, false), 1);
 			node.remove();
 			hideModal();
@@ -282,7 +283,7 @@ const saveAttribute = (attribute, node, element, type) => {
 	let oldTitle = attribute.name;
 	let newAttribute = { name: title, value: value };
 
-	updateAPI(element, type, 'save', { keyAttribute: oldTitle, attribute: newAttribute }, res => {
+	updateAPI(element.name, type, 'saveAttribute', { keyAttribute: oldTitle, attribute: newAttribute }, res => {
 		attribute.name = title;
 		attribute.value = value;
 		node.innerHTML = title;
@@ -296,7 +297,7 @@ const createAttribute = (id, element, type) => {
 	let value = document.querySelector('#valueAttribute').value;
 	let attribute = { name: title, value: value };
 
-	updateAPI(element, type, 'add', { attribute: attribute }, res => {
+	updateAPI(element.name, type, 'addAttribute', { attribute: attribute }, res => {
 		element.attributes.push(attribute);
 		addAttribute(id, attribute, element, type);
 		hideModal();
@@ -306,7 +307,7 @@ const createAttribute = (id, element, type) => {
 const createToken = () => {
 	let tokenName = prompt("Entrez un nom pour le Jeton", "Jeton");
 	if (tokenName != null && tokenName != "") {
-		updateAPI({ name: tokenName }, 'newToken', 'addToken', {}, res => {
+		updateAPI(tokenName, 'tokens', 'addToken', {}, res => {
 			let templateToken = { "name": tokenName,
 				"Color": "",
 				"Border": "",
@@ -324,7 +325,7 @@ const createToken = () => {
 const createEffect = () => {
 	let effectName = prompt("Entrez un nom pour l'Effet", "Effet");
 	if (effectName != null && effectName != "") {
-		updateAPI({ name: effectName }, 'newEffect', 'addEffect', {}, res => {
+		updateAPI(effectName, 'effects', 'addEffect', {}, res => {
 			let templateEffect = { "name": effectName,
 				"attributes": [] };
 			system.effects.push(templateEffect);
@@ -343,7 +344,7 @@ const showToken = index => {
 		formToken.style.display = 'block';
 		formEffect.style.display = 'none';
 		let token = system.tokens[index];
-		addOnClickModal('#addTokenAttribute', '#listTokenAttributes', token, 'tokens');
+		addOnClickModal('#addTokenAttribute', '#listTokenAttributes', token, 'token');
 
 		fillInput('#titleToken', token.name);
 		fillInput('#colorBGToken', token.Color);
@@ -351,8 +352,8 @@ const showToken = index => {
 		addAttributes('#listTokenAttributes', token.attributes, token);
 		fillList('#listTokenMethods', token.methods);
 		changeBtn('#tokenView', token.Color, token.Border);
-		addOnClickSaveItem('#tokenBtnSave', token, 'tokens', '#titleToken', '#listTokens', '#colorBGToken', '#colorBorderToken');
-		addOnClickdeleteElement('#tokenBtnDelete', token, 'tokens', 'deleteToken', system.tokens, '#listTokens');
+		addOnClickSaveItem('#tokenBtnSave', token, 'token', '#titleToken', '#listTokens', '#colorBGToken', '#colorBorderToken');
+		addOnClickdeleteElement('#tokenBtnDelete', token, 'token', 'deleteToken', system.tokens, '#listTokens');
 
 		$('#colorBGToken').colpick({
 			colorScheme: 'light',
@@ -396,10 +397,10 @@ const showEffect = index => {
 		formEffect.style.display = 'block';
 		formToken.style.display = 'none';
 		let effect = system.effects[index];
-		addOnClickModal('#addEffectAttribute', '#listEffectAttributes', effect, 'effects');
+		addOnClickModal('#addEffectAttribute', '#listEffectAttributes', effect, 'effect');
 
 		fillInput('#titleEffect', effect.name);
-		addAttributes('#listEffectAttributes', effect.attributes, effect, 'effects');
+		addAttributes('#listEffectAttributes', effect.attributes, effect, 'effect');
 		addOnClickSaveItem('#effectBtnSave', effect, 'effects', '#titleEffect', '#listEffects');
 		addOnClickdeleteElement('#effectBtnDelete', effect, 'effects', 'deleteEffect', system.effects, '#listEffects');
 	} else {
@@ -420,7 +421,7 @@ const addOnClickModal = (id, listnode, item, type) => {
 const addOnClickdeleteElement = (id, item, type, action, list, container) => {
 	document.querySelector(id).onclick = () => {
 		if (confirm('Voulez-vous vraiment supprimer cet Attributs?')) {
-			updateAPI(item, type, action, {}, res => {
+			updateAPI(item.name, type, action, {}, res => {
 				list.splice(findElement(list, 'name', item.name, false), 1);
 				let node = findNode(document.querySelector(container), item.name);
 				node.remove();
@@ -433,8 +434,6 @@ const addOnClickdeleteElement = (id, item, type, action, list, container) => {
 
 const addOnClickSaveItem = (id, item, type, nameId, container, colorId = null, borderId = null) => {
 	document.querySelector(id).onclick = () => {
-		let oldTitle = { name: item.name };
-
 		let data = { name: document.querySelector(nameId).value };
 
 		if (colorId) {
@@ -443,9 +442,8 @@ const addOnClickSaveItem = (id, item, type, nameId, container, colorId = null, b
 		if (borderId) {
 			data.Border = document.querySelector(borderId).value;
 		}
-
+		let oldTitle = item.name;
 		updateAPI(oldTitle, type, 'saveItem', data, res => {
-
 			item.name = document.querySelector(nameId).value;
 			if (colorId) {
 				item.Color = document.querySelector(colorId).value;
@@ -453,7 +451,7 @@ const addOnClickSaveItem = (id, item, type, nameId, container, colorId = null, b
 			if (borderId) {
 				item.Border = document.querySelector(borderId).value;
 			}
-			let node = findNode(document.querySelector(container), oldTitle.name);
+			let node = findNode(document.querySelector(container), oldTitle);
 			node.innerHTML = item.name;
 			formToken.style.display = 'none';
 			formEffect.style.display = 'none';
@@ -461,10 +459,26 @@ const addOnClickSaveItem = (id, item, type, nameId, container, colorId = null, b
 	};
 };
 
+const addOnClickSaveSystem = id => {
+	document.querySelector(id).onclick = () => {
+		let data = {};
+		data['title'] = document.querySelector('#titleSystem').value;
+		data['tileColor'] = document.querySelector('#colorBGTile').value;
+		data['tileBorder'] = document.querySelector('#colorBorderTile').value;
+		data['boardColor'] = document.querySelector('#colorBGBoard').value;
+		updateAPI(null, 'system', 'saveSystem', data, res => {
+			system.title = data.title;
+			system.tile.Color = data.tileColor;
+			system.tile.Board = data.tileBoard;
+			system.board.Color = data.boardColor;
+		});
+	};
+};
+
 const updateAPI = (item, type, action, data, callback) => {
-	let params = { keyToken: item.name, data: data, type: type, action: action };
-	postApi('updateAttribute', res => {
-		if (res == action) {
+	let params = { key: item, data: data, type: type };
+	postApi(action, res => {
+		if (res == 'SUCCESS') {
 			callback(res);
 		} else {
 			alert(res);
