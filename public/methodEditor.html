@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>System-Hex - Creation</title>
+	<link href="https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c:700" rel="stylesheet">
+	<link rel="stylesheet" href="css/global.css">
+	<script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+	<script src="js/bundle.js"></script>
+
+	<link rel="stylesheet" type="text/css" href="../css/colpick.css">
+    <script type="text/javascript" src="../js/colpick.js"></script>
+</head>
+<body>
+	<div class="header_bar display_evenly">
+		<div class="header_title">
+			<h1>Système Démo</h1>
+		</div>
+		<input type="text" class="titleInput" id="titleSystem" name="titleSystem" placeholder="Nom" maxlength="20">
+		<div class="header_menu">
+			<a href="#">
+				<div id="systemBtnSave" class="button_square save"></div>
+			</a>
+			<a href="#">
+				<div class="button_square delete"></div>
+			</a>
+			<a href="dashboard.html">
+				<div class="button_square close"></div>
+			</a>
+		</div>
+	</div>
+	<div class="outer_form display_evenly">
+		<div class="inner_form full_height display_flex half_width">
+			<div class="center_form full_height half_width">
+				<h2>Arbres</h2>
+				<h5 class="first">Attributs</h5>
+					<div id="listTokenAttributes" class="list sublist" ></div>
+				<h5>Méthodes</h5>
+					<div id="listTokenMethods" class="list sublist" ></div>
+				<h5>Variables</h5>
+					<div id="listTokenVariables" class="list sublist" ></div>
+			</div>
+		</div>
+		<div class="center_form full_height">
+			<h2>Pièces</h2>
+			<h5 class='first'>Block</h5>
+			<h5>Condition</h5>
+			<h5>Variable</h5>
+			<h5>Valeur</h5>
+			<h5>Actions</h5>
+
+		</div>
+
+
+		<div class="inner_form full_height display_flex full_width">
+			<div class="center_form long_form full_height full_width">
+				<h3 class='first'>Éditeur</h3>
+
+			</div>
+		</div>
+
+	</div>
+
+</body>
+</html>

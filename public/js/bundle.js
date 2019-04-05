@@ -173,10 +173,12 @@ const getSystem = () => {
 		fillList('#listEffects', system.effects, showEffect);
 		document.querySelector('#addEffect').onclick = createEffect;
 
+		changeBtn('#tileView', system.tile.Color, system.tile.Border);
 		$('#colorBGTile').colpick({
 			colorScheme: 'light',
 			onChange: function (hsb, hex, rgb, el, bySetColor) {
 				$(el).val(hex);
+				changeBtn('#tileView', hex, document.querySelector('#colorBorderTile').value);
 			}
 		});
 
@@ -184,13 +186,16 @@ const getSystem = () => {
 			colorScheme: 'light',
 			onChange: function (hsb, hex, rgb, el, bySetColor) {
 				$(el).val(hex);
+				changeBtn('#tileView', document.querySelector('#colorBGTile').value, hex);
 			}
 		});
 
+		changeBtn('#boardView', system.board.Color, "");
 		$('#colorBGBoard').colpick({
 			colorScheme: 'light',
 			onChange: function (hsb, hex, rgb, el, bySetColor) {
 				$(el).val(hex);
+				changeBtn('#boardView', hex, "");
 			}
 		});
 	});
@@ -345,7 +350,7 @@ const showToken = index => {
 		formEffect.style.display = 'none';
 		let token = system.tokens[index];
 		addOnClickModal('#addTokenAttribute', '#listTokenAttributes', token, 'token');
-
+		console.log(token.name);
 		fillInput('#titleToken', token.name);
 		fillInput('#colorBGToken', token.Color);
 		fillInput('#colorBorderToken', token.Border);

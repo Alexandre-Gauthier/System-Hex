@@ -156,13 +156,14 @@ a > .inner_form:hover h1{
 .header_bar{
 	height: 70px;
 	width:100%;
-	justify-content: space-around;
 	padding:10px 20px;
 	box-sizing: border-box;
 }
 
 .header_bar .header_title{
+	display: flex;
 	float:left;
+	justify-content: space-between;
 	/* margin-left:10px; */
 }
 
@@ -170,6 +171,19 @@ a > .inner_form:hover h1{
 	float:right;
 	display: flex;
 	justify-content: space-between;
+}
+
+.button_small{
+	width:30px;
+	height:20px;
+	box-sizing: border-box;
+	background-color: #81a061;
+	color: #60704a;
+	border: 4px solid #788c5a;
+	padding: 5px;
+	border-radius: 10px;
+	margin:5px;
+	cursor: pointer;
 }
 
 .button_square{
@@ -273,7 +287,7 @@ a > .inner_form:hover h1{
 	margin-left:15px;
 }
 
-.center_form h4:before{
+.center_form h4:not(.first):before{
 	content: "";
 	display:block;
 	width:100%;
@@ -382,7 +396,7 @@ a > .inner_form:hover h1{
 .center_form .config_header{
 	display:flex;
 	justify-content: space-around;
-	margin-bottom: 10px;
+	margin: 10px 0;
 }
 
 .list{
@@ -571,3 +585,28 @@ background: #999482;
 	margin: 10px;
 	padding: 2px 16px;
   }
+
+  /************************************************* Dashboard ***********************************************************/
+  .long_form{
+	max-width:100%;
+  }
+
+  .long_form h3{
+	  font-size: 20px;
+	  text-align: center;
+  }
+
+  .center_form h5{
+	color: #82a061;
+	font-size: 15px;
+  }
+
+  .center_form h5:not(.first):before{
+	content: "";
+	display:block;
+	width:100%;
+	background-color: #8e8a6b;
+	height: 3px;
+	border-radius: 1.5px;
+	margin-top: 10px;
+}
