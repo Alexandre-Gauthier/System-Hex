@@ -227,7 +227,7 @@ const showToken = (index) =>{
 			}
 		});
 		document.querySelector('#addTokenMethod').onclick = () =>{
-			window.location.href = "/methodEditor.html?token="+token.name+"&method=new"
+			window.location.href = "/methodEditor.html?token="+token.name+"&method=new";
 		}
 	}else{
 		formToken.style.display = 'none';

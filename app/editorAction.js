@@ -5,7 +5,6 @@ let localeVars = {};
 
 let space = null;
 let methodBody = null;
-let titleNode = null;
 
 let selectedPiece = null;
 let selectedTags = [];
@@ -21,7 +20,6 @@ let method = null;
 
 const iniEditor = () =>{
 	space = document.querySelector('#creationSpace');
-	titleNode = document.querySelector('#stringTest');
 
 	space.onclick=(e)=>{
 		if(selectedPiece){
@@ -37,6 +35,7 @@ const iniEditor = () =>{
 		token = findElement(system.tokens,'name',getUrlVars()["token"],true);
 		setTextNode('#tokenTitle',token.name);
 		addAttributes('#listTokenAttributes',token.attributes,token,'token');
+
 		fillList('#listTokenMethods',token.methods);
 		addOnClickSaveMethod('#methodBtnSave');
 		if(getUrlVars()["method"] == 'new'){
@@ -44,7 +43,11 @@ const iniEditor = () =>{
 			token.methods.push(method);
 		}else{
 			method = findElement(token.methods,'name',getUrlVars()["method"],true);
-			fillInput('#titleMethod',method.name);
+			fillInput('#titleMethod',getUrlVars()["method"]);
+			console.log(method);
+			dom2JSON = method.dom;
+			methodBody = method.body;
+			restoreDOM();
 		}
 	});
 	setTextNode('#editorHeader','Éditeur ('+unresolvedInput+')');
@@ -59,10 +62,10 @@ const addOnClickSaveMethod = (id) =>{
 		dom2String();
 		if(document.querySelector('#titleMethod').value != ""){
 			let data = {oldName:method.name};
-			method.name = document.querySelector('#titleSystem').value;
+			method.name = document.querySelector('#titleMethod').value;
 			data['method'] = method;
 			updateAPI(token.name,'token','saveMethod',data,(res)=>{
-
+				window.location.href = "/methodEditor.html?token="+token.name+"&method="+method.name;
 			});
 		}else{
 			alert('Entrez un nom');
@@ -160,9 +163,6 @@ const showButton = () =>{
 // ****************************************** Button Action *******************************************
 
 const saveDOM = () =>{
-	if(unresolvedInput>0){
-		alert('Unresolved : '+unresolvedInput);
-	}
 	dom2JSON = toJSON(space);
 	return dom2JSON;
 }
@@ -171,7 +171,6 @@ const clearDOM = () =>{
 	while (space.firstChild){
 		space.removeChild(space.firstChild);
 	}
-	titleNode.innerHTML = "Hello";
 }
 
 const restoreDOM = () =>{
@@ -741,8 +740,7 @@ const dom2String = () =>{
 	recurseDomChildren(space);
 	setTextNode('#editorHeader','Éditeur ('+unresolvedInput+')');
 	method.unresolved = unresolvedInput;
-	titleNode.innerHTML = methodBody;
-	// method.dom = saveDOM();
+	method.dom = saveDOM();
 	method.body = methodBody;
 }
 

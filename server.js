@@ -292,8 +292,8 @@ app.post('/saveMethod', (req,res)=>{
                 if(req.body.data.oldName == ""){
                     item.methods.push(req.body.data.method);
                 }else{
-                    let method = findElement(item.methods,'name',req.body.data.oldName,true);
-                    method = req.body.data.method;
+                    item.methods.splice(findElement(item.methods,'name',req.body.data.oldName,false),1);
+                    item.methods.push(req.body.data.method);
                 }
                 return true;
             }
