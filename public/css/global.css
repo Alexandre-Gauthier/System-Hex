@@ -674,6 +674,18 @@ padding: 2px 16px;
 	border-color: #474040;
 }
 
+#editorWindow #editorAction .button_square.move{
+	background-color: #81a061;
+	color: #647a48;
+	border-color: #647a48;
+}
+
+#editorWindow #editorAction .button_square.move:hover{
+	background-color: #92ad73;
+	color: #788c5a;
+	border-color: #788c5a;
+}
+
 /* creation */
 
 #creationSpace{

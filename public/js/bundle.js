@@ -662,6 +662,7 @@ const iniEditor = () => {
 
 		fillList('#listTokenMethods', token.methods);
 		addOnClickSaveMethod('#methodBtnSave');
+		addOnClickDeleteMethod('#methodBtnDelete');
 		if (getUrlVars()["method"] == 'new') {
 			method = { name: '', body: '', dom: '', unresolved: 0 };
 			token.methods.push(method);
@@ -697,10 +698,23 @@ const addOnClickSaveMethod = id => {
 	};
 };
 
+const addOnClickDeleteMethod = id => {
+	document.querySelector(id).onclick = () => {
+		if (confirm('Voulez-vous vraiment supprimer cette Méthode?')) {
+			let data = { oldName: method.name };
+			updateAPI(token.name, 'token', 'deleteMethod', data, res => {
+				window.location.href = "/dashboard.html";
+			});
+		}
+	};
+};
+
 // ****************************************** Event Action *******************************************
 
 const unSelect = () => {
-	selectedPiece.style.boxShadow = "none";
+	if (selectedPiece) {
+		selectedPiece.style.boxShadow = "none";
+	}
 	selectedPiece = null;
 	selectedTags = null;
 
@@ -722,8 +736,9 @@ const select = (event, node) => {
 };
 
 const activeUpBtn = () => {
-	if (selectedPiece && hasTag('newPiece', selectedPiece)) {
-		if (getPrev(selectedPiece)) {
+	if (selectedPiece && selectedPiece.getAttribute("class") == "newPiece") {
+		let prev = getPrev(selectedPiece);
+		if (prev && !hasTag('hint', prev)) {
 			document.querySelector('#editorBtnUp').classList.add("active");
 		} else {
 			document.querySelector('#editorBtnUp').classList.remove("active");
@@ -734,7 +749,7 @@ const activeUpBtn = () => {
 };
 
 const activeDownBtn = () => {
-	if (selectedPiece && hasTag('newPiece', selectedPiece)) {
+	if (selectedPiece && selectedPiece.getAttribute("class") == "newPiece") {
 		if (getNext(selectedPiece)) {
 			document.querySelector('#editorBtnDown').classList.add("active");
 		} else {
@@ -748,8 +763,10 @@ const activeDownBtn = () => {
 const activeDeleteBtn = () => {
 	if (selectedPiece && !hasTag('capsule', selectedPiece)) {
 		document.querySelector('#editorBtnDelete').classList.add("active");
+		document.querySelector('#editorBtnDelete').classList.add("delete");
 	} else {
 		document.querySelector('#editorBtnDelete').classList.remove("active");
+		document.querySelector('#editorBtnDelete').classList.remove("delete");
 	}
 };
 
@@ -758,6 +775,11 @@ const activeMoveBtn = () => {
 		document.querySelector('#editorBtnMove').classList.add("active");
 	} else {
 		document.querySelector('#editorBtnMove').classList.remove("active");
+	}
+	if (savedPiece) {
+		document.querySelector('#editorBtnMove').classList.add("move");
+	} else {
+		document.querySelector('#editorBtnMove').classList.remove("move");
 	}
 };
 
@@ -831,10 +853,13 @@ const savePiece = () => {
 const restorePiece = () => {
 	if (savedPiece) {
 		let movedPiece = toDOM(savedPiece);
-		if (selectedPiece) {
+		if (selectedPiece && hasTag('capsule', selectedPiece)) {
 			if (hasTags(getTag(movedPiece), selectedPiece)) {
 				selectedPiece.appendChild(movedPiece);
+
 				selectedPiece.querySelector(".hint").style.display = "none";
+				selectedPiece.style.border = "none";
+
 				savedPiece = null;
 				unSelect();
 			}
@@ -842,9 +867,11 @@ const restorePiece = () => {
 			if (hasTags(['block', 'line'], movedPiece)) {
 				space.appendChild(movedPiece);
 				savedPiece = null;
+				unSelect();
 			}
 		}
 	}
+	activeMoveBtn();
 	dom2String();
 };
 
@@ -869,12 +896,12 @@ const createPiece = type => {
 			unresolvedInput--;
 			selectedPiece.style.border = "none";
 			parent.querySelector(".hint").style.display = "none";
-			unSelect();
 		} else {
 			parent = getParent(selectedPiece);
 		}
 	}
 	let piece = new type(parent);
+	unSelect();
 	dom2String();
 };
 

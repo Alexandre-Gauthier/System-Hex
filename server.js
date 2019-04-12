@@ -255,11 +255,11 @@ app.post('/saveItem', (req,res)=>{
                     if(req.body.data.Border != 'undefined'){
                         item.Border = req.body.data.Border;
                     }
+                    return true;
                 }else{
                     res.send('ELEMENT_ALREADY_EXIST');
                     return false;
                 }
-            return true;
         });
     }else{
         res.redirect('/login');
@@ -296,12 +296,26 @@ app.post('/saveMethod', (req,res)=>{
                     item.methods.push(req.body.data.method);
                 }
                 return true;
+            }else{
+                res.send('ELEMENT_ALREADY_EXIST');
+                return false;
             }
         });
     }else{
         res.redirect('/login');
     }
 })
+
+app.post('/deleteMethod', (req,res)=>{
+    if (req.session.user && req.cookies.user_sid) {
+        updateSystem(req,res,(item,system)=>{
+            item.methods.splice(findElement(item.methods,'name',req.body.data.oldName,false),1);
+            return true;
+        });
+    }else{
+        res.redirect('/login');
+    }
+});
 
 const updateSystem = (req,res,action) =>{
     let newSystem = req.session.system;
