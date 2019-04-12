@@ -16,12 +16,12 @@
 <body>
 	<div class="header_bar display_evenly">
 		<div class="header_title">
-			<h1>Système Démo</h1>
+			<h1 id="titleSystem"></h1>
 		</div>
-		<input type="text" class="titleInput" id="titleSystem" name="titleSystem" placeholder="Nom" maxlength="20">
+		<input type="text" class="titleInput" id="titleMethod" name="titleMethod" placeholder="Nom" maxlength="20">
 		<div class="header_menu">
 			<a href="#">
-				<div id="systemBtnSave" class="button_square save"></div>
+				<div id="methodBtnSave" class="button_square save"></div>
 			</a>
 			<a href="#">
 				<div class="button_square delete"></div>
@@ -34,7 +34,7 @@
 	<div class="outer_form display_evenly">
 		<div class="inner_form full_height display_flex half_width">
 			<div class="center_form full_height half_width">
-				<h2>Arbres</h2>
+				<h2 id="tokenTitle"></h2>
 				<h5 class="first">Attributs</h5>
 					<div id="listTokenAttributes" class="list sublist" ></div>
 				<h5>Méthodes</h5>
@@ -43,25 +43,92 @@
 					<div id="listTokenVariables" class="list sublist" ></div>
 			</div>
 		</div>
-		<div class="center_form full_height">
+		<div id="listPieces" class="center_form full_height">
 			<h2>Pièces</h2>
-			<h5 class='first'>Block</h5>
+			<h5 class="first">Bloc</h5>
+			<button tags="block" onclick="createPiece(When)" >Quand</button>
+			<button tags="block" onclick="createPiece(Else)" >Sinon</button>
+			<button tags="block" onclick="createPiece(ElseIf)" >Sinon Si</button>
 			<h5>Condition</h5>
-			<h5>Variable</h5>
+			<button tags="condition" onclick="createPiece(CheckInput)" >Est affecté par</button>
+			<button tags="condition" onclick="createPiece(Comparaison)" >Comparaison</button>
+			<button tags="condition" onclick="createPiece(And)" >Et</button>
+			<button tags="condition" onclick="createPiece(Or)" >Ou</button>
+			<h5>Arithmétique</h5>
+			<button tags="math" onclick="createPiece(MathBloc)" >Math</button>
+			<button tags="line" onclick="createPiece(Increment)" >Augmenter</button>
+			<button tags="line" onclick="createPiece(Decrement)" >Diminuer</button>
+			<button tags="math" onclick="createPiece(GroupMath)" >Groupe</button>
+			<h5>Variables</h5>
+			<button tags="line" onclick="createPiece(NewVariable)" >Créer Variable</button>
+			<button tags="line" onclick="createPiece(ChangeVariable)" >Affecter une Variable</button>
+			<button tags="valeur,condition" onclick="createPiece(GetLocaleVar)" >Variable</button>
 			<h5>Valeur</h5>
-			<h5>Actions</h5>
-
+			<button tags="valeur" onclick="createPiece(InputNumber)" >Entrer un nombre</button>
+			<button tags="valeur" onclick="createPiece(InputString)" >Entrer un nom</button>
+			<button tags="object" onclick="createPiece(GetInput)" >Effet</button>
+			<h5>Pièces</h5>
+			<button tags="condition" onclick="createPiece(Group)" >Groupe</button>
+			<button tags="condition" onclick="createPiece(Not)" >Negation</button>
+			<button tags="line" onclick="createPiece(Line)" >Code</button>
 		</div>
 
 
 		<div class="inner_form full_height display_flex full_width">
-			<div class="center_form long_form full_height full_width">
-				<h3 class='first'>Éditeur</h3>
+			<div class="long_form full_height full_width">
+				<h3 id="editorHeader" class='first'>Éditeur (0)</h3>
+				<p id="stringTest">Hello</p>
+				<div id="editorWindow">
+					<div id="editorAction">
+						<a onclick="upNode()">
+							<div id="editorBtnUp" class="button_square ">Up</div>
+						</a>
+						<a onclick="savePiece()">
+							<div id="editorBtnMove"class="button_square">Mv</div>
+						</a>
+						<a onclick="deleteNode()">
+							<div id="editorBtnDelete" class="button_square">De</div>
+						</a>
+						<a  onclick="downNode()">
+							<div id="editorBtnDown" class="button_square">Dw</div>
+						</a>
+					</div>
+					<div id="creationSpace"></div>
+				</div>
 
 			</div>
 		</div>
 
 	</div>
 
+<!-- The Modal -->
+<div id="dialogNewAttributes" class="modal">
+	<!-- Modal content -->
+	<div class="modal-content">
+		<div class="modal-header">
+			<input type="text" class="titleInput" id="titleAttribute" name="titleAttribute" placeholder="Titre" maxlength="20">
+			<span id="closeBtn">&times;</span>
+		</div>
+		<div class="modal-body">
+			<input type="hidden" id="containerAttribute" >
+			<input type="text" class="titleInput" id="valueAttribute" name="valueAttribute" placeholder="Valeur" maxlength="20">
+		</div>
+
+		<div class="modal-footer">
+			<div class="center_flex">
+				<!-- <button class="button_square save" type="submit"></button> -->
+				<a id="modalBtnSave">
+					<div class="button_square save"></div>
+				</a>
+				<a id="modalBtnDelete">
+					<div class="button_square delete"></div>
+				</a>
+			</div>
+		</div>
+
+	</div>
+
+</div>
+<script>iniEditor();</script>
 </body>
 </html>

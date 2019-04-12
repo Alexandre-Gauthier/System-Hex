@@ -135,3 +135,20 @@ const inputScript = () =>{
 		});
 	});
 }
+
+const findElement = (array,key,value,element=true) =>{
+    for(let i = 0; i < array.length;i++){
+        if(array[i][key] == value){
+            return element?array[i]:i;
+        }
+    }
+}
+
+function getUrlVars() {
+    var vars = {};
+    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,
+    function(m,key,value) {
+      vars[key] = value;
+    });
+    return vars;
+}

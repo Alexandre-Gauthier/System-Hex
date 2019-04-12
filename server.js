@@ -120,6 +120,14 @@ app.get('/systemChoiceData',(req, res) => {
 	}
 });
 
+app.get('/methodEditor',(req, res) => {
+	if (req.session.user && req.cookies.user_sid && req.session.system) {
+        res.json(req.session.system);
+	} else {
+		res.redirect('/chooseSystem');
+	}
+});
+
 /* Route for Dashboard update */
 app.post('/addAttribute', (req,res)=>{
     if (req.session.user && req.cookies.user_sid) {
@@ -271,6 +279,29 @@ app.post('/saveSystem', (req,res)=>{
         res.redirect('/login');
     }
 });
+
+/* Route for editor */
+
+app.post('/saveMethod', (req,res)=>{
+    if (req.session.user && req.cookies.user_sid) {
+        updateSystem(req,res,(item)=>{
+            if(req.body.data.oldName == req.body.data.method.name ||
+                !findElement(item.methods,'name',req.body.data.method.name) ||
+                req.body.data.oldName == ""
+            ){
+                if(req.body.data.oldName == ""){
+                    item.methods.push(req.body.data.method);
+                }else{
+                    let method = findElement(item.methods,'name',req.body.data.oldName,true);
+                    method = req.body.data.method;
+                }
+                return true;
+            }
+        });
+    }else{
+        res.redirect('/login');
+    }
+})
 
 const updateSystem = (req,res,action) =>{
     let newSystem = req.session.system;

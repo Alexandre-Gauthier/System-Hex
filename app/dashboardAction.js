@@ -206,7 +206,7 @@ const showToken = (index) =>{
 		fillInput('#colorBGToken',token.Color);
 		fillInput('#colorBorderToken',token.Border);
 		addAttributes('#listTokenAttributes',token.attributes,token);
-		fillList('#listTokenMethods',token.methods);
+		addOpenEditor('#listTokenMethods',token.methods,token.name);
 		changeBtn('#tokenView',token.Color,token.Border);
 		addOnClickSaveItem('#tokenBtnSave',token,'token','#titleToken','#listTokens','#colorBGToken','#colorBorderToken');
 		addOnClickdeleteElement('#tokenBtnDelete',token,'token','deleteToken',system.tokens,'#listTokens');
@@ -226,6 +226,9 @@ const showToken = (index) =>{
 				changeBtn('#tokenView',document.querySelector('#colorBGToken').value,hex);
 			}
 		});
+		document.querySelector('#addTokenMethod').onclick = () =>{
+			window.location.href = "/methodEditor.html?token="+token.name+"&method=new"
+		}
 	}else{
 		formToken.style.display = 'none';
 	}
@@ -261,6 +264,19 @@ const showEffect = (index) =>{
 		addOnClickdeleteElement('#effectBtnDelete',effect,'effects','deleteEffect',system.effects,'#listEffects');
 	}else{
 		formEffect.style.display = 'none';
+	}
+}
+
+const addOpenEditor = (id,array,name) =>{
+	let parent = document.querySelector(id);
+	while (parent.firstChild) {
+		parent.removeChild(parent.firstChild);
+	}
+	for(let i = 0; i < array.length;i++){
+		let item = array[i];
+		addElement(id,i,item,()=>{
+			window.location.href = "/methodEditor.html?token="+name+"&method="+item.name;
+		});
 	}
 }
 
@@ -350,14 +366,6 @@ const hideModal = () =>{
 	fillInput('#titleAttribute','');
 	fillInput('#valueAttribute','');
 	modal.style.display = "none";
-}
-
-const findElement = (array,key,value,element=true) =>{
-    for(let i = 0; i < array.length;i++){
-        if(array[i][key] == value){
-            return element?array[i]:i;
-        }
-    }
 }
 
 const findNode = (container,value) =>{
