@@ -551,9 +551,11 @@ function toJSON(node) {
 	} else if (node.nodeName) {
 		obj.nodeName = node.nodeName;
 	}
+
 	if (node.nodeValue) {
 		obj.nodeValue = node.nodeValue;
 	}
+
 	var attrs = node.attributes;
 	if (attrs) {
 		var length = attrs.length;
@@ -571,6 +573,9 @@ function toJSON(node) {
 			arr[i] = toJSON(childNodes[i]);
 		}
 	}
+	if (node instanceof HTMLInputElement || node instanceof HTMLSelectElement) {
+		arr = obj.value = node.value;
+	}
 	return obj;
 }
 
@@ -578,8 +583,10 @@ function toDOM(obj) {
 	if (typeof obj == 'string') {
 		obj = JSON.parse(obj);
 	}
+
 	var node,
 	    nodeType = obj.nodeType;
+
 	switch (nodeType) {
 		case 1:
 			//ELEMENT_NODE
@@ -618,6 +625,10 @@ function toDOM(obj) {
 		for (i = 0, len = childNodes.length; i < len; i++) {
 			node.appendChild(toDOM(childNodes[i]));
 		}
+	}
+	if (obj.value) {
+		node.value = obj.value;
+		node.defaultValue = obj.value;
 	}
 	return node;
 }
