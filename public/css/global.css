@@ -43,6 +43,11 @@ h1{
 	margin: auto;
 }
 
+.center_flex.form_bottom{
+	margin: 10px auto;
+}
+
+
 .center_flex.form_bottom:before{
 	content:"";
 	display:block;
@@ -62,7 +67,6 @@ h1{
 .flex_reverse{
 	flex-direction: row-reverse;
 }
-
 
 .center_form{
 	min-width: 250px;
@@ -117,6 +121,7 @@ h1{
 	background-color: #81a061;
 	color:#52603e;
 	font-weight: bold;
+	cursor: pointer;
 }
 
 .center_form button:hover{

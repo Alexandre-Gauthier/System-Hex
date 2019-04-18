@@ -17,3 +17,17 @@ const addOption = (id,name) =>{
 
 	selectionSystems.appendChild(node);
 }
+
+const addSystem = () =>{
+	let name = prompt("Entrez un nom pour le Système","System");
+	if (name != null && name != "") {
+		let params = {name:name};
+		postApi('addSystem',(res)=>{
+			if(res == 'SUCCESS'){
+				window.location.href = "/crossroad.html";
+			}else{
+				alert(res);
+			}
+		},params);
+	}
+}

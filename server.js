@@ -111,14 +111,20 @@ app.get('/chooseSystemData', (req, res) => {
 
 app.post('/systemChoice', (req,res) =>{
     if (req.session.user && req.cookies.user_sid) {
-        db.getSystem(req.session.user.id,req.body.system,(system)=>{
-            req.session.system = system;
-            res.sendFile(__dirname + '/public/crossroad.html');
-        });
+        if(req.body.system){
+            db.getSystem(req.session.user.id,req.body.system,(system)=>{
+                req.session.system = system;
+                res.sendFile(__dirname + '/public/crossroad.html');
+            });
+        }else{
+            res.send('ERROR_NO_SYSTEM_ID')
+        }
+
 	} else {
 		res.redirect('/login');
 	}
 });
+
 
 app.get('/systemChoiceData',(req, res) => {
 	if (req.session.user && req.cookies.user_sid && req.session.system) {
@@ -325,6 +331,23 @@ app.post('/deleteMethod', (req,res)=>{
     }
 });
 
+
+app.post('/addSystem', (req,res) =>{
+    if (req.session.user && req.cookies.user_sid) {
+        insertSystem(req,res);
+	} else {
+		res.redirect('/login');
+	}
+});
+
+app.post('/deleteSystem',(req,res)=>{
+    if (req.session.user && req.cookies.user_sid) {
+        deleteSystem(req,res);
+	} else {
+		res.redirect('/login');
+	}
+});
+
 const updateSystem = (req,res,action) =>{
     let newSystem = req.session.system;
     let item = getItem(req,newSystem);
@@ -337,6 +360,44 @@ const updateSystem = (req,res,action) =>{
             });
         });
     }
+}
+
+const deleteSystem = (req,res) =>{
+    db.getSystems(req.session.user.id,(result)=>{
+        result.systems.splice(findElement(result.systems,'id',req.session.system.id,false),1);
+
+        db.updateSystem(req.session.user.id,result,(data)=>{
+            res.send('SUCCESS');
+        });
+    });
+}
+
+const insertSystem = (req,res) =>{
+    let newSystem = {"id":0,
+                    "title":req.body.name,
+                    "board":{"Color":"",
+                        "Attributes":[""],
+                        "Methods":[""]},
+                    "tile":{"Color":"",
+                        "Border":"",
+                        "Attributes":[""],
+                        "Methods":[""]},
+                    "tokens":[""],
+                    "effects":[""]
+                    };
+    db.getSystems(req.session.user.id,(result)=>{
+        newSystem.id = result.systems[result.systems.length-1]+1;
+        if(newSystem.id == null){
+            newSystem.id = 1; // À Ajuster
+
+        }
+        result.systems.push(newSystem);
+        req.session.system = newSystem;
+
+        db.updateSystem(req.session.user.id,result,(data)=>{
+            res.send('SUCCESS');
+        });
+    });
 }
 
 const getItem = (req, system) =>{

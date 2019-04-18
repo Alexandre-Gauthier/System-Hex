@@ -88,10 +88,13 @@ const addAttributes = (id,array,element,type='token') =>{
 	while (parent.firstChild) {
 		parent.removeChild(parent.firstChild);
 	}
-	for(let i = 0; i < array.length;i++){
-		let attribute = array[i];
-		addAttribute(id,attribute,element,type);
+	if(array){
+		for(let i = 0; i < array.length;i++){
+			let attribute = array[i];
+			addAttribute(id,attribute,element,type);
+		}
 	}
+
 }
 
 const addAttribute = (id,attribute,element,type) =>{
@@ -273,16 +276,19 @@ const addOpenEditor = (id,array,name) =>{
 	while (parent.firstChild) {
 		parent.removeChild(parent.firstChild);
 	}
-	for(let i = 0; i < array.length;i++){
-		let item = array[i];
-		addElement(id,i,item,()=>{
-			let tokenStr = "";
-			if(name){
-				tokenStr = "token="+name+"&";
-			}
-			window.location.href = "/methodEditor.html?"+tokenStr+"method="+item.name;
-		});
+	if(array){
+		for(let i = 0; i < array.length;i++){
+			let item = array[i];
+			addElement(id,i,item,()=>{
+				let tokenStr = "";
+				if(name){
+					tokenStr = "token="+name+"&";
+				}
+				window.location.href = "/methodEditor.html?"+tokenStr+"method="+item.name;
+			});
+		}
 	}
+
 }
 
 const addOnClickModal = (id,listnode,item,type) =>{
@@ -379,5 +385,18 @@ const findNode = (container,value) =>{
 		if(childs[i].innerHTML == value){
 			return childs[i];
 		}
+	}
+}
+
+const deleteSystem = () =>{
+	if (confirm('Voulez-vous vraiment supprimer ce Système?')) {
+		let params = {};
+		postApi('deleteSystem',(res)=>{
+			if(res == 'SUCCESS'){
+				window.location.href = "/chooseSystem.html";
+			}else{
+				alert(res);
+			}
+		},params);
 	}
 }
