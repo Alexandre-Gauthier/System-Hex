@@ -1,25 +1,4 @@
 const iniObservation = () =>{
-	getApi('systemChoiceData',(result)=>{
-		system = result;
-		setTextNode('#titleSystem',system.title);
-	});
-}
-
-const nbColumns = 24;
-let nbRows = 14;
-const tilesList = [];
-const boardConfig = {width:0,height:0,size:0};
-
-const tileDic = {};
-
-let ctx = null;
-let canvas = null;
-
-let posX = 0;
-let posY = 0;
-let clickEvent = false;
-
-window.onload=()=>{
 	canvas = document.querySelector('#mainCanvas');
 	ctx = canvas.getContext('2d');
 	ctx.moveTo(0, 0);
@@ -41,8 +20,27 @@ window.onload=()=>{
 		posY = e.offsetY;
 	}
 
+	getApi('systemChoiceData',(result)=>{
+		system = result;
+		setTextNode('#titleSystem',system.title);
+	});
+
 	iniApp();
 }
+
+const nbColumns = 24;
+let nbRows = 14;
+const tilesList = [];
+const boardConfig = {width:0,height:0,size:0};
+
+const tileDic = {};
+
+let ctx = null;
+let canvas = null;
+
+let posX = 0;
+let posY = 0;
+let clickEvent = false;
 
 const iniApp = () =>{
 	// Create board
