@@ -76,6 +76,12 @@ function toJSON(node) {
 				node.appendChild(toDOM(childNodes[i]));
 			}
 		}
+
+		if(obj.tagName == "select" && hasTag('variable',node)){
+			clearSelectOptions(node);
+			let options = getVar().concat(getAttributes());
+			addSelectOptions(node,options);
+		}
 		if(obj.value){
 			node.value = obj.value;
 			node.defaultValue = obj.value;

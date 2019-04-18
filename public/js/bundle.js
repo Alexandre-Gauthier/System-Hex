@@ -168,7 +168,7 @@ function getUrlVars() {
 let system = null;
 let modal = null;
 
-const getSystem = () => {
+const iniDashboard = () => {
 	getApi('systemChoiceData', result => {
 		system = result;
 		addOnClickSaveSystem('#systemBtnSave');
@@ -183,6 +183,7 @@ const getSystem = () => {
 		addAttributes('#listBoardAttributes', system.board.attributes, system.board, 'board');
 		addOnClickModal('#addBoardAttribute', '#listBoardAttributes', system.board, 'board');
 
+		addOpenEditor('#listTileMethods', system.tile.methods, null);
 		fillList('#listTokens', system.tokens, showToken);
 		document.querySelector('#addToken').onclick = createToken;
 
@@ -440,7 +441,11 @@ const addOpenEditor = (id, array, name) => {
 	for (let i = 0; i < array.length; i++) {
 		let item = array[i];
 		addElement(id, i, item, () => {
-			window.location.href = "/methodEditor.html?token=" + name + "&method=" + item.name;
+			let tokenStr = "";
+			if (name) {
+				tokenStr = "token=" + name + "&";
+			}
+			window.location.href = "/methodEditor.html?" + tokenStr + "method=" + item.name;
 		});
 	}
 };
@@ -541,6 +546,29 @@ const findNode = (container, value) => {
 		}
 	}
 };
+let board = { attributes: [], color: '#ede1c9' };
+
+let iniTile = { attributes: [], color: '#ede1c9', border: '#8e8a6b', selected: '#436177', methods: [{ name: 'onFire', arguments: 'obj', body: "" }] };
+
+let iniTokenArbre = { name: 'Arbre',
+						color: '#8dae7f',
+						border: '#547048',
+						attributes: { durability: 500 },
+						listenedInputs: ['fire'],
+						methods: [{ name: 'dealFire', arguments: 'obj', body: "let input = getInput(obj.inputs,'fire'); if(input){obj.attributes['durability'] -= input.power;obj.addInput(obj.outputs,input);}" }, { name: 'destroyToken', arguments: 'obj', body: "if(obj.attributes['durability']<=0){obj.addInput(obj.outputs,{name:'destroyChild',elem:obj.id})}" }]
+};
+
+let iniTokenFire = { name: 'Fire',
+						color: '#f4b642',
+						border: '#995037',
+						attributes: {},
+						listenedInputs: ['fire'],
+						methods: [{ name: 'destroyToken', arguments: 'obj', body: "if(!getInput(obj.inputs,'fire')){obj.addInput(obj.outputs,{name:'destroyChild',elem:obj.id})}" }]
+};
+
+let inputFire = { name: 'fire',
+						power: 10
+};
 function toJSON(node) {
 	node = node || this;
 	var obj = {
@@ -626,6 +654,12 @@ function toDOM(obj) {
 			node.appendChild(toDOM(childNodes[i]));
 		}
 	}
+
+	if (obj.tagName == "select" && hasTag('variable', node)) {
+		clearSelectOptions(node);
+		let options = getVar().concat(getAttributes());
+		addSelectOptions(node, options);
+	}
 	if (obj.value) {
 		node.value = obj.value;
 		node.defaultValue = obj.value;
@@ -667,20 +701,28 @@ const iniEditor = () => {
 	getApi('methodEditor', result => {
 		system = result;
 		setTextNode('#titleSystem', system.title);
-		token = findElement(system.tokens, 'name', getUrlVars()["token"], true);
-		setTextNode('#tokenTitle', token.name);
+		if (getUrlVars()["token"]) {
+			token = findElement(system.tokens, 'name', getUrlVars()["token"], true);
+			setTextNode('#tokenTitle', token.name);
+			addOnClickSaveMethod('#methodBtnSave', token.name, 'token');
+			addOnClickDeleteMethod('#methodBtnDelete', token.name, 'token');
+		} else {
+			token = system.tile;
+			setTextNode('#tokenTitle', "Tiles");
+			addOnClickSaveMethod('#methodBtnSave', token, 'tile');
+			addOnClickDeleteMethod('#methodBtnDelete', token, 'tile');
+		}
+
 		addAttributes('#listTokenAttributes', token.attributes, token, 'token');
 
 		fillList('#listTokenMethods', token.methods);
-		addOnClickSaveMethod('#methodBtnSave');
-		addOnClickDeleteMethod('#methodBtnDelete');
+
 		if (getUrlVars()["method"] == 'new') {
 			method = { name: '', body: '', dom: '', unresolved: 0 };
 			token.methods.push(method);
 		} else {
 			method = findElement(token.methods, 'name', getUrlVars()["method"], true);
 			fillInput('#titleMethod', getUrlVars()["method"]);
-			console.log(method);
 			dom2JSON = method.dom;
 			methodBody = method.body;
 			restoreDOM();
@@ -693,15 +735,19 @@ const setTextNode = (id, text) => {
 	document.querySelector(id).innerHTML = text;
 };
 
-const addOnClickSaveMethod = id => {
+const addOnClickSaveMethod = (id, key, type = 'token') => {
 	document.querySelector(id).onclick = () => {
 		dom2String();
 		if (document.querySelector('#titleMethod').value != "") {
 			let data = { oldName: method.name };
 			method.name = document.querySelector('#titleMethod').value;
 			data['method'] = method;
-			updateAPI(token.name, 'token', 'saveMethod', data, res => {
-				window.location.href = "/methodEditor.html?token=" + token.name + "&method=" + method.name;
+			updateAPI(key, type, 'saveMethod', data, res => {
+				let tokenStr = "";
+				if (getUrlVars()["token"]) {
+					tokenStr = "token=" + token.name + "&";
+				}
+				window.location.href = "/methodEditor.html?" + tokenStr + "method=" + method.name;
 			});
 		} else {
 			alert('Entrez un nom');
@@ -709,11 +755,11 @@ const addOnClickSaveMethod = id => {
 	};
 };
 
-const addOnClickDeleteMethod = id => {
+const addOnClickDeleteMethod = (id, key, type = 'token') => {
 	document.querySelector(id).onclick = () => {
 		if (confirm('Voulez-vous vraiment supprimer cette Méthode?')) {
 			let data = { oldName: method.name };
-			updateAPI(token.name, 'token', 'deleteMethod', data, res => {
+			updateAPI(key, type, 'deleteMethod', data, res => {
 				window.location.href = "/dashboard.html";
 			});
 		}
@@ -984,20 +1030,20 @@ const nodeIsEmpty = (node, limit) => {
 
 // ************************************** Getter Input && Attribute ****************************************
 const getInputs = () => {
-	let results = Object.keys(inputs);
+	let results = system.effects;
 	let arr = [];
 	results.forEach(input => {
-		arr.push([input]);
+		arr.push([input.name]);
 	});
 
 	return arr;
 };
 
 const getAttributes = () => {
-	let results = Object.keys(attributes);
+	let results = token.attributes;
 	let arr = [];
 	results.forEach(attribute => {
-		arr.push([attribute, "obj.attributes['" + attribute + "']"]);
+		arr.push([attribute.name, "obj.attributes['" + attribute.name + "']"]);
 	});
 
 	return arr;
@@ -1011,6 +1057,27 @@ const getVar = () => {
 	});
 
 	return arr;
+};
+
+const clearSelectOptions = select => {
+	let length = select.options.length;
+	for (let i = 0; i < length; i++) {
+		select.options[i] = null;
+	}
+};
+
+const addSelectOptions = (select, options) => {
+	options.forEach(option => {
+		let newOption = document.createElement("option");
+		let value = option[0];
+		if (option[1]) {
+			value = option[1];
+		}
+		newOption.setAttribute("value", value);
+		let text = document.createTextNode(option[0]);
+		newOption.appendChild(text);
+		select.appendChild(newOption);
+	});
 };
 
 // ****************************************** Class Pieces *******************************************
@@ -1062,17 +1129,7 @@ class Piece {
 			dom2String();
 		};
 
-		options.forEach(option => {
-			let newOption = document.createElement("option");
-			let value = option[0];
-			if (option[1]) {
-				value = option[1];
-			}
-			newOption.setAttribute("value", value);
-			let text = document.createTextNode(option[0]);
-			newOption.appendChild(text);
-			selector.appendChild(newOption);
-		});
+		addSelectOptions(selector, options);
 	}
 
 	addBloc(txt) {
@@ -1149,7 +1206,7 @@ class Comparaison extends Piece {
 		this.node.style.display = "flex";
 		this.addAnchor("startGroup");
 		this.addCapsule("valeur", "valeur,math");
-		this.addSelect("select", [["égal à", "=="], ["plus grand que", ">"], ["plus petit que", "<"], ["plus grand ou egal que", ">="], ["plus petit ou egal que", "<="], ["n'égal pas", "!="]]);
+		this.addSelect("select,comparaison", [["égal à", "=="], ["plus grand que", ">"], ["plus petit que", "<"], ["plus grand ou egal que", ">="], ["plus petit ou egal que", "<="], ["n'égal pas", "!="]]);
 		this.addCapsule("valeur", "valeur,math");
 		this.addAnchor("endGroup");
 	}
@@ -1164,7 +1221,7 @@ class CheckInput extends Piece {
 		this.node.style.display = "flex";
 		this.addText("Jeton est affecté par ", "h3", this.node);
 		this.addAnchor("checkInput");
-		this.addSelect("select", getInputs());
+		this.addSelect("select,input", getInputs());
 		this.addAnchor("endGroup");
 	}
 }
@@ -1177,7 +1234,7 @@ class GetInput extends Piece {
 
 		this.node.style.display = "flex";
 		this.addAnchor("getInput");
-		this.addSelect("select", getInputs());
+		this.addSelect("select,input", getInputs());
 		this.addAnchor("endGroup");
 	}
 }
@@ -1191,7 +1248,7 @@ class GetLocaleVar extends Piece {
 
 		let results = getVar().concat(getAttributes());
 		if (results.length > 0) {
-			this.addSelect("select", results);
+			this.addSelect("select,variable", results);
 		}
 	}
 }
@@ -1285,7 +1342,7 @@ class MathBloc extends Piece {
 		this.node.style.backgroundColor = "#c2a9cc";
 
 		this.node.style.display = "flex";
-		this.addSelect("select", [["+", "+"], ["-", "-"], ["*", "*"], ["/", "/"], ["mod", "%"]]);
+		this.addSelect("select,operator", [["+", "+"], ["-", "-"], ["*", "*"], ["/", "/"], ["mod", "%"]]);
 		this.addCapsule("valeur", "valeur,group");
 	}
 }
@@ -1337,7 +1394,7 @@ class Increment extends Piece {
 		let results = getVar().concat(getAttributes());
 		if (results.length > 0) {
 			this.addText("Augmenter ", "h3", this.node);
-			this.addSelect("select", results);
+			this.addSelect("select,variable", results);
 			this.addText(" de ", "h3", this.node);
 			this.addAnchor("increment");
 			this.addCapsule("valeur", "valeur,group,math");
@@ -1356,7 +1413,7 @@ class Decrement extends Piece {
 		console.log(results);
 		if (results.length > 0) {
 			this.addText("Diminuer ", "h3", this.node);
-			this.addSelect("select", results);
+			this.addSelect("select,variable", results);
 			this.addText(" de ", "h3", this.node);
 			this.addAnchor("decrement");
 			this.addCapsule("valeur", "valeur,group,math");
@@ -1374,7 +1431,7 @@ class ChangeVariable extends Piece {
 		let results = getVar().concat(getAttributes());
 		console.log(results);
 		if (results.length > 0) {
-			this.addSelect("select", results);
+			this.addSelect("select,variable", results);
 			this.addText(" est égal à ", "h3", this.node);
 			this.addAnchor("equal");
 			this.addCapsule("valeur", "valeur,group,math,object");
@@ -1542,4 +1599,482 @@ function setInputFilter(textbox, inputFilter) {
 		});
 	});
 }
+class Master {
+	constructor(id, attributes) {
+		this.id = id;
+		this.children = [];
+		this.attributes = attributes;
+		this.methods = [];
 
+		this.inputs = [];
+		this.nextInputs = [];
+		this.outputs = [];
+
+		this.posX = 0;
+		this.posY = 0;
+		this.size = 0;
+	}
+
+	// ---------------------------------------------------------------------------------------------
+	// Méthodes D'initialisation
+	// ---------------------------------------------------------------------------------------------
+	// Créé les méthodes données en string et les ajoutes à un tableau
+	installMethods(methods) {
+		methods.forEach(method => {
+			var f = new Function(method.arguments, method.body);
+			this.methods.push(f);
+		});
+	}
+
+	// Ajoute l'input donnée (en json)
+	addInput(arr, input) {
+		if (!getInput(arr, input.name)) {
+			arr.push(JSON.parse(JSON.stringify(input)));
+		}
+	}
+
+	addCoord(size, x, y) {
+		this.size = size;
+		this.posX = x;
+		this.posY = y;
+	}
+
+	// ---------------------------------------------------------------------------------------------
+	// Tick
+	// ---------------------------------------------------------------------------------------------
+	tick() {
+		this.pushInputsDown();
+		this.runChildren();
+		this.runMyMethods();
+		this.clearInputs();
+	}
+
+	// ---------------------------------------------------------------------------------------------
+	// Méthodes pour les Childs
+	// ---------------------------------------------------------------------------------------------
+	// Distribue les inputs à tous ses enfants
+	pushInputsDown() {
+		this.children.forEach(child => {
+			this.inputs.forEach(input => {
+				if (child.listenedInputs.includes(input.name)) {
+					child.addInput(child.inputs, input);
+				}
+			});
+		});
+	}
+
+	// Roule les enfants et récupère les outputs
+	runChildren() {
+		this.children.forEach(child => {
+			let result = child.tick();
+			result.forEach(output => {
+
+				this.addInput(this.outputs, output);
+			});
+		});
+	}
+
+	createToken(template) {
+		let token = null;
+		if (!getToken(this.children, template.name)) {
+			let attributes = JSON.parse(JSON.stringify(template.attributes));
+			token = new Token(getId(), attributes, this, template.name, template.color, template.border);
+			token.installMethods(template.methods);
+			token.addListenedInputs(template.listenedInputs);
+			// console.log('createToken')
+		}
+		return token;
+	}
+
+	// ---------------------------------------------------------------------------------------------
+	// Méthodes d'action
+	// ---------------------------------------------------------------------------------------------
+	runMyMethods() {
+		for (let i = 0; i < this.methods.length; i++) {
+			this.methods[i](this);
+		}
+	}
+
+	clearInputs() {
+		this.inputs = [];
+	}
+}
+class Tile extends Master {
+	constructor(id, attributes, x, y) {
+		super(id, attributes);
+
+		this.stackColor = { ini: iniTile.color, border: iniTile.border, selected: iniTile.selected };
+		this.colorToken = '';
+		this.borderToken = '';
+
+		this.selected = false;
+		this.hexX = x;
+		this.hexY = y;
+	}
+
+	// ---------------------------------------------------------------------------------------------
+	// Méthodes Test
+	// ---------------------------------------------------------------------------------------------
+	testToken() {
+		let range = 50;
+
+		let min = 1;
+		let max = 100;
+		let randToken = Math.floor(Math.random() * (+max - +min)) + +min;
+		if (randToken >= 100 - range) {
+			let token = this.createToken(iniTokenArbre);
+			if (token) {
+				this.children.push(this.createToken(iniTokenArbre));
+			}
+		}
+	}
+	setOnFire() {
+		this.addInput(this.nextInputs, inputFire);
+		clickEvent = false;
+	}
+	// ---------------------------------------------------------------------------------------------
+	// Tick
+	// ---------------------------------------------------------------------------------------------
+	tick(clickEvent) {
+		this.mouseEvent(clickEvent);
+		this.switchInputs();
+		this.iniInputs(); // À modifier pour une méthode anonyme
+		super.tick();
+		this.drawTile();
+		this.checkOutputs();
+		this.setColor();
+	}
+
+	// ---------------------------------------------------------------------------------------------
+	// Méthodes d'Actions
+	// ---------------------------------------------------------------------------------------------
+	mouseEvent(clickEvent) {
+		let mod = 5;
+		let x = this.posX;
+		let y = this.posY;
+		if (posX > x - this.size + mod && posX < x + this.size - mod && posY > y - this.size + mod && posY < y + this.size - mod) {
+			this.selected = true;
+			if (clickEvent) {
+				this.setOnFire();
+				this.getNeighbours();
+			}
+		} else {
+			this.selected = false;
+		}
+	}
+
+	setColor() {
+		this.children.forEach(child => {
+			if (child.color) {
+				this.colorToken = child.color;
+			}
+			if (child.borderColor) {
+				this.borderToken = child.borderColor;
+			}
+		});
+	}
+
+	switchInputs() {
+		this.nextInputs.forEach(input => {
+			this.inputs.push(JSON.parse(JSON.stringify(input)));
+		});
+		this.nextInputs = [];
+	}
+
+	iniInputs() {
+		this.inputs.forEach(input => {
+			switch (input.name) {
+				case 'fire':
+					let token = this.createToken(iniTokenFire);
+					if (token) {
+						this.children.push(token);
+					}
+
+					console.log('fire');
+					break;
+			}
+		});
+	}
+
+	checkOutputs() {
+		this.outputs.forEach(output => {
+			switch (output.name) {
+				case 'destroyChild':
+					deleteToken(this.children, output.elem);
+					this.colorToken = '';
+					this.borderToken = '';
+					deleteInput(this.outputs, output.name);
+					break;
+				case 'fire':
+					this.addInput(this.nextInputs, output);
+					giveInput(output, this.getNeighbours());
+					deleteInput(this.outputs, output.name);
+					break;
+			}
+		});
+	}
+
+	getNeighbours() {
+		let keyVoisin = [];
+		let x = this.hexX;
+		let y = this.hexY;
+		if (x % 2 == 0) {
+			if (x > 0) {
+				keyVoisin.push(x - 1 + '-' + y);
+			}
+			if (y > 0) {
+				keyVoisin.push(x + '-' + (y - 1));
+			}
+			if (x < nbColumns - 1) {
+				keyVoisin.push(x + 1 + '-' + y);
+			}
+
+			if (y < nbRows - 1 && x > 0) {
+				keyVoisin.push(x - 1 + '-' + (y + 1));
+			}
+			if (y < nbRows - 1) {
+				keyVoisin.push(x + '-' + (y + 1));
+			}
+			if (y < nbRows - 1 && x < nbColumns - 1) {
+				keyVoisin.push(x + 1 + '-' + (y + 1));
+			}
+		} else {
+			if (y > 0 && x > 0) {
+				keyVoisin.push(x - 1 + '-' + (y - 1));
+			}
+			if (y > 0) {
+				keyVoisin.push(x + '-' + (y - 1));
+			}
+			if (y > 0 && x < nbColumns - 1) {
+				keyVoisin.push(x + 1 + '-' + (y - 1));
+			}
+
+			if (x > 0) {
+				keyVoisin.push(x - 1 + '-' + y);
+			}
+			if (y < nbRows - 1) {
+				keyVoisin.push(x + '-' + (y + 1));
+			}
+			if (x < nbColumns - 1) {
+				keyVoisin.push(x + 1 + '-' + y);
+			}
+		}
+		return keyVoisin;
+	}
+
+	// ---------------------------------------------------------------------------------------------
+	// Méthodes d'Affichage
+	// ---------------------------------------------------------------------------------------------
+	drawTile() {
+		let x = this.posX;
+		let y = this.posY;
+		let size = this.size;
+		let side = 0;
+		let canvas = document.querySelector('#mainCanvas').getContext('2d');
+
+		canvas.beginPath();
+		canvas.lineCap = "round";
+		canvas.moveTo(x + size * Math.cos(0), y + size * Math.sin(0));
+		for (side; side < 7; side++) {
+			canvas.lineTo(x + size * Math.cos(side * 2 * Math.PI / 6), y + size * Math.sin(side * 2 * Math.PI / 6));
+		}
+		canvas.closePath();
+
+		canvas.fillStyle = this.getBgColor();
+		canvas.save();
+		canvas.clip();
+		canvas.fill();
+
+		canvas.lineWidth = 8;
+		canvas.strokeStyle = this.getBorderColor();
+		canvas.stroke();
+		canvas.restore();
+
+		// canvas.font = "10px Arial";
+		// canvas.fillStyle = 'black';
+		// ctx.fillText(this.hexX+"-"+this.hexY, x-9, y+4);
+	}
+
+	getBorderColor() {
+		let borderColor = this.stackColor.border;
+		if (this.selected) {
+			borderColor = this.stackColor.selected;
+		} else if (this.borderToken != '') {
+			borderColor = this.borderToken;
+		}
+
+		return borderColor;
+	}
+
+	getBgColor() {
+		let color = this.stackColor.ini;
+		if (this.colorToken != '') {
+			color = this.colorToken;
+		}
+
+		return color;
+	}
+}
+class Token extends Master {
+	constructor(id, attributes, parent, name, color, border) {
+		super(id, attributes);
+		this.parent = parent;
+		this.name = name;
+		this.listenedInputs = [];
+		this.color = color;
+		this.borderColor = border;
+	}
+
+	tick() {
+		super.tick();
+		return this.outputs;
+	}
+
+	addListenedInputs(inputs) {
+		inputs.forEach(input => {
+			this.listenedInputs.push(input);
+		});
+	}
+
+}
+
+const iniObservation = () => {
+	getApi('systemChoiceData', result => {
+		system = result;
+		setTextNode('#titleSystem', system.title);
+	});
+};
+
+const nbColumns = 24;
+let nbRows = 14;
+const tilesList = [];
+const boardConfig = { width: 0, height: 0, size: 0 };
+
+const tileDic = {};
+
+let ctx = null;
+let canvas = null;
+
+let posX = 0;
+let posY = 0;
+let clickEvent = false;
+
+window.onload = () => {
+	canvas = document.querySelector('#mainCanvas');
+	ctx = canvas.getContext('2d');
+	ctx.moveTo(0, 0);
+
+	let container = document.querySelector('#board_container');
+	boardConfig.width = container.offsetWidth;
+	boardConfig.height = container.offsetHeight;
+	boardConfig.size = boardConfig.width / nbColumns - boardConfig.width * .0175;
+	nbRows = Math.ceil(boardConfig.height / boardConfig.size * .46);
+	ctx.canvas.width = container.offsetWidth;
+	ctx.canvas.height = container.offsetHeight;
+
+	canvas.onclick = e => {
+		clickEvent = true;
+	};
+	canvas.onmousemove = e => {
+		posX = e.offsetX;
+		posY = e.offsetY;
+	};
+
+	iniApp();
+};
+
+const iniApp = () => {
+	// Create board
+	// canvas.style.backgroundColor = board.color;
+	for (let row = 0; row < nbRows; row++) {
+		let tileRow = [];
+		for (let column = 0; column < nbColumns; column++) {
+			let tile = new Tile(getId(), iniTile.attributes, column, row);
+			tile.installMethods(iniTile.methods);
+			tile.testToken();
+
+			let iniPosX = boardConfig.width * .025,
+			    iniPosY = boardConfig.width * .025;
+			let gap = 5;
+			let x = boardConfig.size * 1.5 + gap;
+			let y = boardConfig.size * 1.75 + gap;
+			if (column % 2 == 0) {
+				iniPosY += boardConfig.size;
+			}
+			tile.addCoord(boardConfig.size, column * x + iniPosX, row * y + iniPosY);
+
+			tileRow.push(tile);
+			tileDic[column + '-' + row] = tile;
+		}
+		tilesList.push(tileRow);
+	}
+	tick();
+};
+
+const tick = () => {
+	ctx.clearRect(0, 0, boardConfig.width, boardConfig.height);
+	for (let row = 0; row < nbRows; row++) {
+		for (let column = 0; column < nbColumns; column++) {
+			let tile = tilesList[row][column];
+
+			tile.tick(clickEvent); // To Dispatch to workers
+		}
+	}
+
+	clickEvent = false;
+	// setTimeout(tick, 30);
+	window.requestAnimationFrame(tick);
+};
+
+// ---------------------------------------------------------------------------------------------
+// GENERAL FUNCTIONS
+// ---------------------------------------------------------------------------------------------
+const getInput = (arr, input) => {
+	for (let i = 0; i < arr.length; i++) {
+		if (arr[i].name === input) {
+			return arr[i];
+		}
+	}
+};
+
+const getToken = (arr, token) => {
+	for (let i = 0; i < arr.length; i++) {
+		if (arr[i].name === token) {
+			return arr[i];
+		}
+		/*
+  if(arr.children.length > 0){
+  	getToken(arr.children,token);
+  }*/
+	}
+};
+
+const deleteInput = (arr, input) => {
+	for (let i = 0; i < arr.length; i++) {
+		if (arr[i].name === input) {
+			arr.splice(i, 1);
+		}
+	}
+};
+
+const deleteToken = (arr, id) => {
+	for (let i = 0; i < arr.length; i++) {
+		if (arr[i].id === id) {
+			arr.splice(i, 1);
+		}
+	}
+};
+
+const getId = () => {
+	if (typeof getId.counter == 'undefined') {
+		getId.counter = 0;
+	}
+	return ++getId.counter;
+};
+
+const giveInput = (input, arr) => {
+	arr.forEach(tileId => {
+		let tile = tileDic[tileId];
+		tile.addInput(tile.nextInputs, input);
+	});
+};

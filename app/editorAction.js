@@ -32,20 +32,29 @@ const iniEditor = () =>{
 	getApi('methodEditor',(result)=>{
 		system = result;
 		setTextNode('#titleSystem',system.title);
-		token = findElement(system.tokens,'name',getUrlVars()["token"],true);
-		setTextNode('#tokenTitle',token.name);
+		if(getUrlVars()["token"]){
+			token = findElement(system.tokens,'name',getUrlVars()["token"],true);
+			setTextNode('#tokenTitle',token.name);
+			addOnClickSaveMethod('#methodBtnSave',token.name,'token');
+			addOnClickDeleteMethod('#methodBtnDelete',token.name,'token');
+		}else{
+			token = system.tile;
+			setTextNode('#tokenTitle',"Tiles");
+			addOnClickSaveMethod('#methodBtnSave',token,'tile');
+			addOnClickDeleteMethod('#methodBtnDelete',token,'tile');
+		}
+
 		addAttributes('#listTokenAttributes',token.attributes,token,'token');
 
 		fillList('#listTokenMethods',token.methods);
-		addOnClickSaveMethod('#methodBtnSave');
-		addOnClickDeleteMethod('#methodBtnDelete');
+
+
 		if(getUrlVars()["method"] == 'new'){
 			method = {name:'',body:'',dom:'',unresolved:0};
 			token.methods.push(method);
 		}else{
 			method = findElement(token.methods,'name',getUrlVars()["method"],true);
 			fillInput('#titleMethod',getUrlVars()["method"]);
-			console.log(method);
 			dom2JSON = method.dom;
 			methodBody = method.body;
 			restoreDOM();
@@ -58,15 +67,19 @@ const setTextNode = (id,text) =>{
 	document.querySelector(id).innerHTML = text;
 }
 
-const addOnClickSaveMethod = (id) =>{
+const addOnClickSaveMethod = (id,key,type='token') =>{
 	document.querySelector(id).onclick = () =>{
 		dom2String();
 		if(document.querySelector('#titleMethod').value != ""){
 			let data = {oldName:method.name};
 			method.name = document.querySelector('#titleMethod').value;
 			data['method'] = method;
-			updateAPI(token.name,'token','saveMethod',data,(res)=>{
-				window.location.href = "/methodEditor.html?token="+token.name+"&method="+method.name;
+			updateAPI(key,type,'saveMethod',data,(res)=>{
+				let tokenStr = "";
+				if(getUrlVars()["token"]){
+					tokenStr = "token="+token.name+"&";
+				}
+				window.location.href = "/methodEditor.html?"+tokenStr+"method="+method.name;
 			});
 		}else{
 			alert('Entrez un nom');
@@ -74,11 +87,11 @@ const addOnClickSaveMethod = (id) =>{
 	}
 }
 
-const addOnClickDeleteMethod = (id) =>{
+const addOnClickDeleteMethod = (id,key,type='token') =>{
 	document.querySelector(id).onclick = () =>{
 		if (confirm('Voulez-vous vraiment supprimer cette Méthode?')) {
 			let data = {oldName:method.name};
-			updateAPI(token.name,'token','deleteMethod',data,(res)=>{
+			updateAPI(key,type,'deleteMethod',data,(res)=>{
 				window.location.href = "/dashboard.html";
 			})
 		}
@@ -351,20 +364,20 @@ const nodeIsEmpty = (node,limit) =>{
 
 // ************************************** Getter Input && Attribute ****************************************
 const getInputs = () =>{
-	let results = Object.keys(inputs);
+	let results = system.effects;
 	let arr = [];
 	results.forEach(input=>{
-		arr.push([input]);
+		arr.push([input.name]);
 	});
 
 	return arr;
 }
 
 const getAttributes = () =>{
-	let results = Object.keys(attributes);
+	let results = token.attributes;
 	let arr = [];
 	results.forEach(attribute=>{
-		arr.push([attribute,"obj.attributes['"+attribute+"']"]);
+		arr.push([attribute.name,"obj.attributes['"+attribute.name+"']"]);
 	});
 
 	return arr;
@@ -378,6 +391,27 @@ const getVar = () =>{
 	});
 
 	return arr;
+}
+
+const clearSelectOptions = (select) =>{
+	let length = select.options.length;
+	for (let i = 0; i < length; i++) {
+	select.options[i] = null;
+	}
+}
+
+const addSelectOptions = (select,options) =>{
+	options.forEach(option => {
+		let newOption = document.createElement("option");
+		let value = option[0];
+		if(option[1]){
+			value = option[1]
+		}
+		newOption.setAttribute("value",value);
+		let text = document.createTextNode(option[0]);
+		newOption.appendChild(text);
+		select.appendChild(newOption);
+	});
 }
 
 // ****************************************** Class Pieces *******************************************
@@ -429,17 +463,7 @@ class Piece{
 			dom2String();
 		  }
 
-		options.forEach(option => {
-			let newOption = document.createElement("option");
-			let value = option[0];
-			if(option[1]){
-				value = option[1]
-			}
-			newOption.setAttribute("value",value);
-			let text = document.createTextNode(option[0]);
-			newOption.appendChild(text);
-			selector.appendChild(newOption);
-		});
+		addSelectOptions(selector,options);
 	}
 
 	addBloc(txt){
@@ -516,7 +540,7 @@ class Comparaison extends Piece{
 		this.node.style.display = "flex";
 		this.addAnchor("startGroup");
 		this.addCapsule("valeur","valeur,math");
-		this.addSelect("select",[["égal à","=="],["plus grand que",">"],["plus petit que","<"],["plus grand ou egal que",">="],["plus petit ou egal que","<="],["n'égal pas","!="]]);
+		this.addSelect("select,comparaison",[["égal à","=="],["plus grand que",">"],["plus petit que","<"],["plus grand ou egal que",">="],["plus petit ou egal que","<="],["n'égal pas","!="]]);
 		this.addCapsule("valeur","valeur,math");
 		this.addAnchor("endGroup");
 	}
@@ -531,7 +555,7 @@ class CheckInput extends Piece{
 		this.node.style.display = "flex";
 		this.addText("Jeton est affecté par ","h3",this.node);
 		this.addAnchor("checkInput");
-		this.addSelect("select",getInputs());
+		this.addSelect("select,input",getInputs());
 		this.addAnchor("endGroup");
 	}
 }
@@ -544,7 +568,7 @@ class GetInput extends Piece{
 
 		this.node.style.display = "flex";
 		this.addAnchor("getInput");
-		this.addSelect("select",getInputs());
+		this.addSelect("select,input",getInputs());
 		this.addAnchor("endGroup");
 	}
 }
@@ -558,7 +582,7 @@ class GetLocaleVar extends Piece{
 
 		let results = getVar().concat(getAttributes());
 		if(results.length > 0){
-			this.addSelect("select",results);
+			this.addSelect("select,variable",results);
 		}
 	}
 }
@@ -652,7 +676,7 @@ class MathBloc extends Piece{
 		this.node.style.backgroundColor = "#c2a9cc";
 
 		this.node.style.display = "flex";
-		this.addSelect("select",[["+","+"],["-","-"],["*","*"],["/","/"],["mod","%"]]);
+		this.addSelect("select,operator",[["+","+"],["-","-"],["*","*"],["/","/"],["mod","%"]]);
 		this.addCapsule("valeur","valeur,group")
 	}
 }
@@ -704,7 +728,7 @@ class Increment extends Piece{
 		let results = getVar().concat(getAttributes());
 		if(results.length > 0){
 			this.addText("Augmenter ","h3",this.node);
-			this.addSelect("select",results);
+			this.addSelect("select,variable",results);
 			this.addText(" de ","h3",this.node);
 			this.addAnchor("increment");
 			this.addCapsule("valeur","valeur,group,math")
@@ -724,7 +748,7 @@ class Decrement extends Piece{
 		console.log(results)
 		if(results.length > 0){
 			this.addText("Diminuer ","h3",this.node);
-			this.addSelect("select",results);
+			this.addSelect("select,variable",results);
 			this.addText(" de ","h3",this.node);
 			this.addAnchor("decrement");
 			this.addCapsule("valeur","valeur,group,math")
@@ -743,7 +767,7 @@ class ChangeVariable extends Piece{
 		let results = getVar().concat(getAttributes());
 		console.log(results)
 		if(results.length > 0){
-			this.addSelect("select",results);
+			this.addSelect("select,variable",results);
 			this.addText(" est égal à ","h3",this.node);
 			this.addAnchor("equal");
 			this.addCapsule("valeur","valeur,group,math,object")

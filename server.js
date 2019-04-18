@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 
 let sessionChecker = (req, res, next) => {
     if (req.session.user && req.cookies.user_sid) {
-        res.redirect('/crossroad');
+        res.redirect('/chooseSystem');
     } else {
         next();
     }
@@ -47,7 +47,7 @@ let sessionChecker = (req, res, next) => {
 
 app.get('/', sessionChecker, (req, res) => {
     if (req.session.user && req.cookies.user_sid) {
-        res.redirect('/crossroad');
+        res.redirect('/chooseSystem');
     } else {
         res.redirect('/login');
     }
@@ -68,7 +68,7 @@ app.route('/login')
             }else{
                 req.session.user = user;
                 req.session.rand = Math.random()*100;
-                res.redirect('/crossroad');
+                res.redirect('/chooseSystem');
             }
         });
 	});
@@ -91,6 +91,14 @@ app.get('/crossroad', (req, res) => {
 	}
 });
 
+app.get('/chooseSystem', (req, res) => {
+	if (req.session.user && req.cookies.user_sid) {
+		res.sendFile(__dirname + '/public/chooseSystem.html');
+	} else {
+		res.redirect('/login');
+	}
+});
+
 app.get('/chooseSystemData', (req, res) => {
 	if (req.session.user && req.cookies.user_sid) {
         db.getSystems(req.session.user.id,(systems)=>{
@@ -105,7 +113,7 @@ app.post('/systemChoice', (req,res) =>{
     if (req.session.user && req.cookies.user_sid) {
         db.getSystem(req.session.user.id,req.body.system,(system)=>{
             req.session.system = system;
-            res.sendFile(__dirname + '/public/dashboard.html');
+            res.sendFile(__dirname + '/public/crossroad.html');
         });
 	} else {
 		res.redirect('/login');
@@ -343,6 +351,8 @@ const getItem = (req, system) =>{
         case 'system':
             item = system;
             break;
+        case 'tile':
+            item = system.tile;
         default:
             item = system[req.body.type];
     }

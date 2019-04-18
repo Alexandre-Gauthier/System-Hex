@@ -25,7 +25,7 @@
 			<a href="#">
 				<div class="button_square delete"></div>
 			</a>
-			<a href="#">
+			<a href="crossroad.html">
 				<div class="button_square close"></div>
 			</a>
 		</div>
@@ -45,7 +45,8 @@
 					<div id="listTileAttributes" class="list sublist" ></div>
 					<a id="addTileAttribute" class="add_button">+</a>
 				<h4>Méthodes</h4>
-					<a href="methodEditor.html" class="add_button">+</a>
+					<div id="listTileMethods" class="list sublist" ></div>
+					<a href="/methodEditor.html?method=new" class="add_button">+</a>
 				<h3>Configuration de la planche</h3>
 					<div class="form_line"> <div id="boardView" class="button_small"></div> <p>Couleur : </p><input type="text" class="lineInput" id="colorBGBoard" name="colorBGBoard" placeholder="ffffff" maxlength="6"></div>
 				<h4>Attributs</h4>
@@ -150,6 +151,6 @@
 		</div>
 
 	</div>
-	<script>getSystem();</script>
+	<script>iniDashboard();</script>
 </body>
 </html>

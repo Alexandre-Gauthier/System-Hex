@@ -1,7 +1,7 @@
 let system = null;
 let modal = null;
 
-const getSystem = () =>{
+const iniDashboard = () =>{
 	getApi('systemChoiceData',(result)=>{
 		system = result;
 		addOnClickSaveSystem('#systemBtnSave');
@@ -16,6 +16,7 @@ const getSystem = () =>{
 		addAttributes('#listBoardAttributes',system.board.attributes,system.board,'board');
 		addOnClickModal('#addBoardAttribute','#listBoardAttributes',system.board,'board');
 
+		addOpenEditor('#listTileMethods',system.tile.methods,null);
 		fillList('#listTokens',system.tokens,showToken);
 		document.querySelector('#addToken').onclick = createToken;
 
@@ -275,7 +276,11 @@ const addOpenEditor = (id,array,name) =>{
 	for(let i = 0; i < array.length;i++){
 		let item = array[i];
 		addElement(id,i,item,()=>{
-			window.location.href = "/methodEditor.html?token="+name+"&method="+item.name;
+			let tokenStr = "";
+			if(name){
+				tokenStr = "token="+name+"&";
+			}
+			window.location.href = "/methodEditor.html?"+tokenStr+"method="+item.name;
 		});
 	}
 }
