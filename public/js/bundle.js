@@ -689,6 +689,7 @@ function toDOM(obj) {
 	if (obj.tagName == "select" && hasTag('variable', node)) {
 		clearSelectOptions(node);
 		let options = getVar().concat(getAttributes());
+		console.log(options);
 		addSelectOptions(node, options);
 	}
 	if (obj.value) {

@@ -130,7 +130,7 @@ app.get('/systemChoiceData',(req, res) => {
 	if (req.session.user && req.cookies.user_sid && req.session.system) {
         res.json(req.session.system);
 	} else {
-		res.redirect('/chooseSystem');
+		res.redirect('/login');
 	}
 });
 
@@ -138,7 +138,7 @@ app.get('/methodEditor',(req, res) => {
 	if (req.session.user && req.cookies.user_sid && req.session.system) {
         res.json(req.session.system);
 	} else {
-		res.redirect('/chooseSystem');
+		res.redirect('/login');
 	}
 });
 
@@ -382,14 +382,13 @@ const insertSystem = (req,res) =>{
                         "Border":"",
                         "Attributes":[""],
                         "Methods":[""]},
-                    "tokens":[""],
-                    "effects":[""]
+                    "tokens":[],
+                    "effects":[]
                     };
     db.getSystems(req.session.user.id,(result)=>{
-        newSystem.id = result.systems[result.systems.length-1]+1;
+        newSystem.id = result.systems[result.systems.length-1].id+1; // À Ajuster
         if(newSystem.id == null){
-            newSystem.id = 1; // À Ajuster
-
+            newSystem.id = 1;
         }
         result.systems.push(newSystem);
         req.session.system = newSystem;
