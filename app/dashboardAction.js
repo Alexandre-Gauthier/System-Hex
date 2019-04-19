@@ -171,7 +171,8 @@ const createToken = () =>{
 			let templateToken = {"name":tokenName,
                     "Color":"",
                     "Border":"",
-                    "Img":"",
+					"Img":"",
+                	"listenedInputs":[],
                     "attributes":[],
 					"methods":[]};
 			system.tokens.push(templateToken);
@@ -317,29 +318,41 @@ const addOnClickdeleteElement = (id,item,type,action,list,container) =>{
 
 const addOnClickSaveItem = (id,item,type,nameId,container,colorId=null,borderId=null) =>{
 	document.querySelector(id).onclick = () =>{
-		let data = {name:document.querySelector(nameId).value};
+		saveItem(item,type,nameId,container,colorId,borderId);
+	}
+}
 
+const saveItem = (item,type,nameId=null,container=null,colorId=null,borderId=null) =>{
+	let data = {};
+	if(nameId){
+		data.name = document.querySelector(nameId).value;
+	}else{
+		data.name = item.name;
+	}
+	if(colorId){
+		data.Color = document.querySelector(colorId).value;
+	}
+	if(borderId){
+		data.Border = document.querySelector(borderId).value;
+	}
+	let oldTitle = item.name;
+	updateAPI(oldTitle,type,'saveItem',data,(res)=>{
+		if(nameId){
+			item.name = document.querySelector(nameId).value;
+		}
 		if(colorId){
-			data.Color = document.querySelector(colorId).value;
+			item.Color = document.querySelector(colorId).value;
 		}
 		if(borderId){
-			data.Border = document.querySelector(borderId).value;
+			item.Border = document.querySelector(borderId).value;
 		}
-		let oldTitle = item.name;
-		updateAPI(oldTitle,type,'saveItem',data,(res)=>{
-			item.name = document.querySelector(nameId).value;
-			if(colorId){
-				item.Color = document.querySelector(colorId).value;
-			}
-			if(borderId){
-				item.Border = document.querySelector(borderId).value;
-			}
+		if(container){
 			let node = findNode(document.querySelector(container),oldTitle);
 			node.innerHTML = item.name;
 			formToken.style.display = 'none';
 			formEffect.style.display = 'none';
-		});
-	}
+		}
+	});
 }
 
 const addOnClickSaveSystem = (id) =>{

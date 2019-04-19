@@ -4,6 +4,7 @@ let attributes = {'durability':500,'humidity':100};
 let localeVars = {};
 
 let space = null;
+let stringBody = null;
 let methodBody = null;
 
 let selectedPiece = null;
@@ -20,6 +21,7 @@ let method = null;
 
 const iniEditor = () =>{
 	space = document.querySelector('#creationSpace');
+	stringBody = document.querySelector('#stringBody');
 
 	space.onclick=(e)=>{
 		if(selectedPiece){
@@ -50,7 +52,7 @@ const iniEditor = () =>{
 
 
 		if(getUrlVars()["method"] == 'new'){
-			method = {name:'',body:'',dom:'',unresolved:0};
+			method = {name:'',body:'',dom:'',listenedInputs:[],unresolved:0};
 			token.methods.push(method);
 		}else{
 			method = findElement(token.methods,'name',getUrlVars()["method"],true);
@@ -187,7 +189,7 @@ const showButton = () =>{
 					display = "block";
 				}
 			}else{
-				if(tag=="main" || tag=="block" || tag=="line"){
+				if(tag=="main" || tag=="block" || tag=="line" || tag=="action"){
 					display = "block";
 				}
 			}
@@ -555,7 +557,7 @@ class CheckInput extends Piece{
 		this.node.style.display = "flex";
 		this.addText("Jeton est affecté par ","h3",this.node);
 		this.addAnchor("checkInput");
-		this.addSelect("select,input",getInputs());
+		this.addSelect("select,effect",getInputs());
 		this.addAnchor("endGroup");
 	}
 }
@@ -568,7 +570,7 @@ class GetInput extends Piece{
 
 		this.node.style.display = "flex";
 		this.addAnchor("getInput");
-		this.addSelect("select,input",getInputs());
+		this.addSelect("select,effect",getInputs());
 		this.addAnchor("endGroup");
 	}
 }
@@ -699,7 +701,7 @@ class InputString extends Piece{
 		this.node.style.backgroundColor = "#d7e094";
 
 		this.node.style.display = "flex";
-		this.addInput("Mot","input",/^[a-zA-Z0-9]*$/);
+		this.addInput("Mot","input,string",/^[a-zA-Z0-9]*$/);
 	}
 }
 
@@ -773,15 +775,41 @@ class ChangeVariable extends Piece{
 			this.addCapsule("valeur","valeur,group,math,object")
 			this.addAnchor("endLine");
 		}
-
 	}
 }
+
+class DeleteToken extends Piece{
+	constructor(parent){
+		super(parent);
+		this.node.setAttribute("tags","block,line,action");
+		this.node.style.backgroundColor = "#6d6a6b";
+
+		this.addText("Supprimer le Jeton","h3",this.node);
+		this.addAnchor("deleteToken");
+	}
+}
+
+class BroadcastEffect extends Piece{
+	constructor(parent){
+		super(parent);
+		this.node.setAttribute("tags","block,line,action");
+		this.node.style.backgroundColor = "#b4db85";
+
+		this.node.style.display = "flex";
+		this.addText("Distribuer ","h3",this.node);
+		this.addAnchor("broadcastEffect");
+		this.addSelect("select,effect",getInputs());
+		this.addAnchor("endGroup");
+	}
+}
+
 // ****************************************** To String Functions *******************************************
 
 const dom2String = () =>{
 	unresolvedInput = 0;
 	methodBody = "";
 	localeVars = {};
+	method.listenedInputs = [];
 
 	if(nodeIsEmpty(space,1)){
 		selectedPiece = null;
@@ -791,6 +819,9 @@ const dom2String = () =>{
 
 	recurseDomChildren(space);
 	setTextNode('#editorHeader','Éditeur ('+unresolvedInput+')');
+	if(stringBody){
+		stringBody.innerHTML = methodBody;
+	}
 	method.unresolved = unresolvedInput;
 	method.dom = saveDOM();
 	method.body = methodBody;
@@ -828,10 +859,10 @@ function outputNode(node)
     if(node.nodeType === 1)
 	{
 		if(hasTag('checkInput',node)){
-			methodBody += "inputExist(";
+			methodBody += "obj.inputExist(";
 		}
 		if(hasTag('getInput',node)){
-			methodBody += "getInput(";
+			methodBody += "obj.getInput(";
 		}
 
 		if(hasTag('if',node)){
@@ -884,14 +915,28 @@ function outputNode(node)
 		}
 
 		if(hasTag('select',node)){
-			methodBody += node.options[node.selectedIndex].value;
+			if(hasTag('effect',node)){
+				methodBody += "'"+node.options[node.selectedIndex].value+"'";
+			}else{
+				methodBody += node.options[node.selectedIndex].value;
+			}
 		}
+
+		if(hasTag('effect',node)){
+			let txt = node.value;
+			method.listenedInputs.push(txt);
+		}
+
 		if(hasTag('input',node)){
 			let txt = node.value;
 			if(txt.length <= 0){
 				unresolvedInput++;
 			}
-			methodBody += txt;
+			if(hasTag('string',node)){
+				methodBody += "'"+txt+"'";
+			}else{
+				methodBody += txt;
+			}
 		}
 		if(hasTag('localeVar',node)){
 			let txt = node.value;
@@ -902,6 +947,14 @@ function outputNode(node)
 			}
 			methodBody += txt;
 		}
+		if(hasTag('deleteToken',node)){
+			methodBody += "obj.deleteToken()";
+		}
+
+		if(hasTag('broadcastEffect',node)){
+			methodBody += "obj.broadcastEffect(";
+		}
+
 
 		if(hasTag('capsule',node)){
 			if(nodeIsEmpty(node,1)){

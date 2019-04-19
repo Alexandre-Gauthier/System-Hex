@@ -1,3 +1,20 @@
+const nbColumns = 48;
+let gap = 5;
+let nbRows = 14;
+const tilesList = [];
+const boardConfig = {width:0,height:0,size:0};
+
+const tileDic = {};
+const tokenTemplate = {};
+const effectTemplate = {};
+
+let ctx = null;
+let canvas = null;
+
+let posX = 0;
+let posY = 0;
+let clickEvent = false;
+
 const iniObservation = () =>{
 	canvas = document.querySelector('#mainCanvas');
 	ctx = canvas.getContext('2d');
@@ -6,8 +23,10 @@ const iniObservation = () =>{
 	let container = document.querySelector('#board_container');
 	boardConfig.width = container.offsetWidth;
 	boardConfig.height = container.offsetHeight;
-	boardConfig.size = (boardConfig.width / nbColumns)-boardConfig.width*.0175;
-	nbRows = Math.ceil(boardConfig.height/boardConfig.size*.46);
+
+	boardConfig.size = (boardConfig.width / nbColumns)/1.76;
+	nbRows = Math.ceil(boardConfig.height/boardConfig.size*.435);
+
 	ctx.canvas.width  = container.offsetWidth;
 	ctx.canvas.height = container.offsetHeight;
 
@@ -23,39 +42,49 @@ const iniObservation = () =>{
 	getApi('systemChoiceData',(result)=>{
 		system = result;
 		setTextNode('#titleSystem',system.title);
+		iniApp();
 	});
 
-	iniApp();
 }
 
-const nbColumns = 24;
-let nbRows = 14;
-const tilesList = [];
-const boardConfig = {width:0,height:0,size:0};
-
-const tileDic = {};
-
-let ctx = null;
-let canvas = null;
-
-let posX = 0;
-let posY = 0;
-let clickEvent = false;
 
 const iniApp = () =>{
+	// Create Token Template
+	for(let i = 0; i< system.tokens.length;i++){
+		let json = system.tokens[i];
+		try{
+			let token = new Token(getId(),json.attributes,this,json.name,json.Color,json.Border);
+			token.installMethods(json.methods);
+			tokenTemplate[token.name] = token;
+			console.log(token)
+		}catch(err){
+			console.error(json.name,'ERROR_CONSTRUCTION_METHOD');
+		}
+	}
+
+	// Create Effect Template
+	for(let i = 0; i< system.effects.length;i++){
+		let json = system.effects[i];
+		try{
+			let effect = json;
+			effectTemplate[effect.name] = effect;
+			console.log(effect)
+		}catch(err){
+			console.error(json.name,'ERROR_CONSTRUCTION_METHOD');
+		}
+	}
+
 	// Create board
-	// canvas.style.backgroundColor = board.color;
 	for(let row = 0;row<nbRows;row++){
 		let tileRow = [];
 		for(let column = 0;column<nbColumns;column++){
-			let tile = new Tile(getId(),iniTile.attributes,column,row);
-			tile.installMethods(iniTile.methods);
+			let tile = new Tile(getId(),system.tile.attributes,column,row,system.tile.Color,system.tile.Border);
+			tile.installMethods(system.tile.methods);
 			tile.testToken();
 
-			let iniPosX = boardConfig.width*.025, iniPosY = boardConfig.width*.025;
-			let gap = 5;
-			let x = boardConfig.size*1.5+gap;
-			let y = boardConfig.size*1.75+gap;
+			let iniPosX = boardConfig.size, iniPosY = boardConfig.size;
+			let x = boardConfig.size*1.75;
+			let y = boardConfig.size*2;
 			if(column%2 == 0){
 				iniPosY += boardConfig.size;
 			}
@@ -66,6 +95,8 @@ const iniApp = () =>{
 		}
 		tilesList.push(tileRow);
 	}
+
+
 	tick();
 }
 
@@ -101,10 +132,6 @@ const getToken = (arr,token)=>{
 		if(arr[i].name === token){
 			return arr[i];
 		}
-		/*
-		if(arr.children.length > 0){
-			getToken(arr.children,token);
-		}*/
 	}
 }
 
@@ -134,6 +161,16 @@ const getId = () =>{
 const giveInput = (input,arr) =>{
 	arr.forEach(tileId => {
 		let tile = tileDic[tileId]
-		tile.addInput(tile.nextInputs,input)
+		tile.addInput(tile.nextInputs,input,true)
 	});
+}
+
+const getTemplateToken = (name) =>{
+	for(let i = 0;i < tokenTemplate.length;i++){
+		let token = tokenTemplate[i];
+		if(token.name == name){
+			return token;
+		}
+	}
+	return null;
 }

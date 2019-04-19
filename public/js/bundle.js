@@ -350,6 +350,7 @@ const createToken = () => {
 				"Color": "",
 				"Border": "",
 				"Img": "",
+				"listenedInputs": [],
 				"attributes": [],
 				"methods": [] };
 			system.tokens.push(templateToken);
@@ -494,29 +495,41 @@ const addOnClickdeleteElement = (id, item, type, action, list, container) => {
 
 const addOnClickSaveItem = (id, item, type, nameId, container, colorId = null, borderId = null) => {
 	document.querySelector(id).onclick = () => {
-		let data = { name: document.querySelector(nameId).value };
+		saveItem(item, type, nameId, container, colorId, borderId);
+	};
+};
 
+const saveItem = (item, type, nameId = null, container = null, colorId = null, borderId = null) => {
+	let data = {};
+	if (nameId) {
+		data.name = document.querySelector(nameId).value;
+	} else {
+		data.name = item.name;
+	}
+	if (colorId) {
+		data.Color = document.querySelector(colorId).value;
+	}
+	if (borderId) {
+		data.Border = document.querySelector(borderId).value;
+	}
+	let oldTitle = item.name;
+	updateAPI(oldTitle, type, 'saveItem', data, res => {
+		if (nameId) {
+			item.name = document.querySelector(nameId).value;
+		}
 		if (colorId) {
-			data.Color = document.querySelector(colorId).value;
+			item.Color = document.querySelector(colorId).value;
 		}
 		if (borderId) {
-			data.Border = document.querySelector(borderId).value;
+			item.Border = document.querySelector(borderId).value;
 		}
-		let oldTitle = item.name;
-		updateAPI(oldTitle, type, 'saveItem', data, res => {
-			item.name = document.querySelector(nameId).value;
-			if (colorId) {
-				item.Color = document.querySelector(colorId).value;
-			}
-			if (borderId) {
-				item.Border = document.querySelector(borderId).value;
-			}
+		if (container) {
 			let node = findNode(document.querySelector(container), oldTitle);
 			node.innerHTML = item.name;
 			formToken.style.display = 'none';
 			formEffect.style.display = 'none';
-		});
-	};
+		}
+	});
 };
 
 const addOnClickSaveSystem = id => {
@@ -706,6 +719,7 @@ let attributes = { 'durability': 500, 'humidity': 100 };
 let localeVars = {};
 
 let space = null;
+let stringBody = null;
 let methodBody = null;
 
 let selectedPiece = null;
@@ -721,6 +735,7 @@ let method = null;
 
 const iniEditor = () => {
 	space = document.querySelector('#creationSpace');
+	stringBody = document.querySelector('#stringBody');
 
 	space.onclick = e => {
 		if (selectedPiece) {
@@ -750,7 +765,7 @@ const iniEditor = () => {
 		fillList('#listTokenMethods', token.methods);
 
 		if (getUrlVars()["method"] == 'new') {
-			method = { name: '', body: '', dom: '', unresolved: 0 };
+			method = { name: '', body: '', dom: '', listenedInputs: [], unresolved: 0 };
 			token.methods.push(method);
 		} else {
 			method = findElement(token.methods, 'name', getUrlVars()["method"], true);
@@ -886,7 +901,7 @@ const showButton = () => {
 					display = "block";
 				}
 			} else {
-				if (tag == "main" || tag == "block" || tag == "line") {
+				if (tag == "main" || tag == "block" || tag == "line" || tag == "action") {
 					display = "block";
 				}
 			}
@@ -1253,7 +1268,7 @@ class CheckInput extends Piece {
 		this.node.style.display = "flex";
 		this.addText("Jeton est affecté par ", "h3", this.node);
 		this.addAnchor("checkInput");
-		this.addSelect("select,input", getInputs());
+		this.addSelect("select,effect", getInputs());
 		this.addAnchor("endGroup");
 	}
 }
@@ -1266,7 +1281,7 @@ class GetInput extends Piece {
 
 		this.node.style.display = "flex";
 		this.addAnchor("getInput");
-		this.addSelect("select,input", getInputs());
+		this.addSelect("select,effect", getInputs());
 		this.addAnchor("endGroup");
 	}
 }
@@ -1397,7 +1412,7 @@ class InputString extends Piece {
 		this.node.style.backgroundColor = "#d7e094";
 
 		this.node.style.display = "flex";
-		this.addInput("Mot", "input", /^[a-zA-Z0-9]*$/);
+		this.addInput("Mot", "input,string", /^[a-zA-Z0-9]*$/);
 	}
 }
 
@@ -1471,12 +1486,39 @@ class ChangeVariable extends Piece {
 		}
 	}
 }
+
+class DeleteToken extends Piece {
+	constructor(parent) {
+		super(parent);
+		this.node.setAttribute("tags", "block,line,action");
+		this.node.style.backgroundColor = "#6d6a6b";
+
+		this.addText("Supprimer le Jeton", "h3", this.node);
+		this.addAnchor("deleteToken");
+	}
+}
+
+class BroadcastEffect extends Piece {
+	constructor(parent) {
+		super(parent);
+		this.node.setAttribute("tags", "block,line,action");
+		this.node.style.backgroundColor = "#b4db85";
+
+		this.node.style.display = "flex";
+		this.addText("Distribuer ", "h3", this.node);
+		this.addAnchor("broadcastEffect");
+		this.addSelect("select,effect", getInputs());
+		this.addAnchor("endGroup");
+	}
+}
+
 // ****************************************** To String Functions *******************************************
 
 const dom2String = () => {
 	unresolvedInput = 0;
 	methodBody = "";
 	localeVars = {};
+	method.listenedInputs = [];
 
 	if (nodeIsEmpty(space, 1)) {
 		selectedPiece = null;
@@ -1486,6 +1528,9 @@ const dom2String = () => {
 
 	recurseDomChildren(space);
 	setTextNode('#editorHeader', 'Éditeur (' + unresolvedInput + ')');
+	if (stringBody) {
+		stringBody.innerHTML = methodBody;
+	}
 	method.unresolved = unresolvedInput;
 	method.dom = saveDOM();
 	method.body = methodBody;
@@ -1516,10 +1561,10 @@ function outputNode(node) {
 	var whitespace = /^\s+$/g;
 	if (node.nodeType === 1) {
 		if (hasTag('checkInput', node)) {
-			methodBody += "inputExist(";
+			methodBody += "obj.inputExist(";
 		}
 		if (hasTag('getInput', node)) {
-			methodBody += "getInput(";
+			methodBody += "obj.getInput(";
 		}
 
 		if (hasTag('if', node)) {
@@ -1572,14 +1617,28 @@ function outputNode(node) {
 		}
 
 		if (hasTag('select', node)) {
-			methodBody += node.options[node.selectedIndex].value;
+			if (hasTag('effect', node)) {
+				methodBody += "'" + node.options[node.selectedIndex].value + "'";
+			} else {
+				methodBody += node.options[node.selectedIndex].value;
+			}
 		}
+
+		if (hasTag('effect', node)) {
+			let txt = node.value;
+			method.listenedInputs.push(txt);
+		}
+
 		if (hasTag('input', node)) {
 			let txt = node.value;
 			if (txt.length <= 0) {
 				unresolvedInput++;
 			}
-			methodBody += txt;
+			if (hasTag('string', node)) {
+				methodBody += "'" + txt + "'";
+			} else {
+				methodBody += txt;
+			}
 		}
 		if (hasTag('localeVar', node)) {
 			let txt = node.value;
@@ -1589,6 +1648,13 @@ function outputNode(node) {
 				localeVars[txt] = true;
 			}
 			methodBody += txt;
+		}
+		if (hasTag('deleteToken', node)) {
+			methodBody += "obj.deleteToken()";
+		}
+
+		if (hasTag('broadcastEffect', node)) {
+			methodBody += "obj.broadcastEffect(";
 		}
 
 		if (hasTag('capsule', node)) {
@@ -1631,16 +1697,20 @@ function setInputFilter(textbox, inputFilter) {
 		});
 	});
 }
-class Master {
+class Element {
 	constructor(id, attributes) {
 		this.id = id;
 		this.children = [];
-		this.attributes = attributes;
+		this.attributes = {};
+		this.createAttributes(attributes);
 		this.methods = [];
 
 		this.inputs = [];
 		this.nextInputs = [];
 		this.outputs = [];
+
+		this.listenedInputs = [];
+		this.myListenedInputs = [];
 
 		this.posX = 0;
 		this.posY = 0;
@@ -1650,19 +1720,48 @@ class Master {
 	// ---------------------------------------------------------------------------------------------
 	// Méthodes D'initialisation
 	// ---------------------------------------------------------------------------------------------
-	// Créé les méthodes données en string et les ajoutes à un tableau
-	installMethods(methods) {
-		methods.forEach(method => {
-			var f = new Function(method.arguments, method.body);
-			this.methods.push(f);
+	addListenedInputs(inputs) {
+		inputs.forEach(input => {
+			this.myListenedInputs.push(input);
+			this.listenedInputs.push(input);
 		});
 	}
 
+	createAttributes(array) {
+		if (array && array.length > 0) {
+			array.forEach(attribute => {
+				this.attributes[attribute.name] = attribute.value;
+			});
+		}
+	}
+
+	// Créé les méthodes données en string et les ajoutes à un tableau
+	installMethods(methods) {
+		if (methods) {
+			methods.forEach(method => {
+				if (method.unresolved == 0) {
+					try {
+						var f = new Function('obj', method.body);
+						this.methods.push(f);
+						this.addListenedInputs(method.listenedInputs);
+					} catch (err) {
+						console.error('METHOD', method.name, 'HAS AN ERROR');
+					}
+				}
+			});
+		}
+	}
+
 	// Ajoute l'input donnée (en json)
-	addInput(arr, input) {
+	addInput(arr, input, limit = false) {
 		if (!getInput(arr, input.name)) {
 			arr.push(JSON.parse(JSON.stringify(input)));
 		}
+		// if(limit && this.listenedInputs.includes(input.name)){
+
+		// }else{
+
+		// }
 	}
 
 	addCoord(size, x, y) {
@@ -1689,7 +1788,7 @@ class Master {
 		this.children.forEach(child => {
 			this.inputs.forEach(input => {
 				if (child.listenedInputs.includes(input.name)) {
-					child.addInput(child.inputs, input);
+					child.addInput(child.inputs, input, true);
 				}
 			});
 		});
@@ -1709,11 +1808,8 @@ class Master {
 	createToken(template) {
 		let token = null;
 		if (!getToken(this.children, template.name)) {
-			let attributes = JSON.parse(JSON.stringify(template.attributes));
-			token = new Token(getId(), attributes, this, template.name, template.color, template.border);
+			token = new Token(getId(), template.attributes, this, template.name, template.color, template.border);
 			token.installMethods(template.methods);
-			token.addListenedInputs(template.listenedInputs);
-			// console.log('createToken')
 		}
 		return token;
 	}
@@ -1730,12 +1826,31 @@ class Master {
 	clearInputs() {
 		this.inputs = [];
 	}
+
+	inputExist(name) {
+		return getInput(this.inputs, name) ? true : false;
+	}
+
+	getInput(name) {
+		return getInput(this.inputs, name);
+	}
+
+	deleteToken() {
+		this.addInput(this.outputs, { name: 'destroyChild', elem: this.id });
+	}
+
+	broadcastEffect(name) {
+		let input = getInput(this.inputs, name);
+		if (input) {
+			this.addInput(this.outputs, input);
+		}
+	}
 }
-class Tile extends Master {
-	constructor(id, attributes, x, y) {
+class Tile extends Element {
+	constructor(id, attributes, x, y, color = 'ede1c9', border = '8e8a6b') {
 		super(id, attributes);
 
-		this.stackColor = { ini: iniTile.color, border: iniTile.border, selected: iniTile.selected };
+		this.stackColor = { ini: '#' + color, border: '#' + border, selected: '#436177' };
 		this.colorToken = '';
 		this.borderToken = '';
 
@@ -1754,14 +1869,14 @@ class Tile extends Master {
 		let max = 100;
 		let randToken = Math.floor(Math.random() * (+max - +min)) + +min;
 		if (randToken >= 100 - range) {
-			let token = this.createToken(iniTokenArbre);
-			if (token) {
-				this.children.push(this.createToken(iniTokenArbre));
-			}
+			try {
+				let token = Object.create(tokenTemplate.Arbre);
+				this.children.push(token);
+			} catch (err) {}
 		}
 	}
 	setOnFire() {
-		this.addInput(this.nextInputs, inputFire);
+		this.addInput(this.nextInputs, effectTemplate.Feu);
 		clickEvent = false;
 	}
 	// ---------------------------------------------------------------------------------------------
@@ -1816,12 +1931,11 @@ class Tile extends Master {
 	iniInputs() {
 		this.inputs.forEach(input => {
 			switch (input.name) {
-				case 'fire':
-					let token = this.createToken(iniTokenFire);
+				case 'Feu':
+					let token = Object.create(tokenTemplate['Fire']);
 					if (token) {
 						this.children.push(token);
 					}
-
 					console.log('fire');
 					break;
 			}
@@ -1837,7 +1951,7 @@ class Tile extends Master {
 					this.borderToken = '';
 					deleteInput(this.outputs, output.name);
 					break;
-				case 'fire':
+				case 'Feu':
 					this.addInput(this.nextInputs, output);
 					giveInput(output, this.getNeighbours());
 					deleteInput(this.outputs, output.name);
@@ -1917,7 +2031,7 @@ class Tile extends Master {
 		canvas.clip();
 		canvas.fill();
 
-		canvas.lineWidth = 8;
+		canvas.lineWidth = boardConfig.size / 4;
 		canvas.strokeStyle = this.getBorderColor();
 		canvas.stroke();
 		canvas.restore();
@@ -1947,14 +2061,13 @@ class Tile extends Master {
 		return color;
 	}
 }
-class Token extends Master {
+class Token extends Element {
 	constructor(id, attributes, parent, name, color, border) {
 		super(id, attributes);
 		this.parent = parent;
 		this.name = name;
-		this.listenedInputs = [];
-		this.color = color;
-		this.borderColor = border;
+		this.color = '#' + color;
+		this.borderColor = '#' + border;
 	}
 
 	tick() {
@@ -1962,13 +2075,26 @@ class Token extends Master {
 		return this.outputs;
 	}
 
-	addListenedInputs(inputs) {
-		inputs.forEach(input => {
-			this.listenedInputs.push(input);
-		});
-	}
-
 }
+
+var _this = this;
+
+const nbColumns = 48;
+let gap = 5;
+let nbRows = 14;
+const tilesList = [];
+const boardConfig = { width: 0, height: 0, size: 0 };
+
+const tileDic = {};
+const tokenTemplate = {};
+const effectTemplate = {};
+
+let ctx = null;
+let canvas = null;
+
+let posX = 0;
+let posY = 0;
+let clickEvent = false;
 
 const iniObservation = () => {
 	canvas = document.querySelector('#mainCanvas');
@@ -1978,8 +2104,10 @@ const iniObservation = () => {
 	let container = document.querySelector('#board_container');
 	boardConfig.width = container.offsetWidth;
 	boardConfig.height = container.offsetHeight;
-	boardConfig.size = boardConfig.width / nbColumns - boardConfig.width * .0175;
-	nbRows = Math.ceil(boardConfig.height / boardConfig.size * .46);
+
+	boardConfig.size = boardConfig.width / nbColumns / 1.76;
+	nbRows = Math.ceil(boardConfig.height / boardConfig.size * .435);
+
 	ctx.canvas.width = container.offsetWidth;
 	ctx.canvas.height = container.offsetHeight;
 
@@ -1994,40 +2122,48 @@ const iniObservation = () => {
 	getApi('systemChoiceData', result => {
 		system = result;
 		setTextNode('#titleSystem', system.title);
+		iniApp();
 	});
-
-	iniApp();
 };
 
-const nbColumns = 24;
-let nbRows = 14;
-const tilesList = [];
-const boardConfig = { width: 0, height: 0, size: 0 };
-
-const tileDic = {};
-
-let ctx = null;
-let canvas = null;
-
-let posX = 0;
-let posY = 0;
-let clickEvent = false;
-
 const iniApp = () => {
+	// Create Token Template
+	for (let i = 0; i < system.tokens.length; i++) {
+		let json = system.tokens[i];
+		try {
+			let token = new Token(getId(), json.attributes, _this, json.name, json.Color, json.Border);
+			token.installMethods(json.methods);
+			tokenTemplate[token.name] = token;
+			console.log(token);
+		} catch (err) {
+			console.error(json.name, 'ERROR_CONSTRUCTION_METHOD');
+		}
+	}
+
+	// Create Effect Template
+	for (let i = 0; i < system.effects.length; i++) {
+		let json = system.effects[i];
+		try {
+			let effect = json;
+			effectTemplate[effect.name] = effect;
+			console.log(effect);
+		} catch (err) {
+			console.error(json.name, 'ERROR_CONSTRUCTION_METHOD');
+		}
+	}
+
 	// Create board
-	// canvas.style.backgroundColor = board.color;
 	for (let row = 0; row < nbRows; row++) {
 		let tileRow = [];
 		for (let column = 0; column < nbColumns; column++) {
-			let tile = new Tile(getId(), iniTile.attributes, column, row);
-			tile.installMethods(iniTile.methods);
+			let tile = new Tile(getId(), system.tile.attributes, column, row, system.tile.Color, system.tile.Border);
+			tile.installMethods(system.tile.methods);
 			tile.testToken();
 
-			let iniPosX = boardConfig.width * .025,
-			    iniPosY = boardConfig.width * .025;
-			let gap = 5;
-			let x = boardConfig.size * 1.5 + gap;
-			let y = boardConfig.size * 1.75 + gap;
+			let iniPosX = boardConfig.size,
+			    iniPosY = boardConfig.size;
+			let x = boardConfig.size * 1.75;
+			let y = boardConfig.size * 2;
 			if (column % 2 == 0) {
 				iniPosY += boardConfig.size;
 			}
@@ -2038,6 +2174,7 @@ const iniApp = () => {
 		}
 		tilesList.push(tileRow);
 	}
+
 	tick();
 };
 
@@ -2072,10 +2209,6 @@ const getToken = (arr, token) => {
 		if (arr[i].name === token) {
 			return arr[i];
 		}
-		/*
-  if(arr.children.length > 0){
-  	getToken(arr.children,token);
-  }*/
 	}
 };
 
@@ -2105,6 +2238,16 @@ const getId = () => {
 const giveInput = (input, arr) => {
 	arr.forEach(tileId => {
 		let tile = tileDic[tileId];
-		tile.addInput(tile.nextInputs, input);
+		tile.addInput(tile.nextInputs, input, true);
 	});
+};
+
+const getTemplateToken = name => {
+	for (let i = 0; i < tokenTemplate.length; i++) {
+		let token = tokenTemplate[i];
+		if (token.name == name) {
+			return token;
+		}
+	}
+	return null;
 };

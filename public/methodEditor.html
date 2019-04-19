@@ -59,7 +59,7 @@
 			<button tags="line" onclick="createPiece(Increment)" >Augmenter</button>
 			<button tags="line" onclick="createPiece(Decrement)" >Diminuer</button>
 			<button tags="math" onclick="createPiece(GroupMath)" >Groupe</button>
-			<h5>Variables</h5>
+			<h5>Variable</h5>
 			<button tags="line" onclick="createPiece(NewVariable)" >Créer Variable</button>
 			<button tags="line" onclick="createPiece(ChangeVariable)" >Affecter une Variable</button>
 			<button tags="valeur,condition" onclick="createPiece(GetLocaleVar)" >Variable</button>
@@ -67,16 +67,21 @@
 			<button tags="valeur" onclick="createPiece(InputNumber)" >Entrer un nombre</button>
 			<button tags="valeur" onclick="createPiece(InputString)" >Entrer un nom</button>
 			<button tags="object" onclick="createPiece(GetInput)" >Effet</button>
-			<h5>Pièces</h5>
+			<h5>Ligne</h5>
 			<button tags="condition" onclick="createPiece(Group)" >Groupe</button>
 			<button tags="condition" onclick="createPiece(Not)" >Negation</button>
 			<button tags="line" onclick="createPiece(Line)" >Code</button>
+			<h5>Action</h5>
+			<button tags="action,line" onclick="createPiece(DeleteToken)" >Supprimer le Jeton</button>
+			<button tags="action,line" onclick="createPiece(BroadcastEffect)" >Distribuer un Effet</button>
+
 		</div>
 
 
 		<div class="inner_form full_height display_flex full_width">
 			<div class="long_form full_height full_width">
 				<h3 id="editorHeader" class='first'>Éditeur (0)</h3>
+				<p id="stringBody"></p>
 				<div id="editorWindow">
 					<div id="editorAction">
 						<a onclick="upNode()">

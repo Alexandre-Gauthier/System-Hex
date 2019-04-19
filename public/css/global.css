@@ -789,8 +789,6 @@ padding: 2px 16px;
 .long_container{
 	max-width:100%;
 	height: auto;
-	margin-left: 10px;
-	padding:10px;
 
 	position: relative;
 	overflow: hidden;;

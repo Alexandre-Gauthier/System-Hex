@@ -1,8 +1,8 @@
-class Tile extends Master{
-	constructor(id,attributes,x,y){
+class Tile extends Element{
+	constructor(id,attributes,x,y,color='ede1c9',border='8e8a6b'){
 		super(id,attributes);
 
-		this.stackColor = {ini:iniTile.color,border:iniTile.border,selected:iniTile.selected}
+		this.stackColor = {ini:'#'+color,border:'#'+border,selected:'#436177'}
 		this.colorToken = '';
 		this.borderToken = '';
 
@@ -21,14 +21,16 @@ class Tile extends Master{
 		let max = 100;
 		let randToken = Math.floor(Math.random() * (+max - +min)) + +min;
 		if (randToken >= 100-range){
-			let token = this.createToken(iniTokenArbre);
-			if(token){
-				this.children.push(this.createToken(iniTokenArbre))
+			try{
+				let token = Object.create(tokenTemplate.Arbre);
+				this.children.push(token)
+			}catch(err){
+
 			}
 		}
 	}
 	setOnFire(){
-		this.addInput(this.nextInputs,inputFire);
+		this.addInput(this.nextInputs,effectTemplate.Feu);
 		clickEvent = false;
 	}
 	// ---------------------------------------------------------------------------------------------
@@ -85,12 +87,11 @@ class Tile extends Master{
 	iniInputs(){
 		this.inputs.forEach(input=>{
 			switch(input.name){
-				case 'fire':
-					let token = this.createToken(iniTokenFire);
+				case 'Feu':
+					let token = Object.create(tokenTemplate['Fire']);
 					if(token){
 						this.children.push(token);
 					}
-
 					console.log('fire')
 					break;
 			}
@@ -106,7 +107,7 @@ class Tile extends Master{
 					this.borderToken = '';
 					deleteInput(this.outputs,output.name);
 					break;
-				case 'fire':
+				case 'Feu':
 					this.addInput(this.nextInputs,output);
 					giveInput(output,this.getNeighbours());
 					deleteInput(this.outputs,output.name);
@@ -163,7 +164,7 @@ class Tile extends Master{
 		canvas.fill();
 
 
-		canvas.lineWidth = 8;
+		canvas.lineWidth = boardConfig.size/4;
 		canvas.strokeStyle = this.getBorderColor();
 		canvas.stroke();
 		canvas.restore();

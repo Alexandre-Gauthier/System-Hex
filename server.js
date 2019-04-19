@@ -220,6 +220,7 @@ app.post('/addToken', (req,res)=>{
                 "Color":"",
                 "Border":"",
                 "Img":"",
+                "listenedInputs":[],
                 "attributes":[],
                 "methods":[]};
 
