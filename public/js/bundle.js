@@ -1698,8 +1698,10 @@ function setInputFilter(textbox, inputFilter) {
 	});
 }
 class Element {
-	constructor(id, attributes) {
+	constructor(id, attributes, name) {
 		this.id = id;
+		this.name = name;
+
 		this.children = [];
 		this.attributes = {};
 		this.createAttributes(attributes);
@@ -1722,15 +1724,16 @@ class Element {
 	// ---------------------------------------------------------------------------------------------
 	addListenedInputs(inputs) {
 		inputs.forEach(input => {
-			this.myListenedInputs.push(input);
-			this.listenedInputs.push(input);
+			this.addInput(this.myListenedInputs, input);
+			this.addInput(this.listenedInputs, input);
 		});
 	}
 
 	createAttributes(array) {
 		if (array && array.length > 0) {
 			array.forEach(attribute => {
-				this.attributes[attribute.name] = attribute.value;
+				let newAttribute = JSON.parse(JSON.stringify(attribute));
+				this.attributes[newAttribute.name] = newAttribute.value;
 			});
 		}
 	}
@@ -1741,11 +1744,12 @@ class Element {
 			methods.forEach(method => {
 				if (method.unresolved == 0) {
 					try {
-						var f = new Function('obj', method.body);
+						let newMethod = JSON.parse(JSON.stringify(method));
+						var f = new Function('obj', newMethod.body);
 						this.methods.push(f);
-						this.addListenedInputs(method.listenedInputs);
+						this.addListenedInputs(newMethod.listenedInputs);
 					} catch (err) {
-						console.error('METHOD', method.name, 'HAS AN ERROR');
+						console.error('METHOD', newMethod.name, 'HAS AN ERROR');
 					}
 				}
 			});
@@ -1754,14 +1758,17 @@ class Element {
 
 	// Ajoute l'input donnée (en json)
 	addInput(arr, input, limit = false) {
-		if (!getInput(arr, input.name)) {
-			arr.push(JSON.parse(JSON.stringify(input)));
+		if (limit) {
+			if (this.listenedInputs.includes(input.name)) {
+				if (!getInput(arr, input.name)) {
+					arr.push(JSON.parse(JSON.stringify(input)));
+				}
+			}
+		} else {
+			if (!getInput(arr, input.name)) {
+				arr.push(JSON.parse(JSON.stringify(input)));
+			}
 		}
-		// if(limit && this.listenedInputs.includes(input.name)){
-
-		// }else{
-
-		// }
 	}
 
 	addCoord(size, x, y) {
@@ -1787,9 +1794,7 @@ class Element {
 	pushInputsDown() {
 		this.children.forEach(child => {
 			this.inputs.forEach(input => {
-				if (child.listenedInputs.includes(input.name)) {
-					child.addInput(child.inputs, input, true);
-				}
+				child.addInput(child.inputs, input, true);
 			});
 		});
 	}
@@ -1797,6 +1802,7 @@ class Element {
 	// Roule les enfants et récupère les outputs
 	runChildren() {
 		this.children.forEach(child => {
+			this.getChildListenedInput(child.listenedInputs);
 			let result = child.tick();
 			result.forEach(output => {
 
@@ -1805,13 +1811,14 @@ class Element {
 		});
 	}
 
-	createToken(template) {
-		let token = null;
-		if (!getToken(this.children, template.name)) {
-			token = new Token(getId(), template.attributes, this, template.name, template.color, template.border);
-			token.installMethods(template.methods);
-		}
-		return token;
+	getChildListenedInput(inputs) {
+		this.listenedInputs = [];
+		inputs.forEach(input => {
+			this.addInput(this.listenedInputs, input);
+		});
+		this.myListenedInputs.forEach(input => {
+			this.addInput(this.listenedInputs, input);
+		});
 	}
 
 	// ---------------------------------------------------------------------------------------------
@@ -1836,7 +1843,14 @@ class Element {
 	}
 
 	deleteToken() {
+
 		this.addInput(this.outputs, { name: 'destroyChild', elem: this.id });
+	}
+
+	addToken(token) {
+		if (!getToken(this.children, token.name)) {
+			this.children.push(token);
+		}
 	}
 
 	broadcastEffect(name) {
@@ -1848,7 +1862,7 @@ class Element {
 }
 class Tile extends Element {
 	constructor(id, attributes, x, y, color = 'ede1c9', border = '8e8a6b') {
-		super(id, attributes);
+		super(id, attributes, 'tile');
 
 		this.stackColor = { ini: '#' + color, border: '#' + border, selected: '#436177' };
 		this.colorToken = '';
@@ -1870,25 +1884,32 @@ class Tile extends Element {
 		let randToken = Math.floor(Math.random() * (+max - +min)) + +min;
 		if (randToken >= 100 - range) {
 			try {
-				let token = Object.create(tokenTemplate.Arbre);
-				this.children.push(token);
+				let json = tokenTemplate.Arbre;
+				let token = new Token(getId(), json.attributes, this, json.name, json.Color, json.Border);
+				token.installMethods(json.methods);
+				this.addToken(token);
 			} catch (err) {}
 		}
 	}
 	setOnFire() {
-		this.addInput(this.nextInputs, effectTemplate.Feu);
+		this.addInput(this.nextInputs, effectTemplate.Feu, true);
 		clickEvent = false;
 	}
 	// ---------------------------------------------------------------------------------------------
 	// Tick
 	// ---------------------------------------------------------------------------------------------
-	tick(clickEvent) {
-		this.mouseEvent(clickEvent);
+	tick() {
 		this.switchInputs();
 		this.iniInputs(); // À modifier pour une méthode anonyme
 		super.tick();
 		this.drawTile();
 		this.checkOutputs();
+		this.setColor();
+	}
+
+	continuousTick(clickEvent) {
+		this.mouseEvent(clickEvent);
+		this.drawTile();
 		this.setColor();
 	}
 
@@ -1903,7 +1924,6 @@ class Tile extends Element {
 			this.selected = true;
 			if (clickEvent) {
 				this.setOnFire();
-				this.getNeighbours();
 			}
 		} else {
 			this.selected = false;
@@ -1922,8 +1942,9 @@ class Tile extends Element {
 	}
 
 	switchInputs() {
+		this.clearInputs();
 		this.nextInputs.forEach(input => {
-			this.inputs.push(JSON.parse(JSON.stringify(input)));
+			this.addInput(this.inputs, input);
 		});
 		this.nextInputs = [];
 	}
@@ -1932,11 +1953,13 @@ class Tile extends Element {
 		this.inputs.forEach(input => {
 			switch (input.name) {
 				case 'Feu':
-					let token = Object.create(tokenTemplate['Fire']);
+					let json = tokenTemplate.Fire;
+					let token = new Token(getId(), json.attributes, this, json.name, json.Color, json.Border);
+					token.installMethods(json.methods);
+					// let token = Object.create(tokenTemplate['Fire']);
 					if (token) {
-						this.children.push(token);
+						this.addToken(token);
 					}
-					console.log('fire');
 					break;
 			}
 		});
@@ -1952,7 +1975,7 @@ class Tile extends Element {
 					deleteInput(this.outputs, output.name);
 					break;
 				case 'Feu':
-					this.addInput(this.nextInputs, output);
+					this.addInput(this.nextInputs, output, true);
 					giveInput(output, this.getNeighbours());
 					deleteInput(this.outputs, output.name);
 					break;
@@ -2063,27 +2086,26 @@ class Tile extends Element {
 }
 class Token extends Element {
 	constructor(id, attributes, parent, name, color, border) {
-		super(id, attributes);
+		super(id, attributes, name);
 		this.parent = parent;
-		this.name = name;
 		this.color = '#' + color;
 		this.borderColor = '#' + border;
 	}
 
 	tick() {
 		super.tick();
+
 		return this.outputs;
 	}
 
 }
 
-var _this = this;
+const nbColumns = 24;
 
-const nbColumns = 48;
 let gap = 5;
 let nbRows = 14;
 const tilesList = [];
-const boardConfig = { width: 0, height: 0, size: 0 };
+const boardConfig = { width: 0, height: 0, size: 0, speed: 30, timer: 0 };
 
 const tileDic = {};
 const tokenTemplate = {};
@@ -2095,6 +2117,8 @@ let canvas = null;
 let posX = 0;
 let posY = 0;
 let clickEvent = false;
+
+let demoToken = null;
 
 const iniObservation = () => {
 	canvas = document.querySelector('#mainCanvas');
@@ -2119,6 +2143,13 @@ const iniObservation = () => {
 		posY = e.offsetY;
 	};
 
+	$("#speedSlider").slider({
+		min: -60,
+		max: 0,
+		value: 0,
+		slide: changeSpeed,
+		change: changeSpeed });
+
 	getApi('systemChoiceData', result => {
 		system = result;
 		setTextNode('#titleSystem', system.title);
@@ -2127,19 +2158,6 @@ const iniObservation = () => {
 };
 
 const iniApp = () => {
-	// Create Token Template
-	for (let i = 0; i < system.tokens.length; i++) {
-		let json = system.tokens[i];
-		try {
-			let token = new Token(getId(), json.attributes, _this, json.name, json.Color, json.Border);
-			token.installMethods(json.methods);
-			tokenTemplate[token.name] = token;
-			console.log(token);
-		} catch (err) {
-			console.error(json.name, 'ERROR_CONSTRUCTION_METHOD');
-		}
-	}
-
 	// Create Effect Template
 	for (let i = 0; i < system.effects.length; i++) {
 		let json = system.effects[i];
@@ -2147,6 +2165,18 @@ const iniApp = () => {
 			let effect = json;
 			effectTemplate[effect.name] = effect;
 			console.log(effect);
+		} catch (err) {
+			console.error(json.name, 'ERROR_CONSTRUCTION_METHOD');
+		}
+	}
+
+	// Create Token Template
+	for (let i = 0; i < system.tokens.length; i++) {
+		let json = system.tokens[i];
+		try {
+			let token = json;
+			tokenTemplate[token.name] = token;
+			console.log(token);
 		} catch (err) {
 			console.error(json.name, 'ERROR_CONSTRUCTION_METHOD');
 		}
@@ -2178,18 +2208,29 @@ const iniApp = () => {
 	tick();
 };
 
+const changeSpeed = () => {
+	let speed = $("#speedSlider").slider("value");
+	boardConfig.speed = Math.abs(speed);
+	console.log(boardConfig.speed);
+};
+
 const tick = () => {
 	ctx.clearRect(0, 0, boardConfig.width, boardConfig.height);
 	for (let row = 0; row < nbRows; row++) {
 		for (let column = 0; column < nbColumns; column++) {
 			let tile = tilesList[row][column];
 
-			tile.tick(clickEvent); // To Dispatch to workers
+			tile.continuousTick(clickEvent);
+			if (boardConfig.timer <= 0) {
+				tile.tick(); // To Dispatch to workers
+			}
 		}
 	}
-
+	if (boardConfig.timer <= 0) {
+		boardConfig.timer = boardConfig.speed;
+	}
+	boardConfig.timer--;
 	clickEvent = false;
-	// setTimeout(tick, 30);
 	window.requestAnimationFrame(tick);
 };
 

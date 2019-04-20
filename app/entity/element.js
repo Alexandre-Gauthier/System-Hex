@@ -1,6 +1,8 @@
 class Element{
-	constructor(id,attributes){
+	constructor(id,attributes,name){
 		this.id = id;
+		this.name = name;
+
 		this.children = [];
 		this.attributes = {};
 		this.createAttributes(attributes);
@@ -23,15 +25,16 @@ class Element{
 	// ---------------------------------------------------------------------------------------------
 	addListenedInputs(inputs){
 		inputs.forEach(input => {
-			this.myListenedInputs.push(input);
-			this.listenedInputs .push(input);
+			this.addInput(this.myListenedInputs,input);
+			this.addInput(this.listenedInputs,input);
 		});
 	}
 
 	createAttributes(array){
 		if(array && array.length > 0){
 			array.forEach(attribute=>{
-				this.attributes[attribute.name] = attribute.value;
+				let newAttribute = JSON.parse(JSON.stringify(attribute));
+				this.attributes[newAttribute.name] = newAttribute.value;
 			});
 		}
 	}
@@ -42,11 +45,12 @@ class Element{
 			methods.forEach(method =>{
 				if(method.unresolved == 0){
 					try{
-						var f = new Function('obj', method.body);
+						let newMethod = JSON.parse(JSON.stringify(method));
+						var f = new Function('obj', newMethod.body);
 						this.methods.push(f);
-						this.addListenedInputs(method.listenedInputs);
+						this.addListenedInputs(newMethod.listenedInputs);
 					}catch(err){
-						console.error('METHOD',method.name,'HAS AN ERROR');
+						console.error('METHOD',newMethod.name,'HAS AN ERROR');
 					}
 				}
 			});
@@ -55,14 +59,17 @@ class Element{
 
 	// Ajoute l'input donnée (en json)
 	addInput(arr,input,limit=false){
-		if(!getInput(arr,input.name)){
-			arr.push(JSON.parse(JSON.stringify(input)));
+		if(limit){
+			if(this.listenedInputs.includes(input.name)){
+				if(!getInput(arr,input.name)){
+					arr.push(JSON.parse(JSON.stringify(input)));
+				}
+			}
+		}else{
+			if(!getInput(arr,input.name)){
+				arr.push(JSON.parse(JSON.stringify(input)));
+			}
 		}
-		// if(limit && this.listenedInputs.includes(input.name)){
-
-		// }else{
-
-		// }
 	}
 
 	addCoord(size,x,y){
@@ -88,9 +95,7 @@ class Element{
 	pushInputsDown(){
 		this.children.forEach(child => {
 			this.inputs.forEach(input=>{
-				if(child.listenedInputs.includes(input.name)){
-					child.addInput(child.inputs,input,true);
-				}
+				child.addInput(child.inputs,input,true);
 			});
 		});
 	}
@@ -98,6 +103,7 @@ class Element{
 	// Roule les enfants et récupère les outputs
 	runChildren(){
 		this.children.forEach(child => {
+			this.getChildListenedInput(child.listenedInputs);
 			let result = child.tick();
 			result.forEach(output=>{
 
@@ -106,13 +112,14 @@ class Element{
 		});
 	}
 
-	createToken(template){
-		let token = null;
-		if(!getToken(this.children,template.name)){
-			token = new Token(getId(),template.attributes,this,template.name,template.color,template.border);
-			token.installMethods(template.methods);
-		}
-		return token;
+	getChildListenedInput(inputs){
+		this.listenedInputs = [];
+		inputs.forEach(input=>{
+			this.addInput(this.listenedInputs,input);
+		});
+		this.myListenedInputs.forEach(input=>{
+			this.addInput(this.listenedInputs,input);
+		});
 	}
 
 	// ---------------------------------------------------------------------------------------------
@@ -137,7 +144,14 @@ class Element{
 	}
 
 	deleteToken(){
+
 		this.addInput(this.outputs,{name:'destroyChild',elem:this.id})
+	}
+
+	addToken(token){
+		if(!getToken(this.children,token.name)){
+			this.children.push(token);
+		}
 	}
 
 	broadcastEffect(name){

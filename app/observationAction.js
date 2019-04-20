@@ -1,8 +1,9 @@
-const nbColumns = 48;
+const nbColumns = 24;
+
 let gap = 5;
 let nbRows = 14;
 const tilesList = [];
-const boardConfig = {width:0,height:0,size:0};
+const boardConfig = {width:0,height:0,size:0,speed:30,timer:0};
 
 const tileDic = {};
 const tokenTemplate = {};
@@ -14,6 +15,8 @@ let canvas = null;
 let posX = 0;
 let posY = 0;
 let clickEvent = false;
+
+let demoToken = null;
 
 const iniObservation = () =>{
 	canvas = document.querySelector('#mainCanvas');
@@ -30,7 +33,6 @@ const iniObservation = () =>{
 	ctx.canvas.width  = container.offsetWidth;
 	ctx.canvas.height = container.offsetHeight;
 
-
 	canvas.onclick=(e)=>{
 		clickEvent = true;
 	}
@@ -38,6 +40,13 @@ const iniObservation = () =>{
 		posX = e.offsetX;
 		posY = e.offsetY;
 	}
+
+	$( "#speedSlider" ).slider({
+		min: -60,
+		max: 0,
+      	value: 0,
+		slide: changeSpeed,
+		change: changeSpeed});
 
 	getApi('systemChoiceData',(result)=>{
 		system = result;
@@ -49,19 +58,6 @@ const iniObservation = () =>{
 
 
 const iniApp = () =>{
-	// Create Token Template
-	for(let i = 0; i< system.tokens.length;i++){
-		let json = system.tokens[i];
-		try{
-			let token = new Token(getId(),json.attributes,this,json.name,json.Color,json.Border);
-			token.installMethods(json.methods);
-			tokenTemplate[token.name] = token;
-			console.log(token)
-		}catch(err){
-			console.error(json.name,'ERROR_CONSTRUCTION_METHOD');
-		}
-	}
-
 	// Create Effect Template
 	for(let i = 0; i< system.effects.length;i++){
 		let json = system.effects[i];
@@ -69,6 +65,18 @@ const iniApp = () =>{
 			let effect = json;
 			effectTemplate[effect.name] = effect;
 			console.log(effect)
+		}catch(err){
+			console.error(json.name,'ERROR_CONSTRUCTION_METHOD');
+		}
+	}
+
+	// Create Token Template
+	for(let i = 0; i< system.tokens.length;i++){
+		let json = system.tokens[i];
+		try{
+			let token = json;
+			tokenTemplate[token.name] = token;
+			console.log(token)
 		}catch(err){
 			console.error(json.name,'ERROR_CONSTRUCTION_METHOD');
 		}
@@ -96,10 +104,14 @@ const iniApp = () =>{
 		tilesList.push(tileRow);
 	}
 
-
 	tick();
 }
 
+const changeSpeed = () =>{
+	let speed = $( "#speedSlider").slider("value");
+	boardConfig.speed = Math.abs(speed);
+	console.log(boardConfig.speed);
+}
 
 const tick = () =>{
 	ctx.clearRect(0, 0, boardConfig.width, boardConfig.height);
@@ -107,14 +119,20 @@ const tick = () =>{
 		for(let column = 0; column < nbColumns;column++){
 			let tile = tilesList[row][column]
 
-			tile.tick(clickEvent); // To Dispatch to workers
+			tile.continuousTick(clickEvent);
+			if(boardConfig.timer <= 0){
+				tile.tick(); // To Dispatch to workers
+			}
 		}
 	}
-
+	if(boardConfig.timer <= 0){
+		boardConfig.timer = boardConfig.speed;
+	}
+	boardConfig.timer--;
 	clickEvent = false;
-	// setTimeout(tick, 30);
 	window.requestAnimationFrame(tick);
 }
+
 
 // ---------------------------------------------------------------------------------------------
 // GENERAL FUNCTIONS

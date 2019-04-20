@@ -799,3 +799,38 @@ padding: 2px 16px;
 	  font-size: 20px;
 	  text-align: center;
 }
+
+#speedSlider_container{
+	width: 30%;
+}
+
+#speedSlider_container h3{
+	margin: 0 auto;
+	text-align: center;
+	color: #f2e7d0;
+}
+
+#speedSlider{
+	width: 100%;
+}
+
+#speedSlider.ui-slider-horizontal {
+	background: #c4bfae;
+	border: none;
+	border-radius:5px;
+}
+
+#speedSlider .ui-slider-handle{
+	width: 12px;
+	height: 12px;
+	background: #ada895;
+	border: none;
+	border-radius:10px;
+	margin: 0px;
+	margin-left: -.6em;
+	top: 0px;
+}
+
+#speedSlider .ui-slider-handle:hover, #speedSlider:hover .ui-slider-handle{
+	background: #999482;
+}

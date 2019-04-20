@@ -1,6 +1,6 @@
 class Tile extends Element{
 	constructor(id,attributes,x,y,color='ede1c9',border='8e8a6b'){
-		super(id,attributes);
+		super(id,attributes,'tile');
 
 		this.stackColor = {ini:'#'+color,border:'#'+border,selected:'#436177'}
 		this.colorToken = '';
@@ -22,27 +22,34 @@ class Tile extends Element{
 		let randToken = Math.floor(Math.random() * (+max - +min)) + +min;
 		if (randToken >= 100-range){
 			try{
-				let token = Object.create(tokenTemplate.Arbre);
-				this.children.push(token)
+				let json = tokenTemplate.Arbre;
+				let token = new Token(getId(),json.attributes,this,json.name,json.Color,json.Border);
+				token.installMethods(json.methods);
+				this.addToken(token);
 			}catch(err){
 
 			}
 		}
 	}
 	setOnFire(){
-		this.addInput(this.nextInputs,effectTemplate.Feu);
+		this.addInput(this.nextInputs,effectTemplate.Feu,true);
 		clickEvent = false;
 	}
 	// ---------------------------------------------------------------------------------------------
 	// Tick
 	// ---------------------------------------------------------------------------------------------
-	tick(clickEvent){
-		this.mouseEvent(clickEvent)
+	tick(){
 		this.switchInputs();
 		this.iniInputs(); // À modifier pour une méthode anonyme
 		super.tick();
 		this.drawTile();
 		this.checkOutputs();
+		this.setColor();
+	}
+
+	continuousTick(clickEvent){
+		this.mouseEvent(clickEvent)
+		this.drawTile();
 		this.setColor();
 	}
 
@@ -57,7 +64,6 @@ class Tile extends Element{
 			this.selected = true;
 			if(clickEvent){
 				this.setOnFire();
-				this.getNeighbours();
 			}
 		}
 		else{
@@ -78,8 +84,9 @@ class Tile extends Element{
 	}
 
 	switchInputs(){
+		this.clearInputs();
 		this.nextInputs.forEach(input=>{
-			this.inputs.push(JSON.parse(JSON.stringify(input)));
+			this.addInput(this.inputs,input);
 		})
 		this.nextInputs = [];
 	}
@@ -88,11 +95,13 @@ class Tile extends Element{
 		this.inputs.forEach(input=>{
 			switch(input.name){
 				case 'Feu':
-					let token = Object.create(tokenTemplate['Fire']);
+					let json = tokenTemplate.Fire;
+					let token = new Token(getId(),json.attributes,this,json.name,json.Color,json.Border);
+					token.installMethods(json.methods);
+					// let token = Object.create(tokenTemplate['Fire']);
 					if(token){
-						this.children.push(token);
+						this.addToken(token)
 					}
-					console.log('fire')
 					break;
 			}
 		});
@@ -108,7 +117,7 @@ class Tile extends Element{
 					deleteInput(this.outputs,output.name);
 					break;
 				case 'Feu':
-					this.addInput(this.nextInputs,output);
+					this.addInput(this.nextInputs,output,true);
 					giveInput(output,this.getNeighbours());
 					deleteInput(this.outputs,output.name);
 					break;
