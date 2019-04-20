@@ -3,7 +3,7 @@ const nbColumns = 24;
 let gap = 5;
 let nbRows = 14;
 const tilesList = [];
-const boardConfig = {width:0,height:0,size:0,speed:30,timer:0};
+const boardConfig = {width:0,height:0,size:0,speed:0,timer:0};
 
 const tileDic = {};
 const tokenTemplate = {};
@@ -44,7 +44,7 @@ const iniObservation = () =>{
 	$( "#speedSlider" ).slider({
 		min: -60,
 		max: 0,
-      	value: 0,
+      	value: boardConfig.speed,
 		slide: changeSpeed,
 		change: changeSpeed});
 
