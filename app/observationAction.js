@@ -3,7 +3,7 @@ const nbColumns = 24;
 let gap = 5;
 let nbRows = 14;
 const tilesList = [];
-const boardConfig = {width:0,height:0,size:0,speed:0,timer:0};
+const boardConfig = {width:0,height:0,size:0,speed:0,timer:0,startingSpeed:0};
 
 const tileDic = {};
 const tokenTemplate = {};
@@ -44,9 +44,12 @@ const iniObservation = () =>{
 	$( "#speedSlider" ).slider({
 		min: -60,
 		max: 0,
-      	value: boardConfig.speed,
+      	value: boardConfig.startingSpeed,
 		slide: changeSpeed,
 		change: changeSpeed});
+
+		let speed = $( "#speedSlider").slider("value");
+		boardConfig.speed = Math.abs(speed);
 
 	getApi('systemChoiceData',(result)=>{
 		system = result;
@@ -88,7 +91,10 @@ const iniApp = () =>{
 		for(let column = 0;column<nbColumns;column++){
 			let tile = new Tile(getId(),system.tile.attributes,column,row,system.tile.Color,system.tile.Border);
 			tile.installMethods(system.tile.methods);
-			tile.testToken();
+			tile.myListenedInputs = [];
+			tile.listenedInputs = [];
+			// tile.testToken();
+			iniToken(tile);
 
 			let iniPosX = boardConfig.size, iniPosY = boardConfig.size;
 			let x = boardConfig.size*1.75;
@@ -107,6 +113,52 @@ const iniApp = () =>{
 	tick();
 }
 
+const iniTokens = () =>{
+	for(let i = 0;i<tilesList.length;i++){
+		let tile = tilesList[i];
+		iniToken(tile);
+	}
+}
+
+const iniToken = (tile) =>{
+	let min = 1;
+	let max = system.tokens.length*100;
+	let randToken = Math.floor(Math.random() * (+max - +min)) + +min;
+	let chooseToken = getRandomToken(randToken);
+	if(chooseToken){
+		let json = tokenTemplate[chooseToken];
+		let token = new Token(getId(),json.attributes,this,json.name,json.Color,json.Border);
+		token.installMethods(json.methods);
+		tile.addToken(token);
+	}
+}
+
+const getRandomToken = (randomNum) =>{
+	let total = 0;
+	let newTotal = 0;
+	for(let i = 0; i < system.tokens.length; i++){
+		let token = system.tokens[i];
+		let actRatio = token.iniRatio+((token.iniRatio/100)*getRatio(token));
+		newTotal += actRatio;
+		if(randomNum > total && randomNum <= newTotal){
+			return token.name;
+		}
+		total = newTotal;
+	}
+	return null;
+}
+
+const getRatio = (mainToken) =>{
+	let res = 0;
+	for(let i = 0; i < system.tokens.length; i++){
+		let token = system.tokens[i];
+		if(token != mainToken){
+			res += 100-token.iniRatio;
+		}
+	}
+	return res;
+}
+
 const changeSpeed = () =>{
 	let speed = $( "#speedSlider").slider("value");
 	boardConfig.speed = Math.abs(speed);
@@ -115,6 +167,29 @@ const changeSpeed = () =>{
 
 const tick = () =>{
 	ctx.clearRect(0, 0, boardConfig.width, boardConfig.height);
+	tilesSwitch();
+	tilesTick();
+	if(boardConfig.timer <= 0){
+		boardConfig.timer = boardConfig.speed;
+	}
+	boardConfig.timer--;
+	clickEvent = false;
+	window.requestAnimationFrame(tick);
+}
+
+const tilesSwitch = () =>{
+	for(let row = 0; row < nbRows;row++){
+		for(let column = 0; column < nbColumns;column++){
+			let tile = tilesList[row][column]
+
+			if(boardConfig.timer <= 0){
+				tile.switchInputs(); // To Dispatch to workers
+			}
+		}
+	}
+}
+
+const tilesTick = () =>{
 	for(let row = 0; row < nbRows;row++){
 		for(let column = 0; column < nbColumns;column++){
 			let tile = tilesList[row][column]
@@ -125,14 +200,7 @@ const tick = () =>{
 			}
 		}
 	}
-	if(boardConfig.timer <= 0){
-		boardConfig.timer = boardConfig.speed;
-	}
-	boardConfig.timer--;
-	clickEvent = false;
-	window.requestAnimationFrame(tick);
 }
-
 
 // ---------------------------------------------------------------------------------------------
 // GENERAL FUNCTIONS
@@ -191,4 +259,11 @@ const getTemplateToken = (name) =>{
 		}
 	}
 	return null;
+}
+
+const isInput = (name) =>{
+	if(effectTemplate[name] != null){
+		return true;
+	}
+	return false;
 }

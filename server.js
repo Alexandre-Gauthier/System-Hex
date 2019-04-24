@@ -220,6 +220,7 @@ app.post('/addToken', (req,res)=>{
                 "Color":"",
                 "Border":"",
                 "Img":"",
+                "iniRatio":"",
                 "listenedInputs":[],
                 "attributes":[],
                 "methods":[]};
@@ -269,6 +270,9 @@ app.post('/saveItem', (req,res)=>{
                     }
                     if(req.body.data.Border != 'undefined'){
                         item.Border = req.body.data.Border;
+                    }
+                    if(req.body.data.iniRatio != 'undefined'){
+                        item.iniRatio = req.body.data.iniRatio;
                     }
                     return true;
                 }else{
@@ -378,11 +382,11 @@ const insertSystem = (req,res) =>{
                     "title":req.body.name,
                     "board":{"Color":"",
                         "Attributes":[""],
-                        "Methods":[""]},
+                        "methods":[""]},
                     "tile":{"Color":"",
                         "Border":"",
                         "Attributes":[""],
-                        "Methods":[""]},
+                        "methods":[""]},
                     "tokens":[],
                     "effects":[]
                     };

@@ -62,10 +62,13 @@ const fillList = (id,array, onclick=null) =>{
 	while (parent.firstChild) {
 		parent.removeChild(parent.firstChild);
 	}
-	for(let i = 0; i < array.length;i++){
-		let item = array[i];
-		addElement(id,i,item,onclick);
+	if(array){
+		for(let i = 0; i < array.length;i++){
+			let item = array[i];
+			addElement(id,i,item,onclick);
+		}
 	}
+
 }
 
 const addElement = (id,index,item,onclick) =>{
@@ -172,6 +175,7 @@ const createToken = () =>{
                     "Color":"",
                     "Border":"",
 					"Img":"",
+					"iniRatio":"",
                 	"listenedInputs":[],
                     "attributes":[],
 					"methods":[]};
@@ -213,7 +217,7 @@ const showToken = (index) =>{
 		addAttributes('#listTokenAttributes',token.attributes,token);
 		addOpenEditor('#listTokenMethods',token.methods,token.name);
 		changeBtn('#tokenView',token.Color,token.Border);
-		addOnClickSaveItem('#tokenBtnSave',token,'token','#titleToken','#listTokens','#colorBGToken','#colorBorderToken');
+		addOnClickSaveItem('#tokenBtnSave',token,'token','#titleToken','#listTokens','#colorBGToken','#colorBorderToken','#ratioSlider');
 		addOnClickdeleteElement('#tokenBtnDelete',token,'token','deleteToken',system.tokens,'#listTokens');
 
 		$('#colorBGToken').colpick({
@@ -234,6 +238,11 @@ const showToken = (index) =>{
 		document.querySelector('#addTokenMethod').onclick = () =>{
 			window.location.href = "/methodEditor.html?token="+token.name+"&method=new";
 		}
+
+		$( "#ratioSlider" ).slider({
+			min: 0,
+			max: 100,
+			value: token.iniRatio});
 	}else{
 		formToken.style.display = 'none';
 	}
@@ -316,13 +325,13 @@ const addOnClickdeleteElement = (id,item,type,action,list,container) =>{
 	}
 }
 
-const addOnClickSaveItem = (id,item,type,nameId,container,colorId=null,borderId=null) =>{
+const addOnClickSaveItem = (id,item,type,nameId,container,colorId=null,borderId=null,sliderId = null) =>{
 	document.querySelector(id).onclick = () =>{
-		saveItem(item,type,nameId,container,colorId,borderId);
+		saveItem(item,type,nameId,container,colorId,borderId,sliderId);
 	}
 }
 
-const saveItem = (item,type,nameId=null,container=null,colorId=null,borderId=null) =>{
+const saveItem = (item,type,nameId=null,container=null,colorId=null,borderId=null,sliderId = null) =>{
 	let data = {};
 	if(nameId){
 		data.name = document.querySelector(nameId).value;
@@ -335,6 +344,9 @@ const saveItem = (item,type,nameId=null,container=null,colorId=null,borderId=nul
 	if(borderId){
 		data.Border = document.querySelector(borderId).value;
 	}
+	if(sliderId){
+		data.iniRatio = $( sliderId ).slider("value");
+	}
 	let oldTitle = item.name;
 	updateAPI(oldTitle,type,'saveItem',data,(res)=>{
 		if(nameId){
@@ -345,6 +357,9 @@ const saveItem = (item,type,nameId=null,container=null,colorId=null,borderId=nul
 		}
 		if(borderId){
 			item.Border = document.querySelector(borderId).value;
+		}
+		if(sliderId){
+			item.iniRatio = $( sliderId ).slider("value");
 		}
 		if(container){
 			let node = findNode(document.querySelector(container),oldTitle);

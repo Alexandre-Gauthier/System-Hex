@@ -48,6 +48,7 @@ const iniEditor = () =>{
 
 		addAttributes('#listTokenAttributes',token.attributes,token,'token');
 
+		console.log(token)
 		fillList('#listTokenMethods',token.methods);
 
 
@@ -370,6 +371,16 @@ const getInputs = () =>{
 	let arr = [];
 	results.forEach(input=>{
 		arr.push([input.name]);
+	});
+
+	return arr;
+}
+
+const getTokens = () =>{
+	let results = system.tokens;
+	let arr = [];
+	results.forEach(token=>{
+		arr.push([token.name]);
 	});
 
 	return arr;
@@ -747,7 +758,6 @@ class Decrement extends Piece{
 
 		this.node.style.display = "flex";
 		let results = getVar().concat(getAttributes())
-		console.log(results)
 		if(results.length > 0){
 			this.addText("Diminuer ","h3",this.node);
 			this.addSelect("select,variable",results);
@@ -767,7 +777,6 @@ class ChangeVariable extends Piece{
 
 		this.node.style.display = "flex";
 		let results = getVar().concat(getAttributes());
-		console.log(results)
 		if(results.length > 0){
 			this.addSelect("select,variable",results);
 			this.addText(" est égal à ","h3",this.node);
@@ -799,6 +808,20 @@ class BroadcastEffect extends Piece{
 		this.addText("Distribuer ","h3",this.node);
 		this.addAnchor("broadcastEffect");
 		this.addSelect("select,effect",getInputs());
+		this.addAnchor("endGroup");
+	}
+}
+
+class CreateToken extends Piece{
+	constructor(parent){
+		super(parent);
+		this.node.setAttribute("tags","block,line,action");
+		this.node.style.backgroundColor = "#b4db85";
+
+		this.node.style.display = "flex";
+		this.addText("Créer ","h3",this.node);
+		this.addAnchor("createToken");
+		this.addSelect("select,effect",getTokens());
 		this.addAnchor("endGroup");
 	}
 }
@@ -955,6 +978,9 @@ function outputNode(node)
 			methodBody += "obj.broadcastEffect(";
 		}
 
+		if(hasTag('createToken',node)){
+			methodBody += "obj.createToken(";
+		}
 
 		if(hasTag('capsule',node)){
 			if(nodeIsEmpty(node,1)){
@@ -964,7 +990,6 @@ function outputNode(node)
 		if(hasTag('dependent',node)){
 			let prev = getPrev(node)
 			if(prev == null || hasTag("hint",prev)){
-				console.log('danger')
 				unresolvedInput++;
 				node.style.border = "1px solid red";
 			}else{

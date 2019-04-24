@@ -162,6 +162,13 @@ a > .inner_form:hover h1{
 }
 
 /************************************************* Dashboard ***********************************************************/
+.separator{
+	margin: 20px 10px;
+	width: auto;
+	height: 1px;
+	background-color: #8e7f6b;
+}
+
 .header_bar{
 	height: 70px;
 	width:100%;
@@ -309,7 +316,6 @@ a > .inner_form:hover h1{
 .center_form .form_line{
 	margin-left:20px;
 	font-size: 20px;
-	display: flex;
 	color: #8e8a6b;
 }
 
@@ -810,27 +816,33 @@ padding: 2px 16px;
 	color: #f2e7d0;
 }
 
-#speedSlider{
+#speedSlider,#ratioSlider{
 	width: 100%;
 }
 
-#speedSlider.ui-slider-horizontal {
+.ui-slider-horizontal{
+	height:12px;
+}
+
+#speedSlider.ui-slider-horizontal, #ratioSlider.ui-slider-horizontal {
 	background: #c4bfae;
 	border: none;
 	border-radius:5px;
 }
 
-#speedSlider .ui-slider-handle{
+#speedSlider .ui-slider-handle,  #ratioSlider .ui-slider-handle{
 	width: 12px;
 	height: 12px;
 	background: #ada895;
 	border: none;
 	border-radius:10px;
 	margin: 0px;
-	margin-left: -.6em;
+	margin-left: -6px;
 	top: 0px;
 }
 
-#speedSlider .ui-slider-handle:hover, #speedSlider:hover .ui-slider-handle{
+#speedSlider .ui-slider-handle:hover, #speedSlider:hover .ui-slider-handle,
+#ratioSlider .ui-slider-handle:hover,#ratioSlider:hover .ui-slider-handle
+{
 	background: #999482;
 }

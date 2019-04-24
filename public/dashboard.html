@@ -6,8 +6,10 @@
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title>System-Hex - Creation</title>
 	<link href="https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c:700" rel="stylesheet">
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 	<link rel="stylesheet" href="css/global.css">
-	<script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script src="js/bundle.js"></script>
 
 	<link rel="stylesheet" type="text/css" href="../css/colpick.css">
@@ -63,8 +65,10 @@
 					<input type="text" class="titleInput" id="titleToken" name="titleToken" placeholder="Titre" maxlength="20">
 				</div>
 				<h3>Configuration</h3>
-					<div class="form_line"><p>Couleur : </p><input type="text" class="lineInput" id="colorBGToken" name="colorBGToken" placeholder="ffffff" maxlength="6"></div>
-					<div class="form_line"><p>Bordure : </p><input type="text" class="lineInput" id="colorBorderToken" name="colorBorderToken" placeholder="ffffff" maxlength="6"></div>
+					<div class="form_line display_flex"><p>Couleur : </p><input type="text" class="lineInput" id="colorBGToken" name="colorBGToken" placeholder="ffffff" maxlength="6"></div>
+					<div class="form_line display_flex"><p>Bordure : </p><input type="text" class="lineInput" id="colorBorderToken" name="colorBorderToken" placeholder="ffffff" maxlength="6"></div>
+					<div class="separator"></div>
+					<div class="form_line"><p>Initialisation : </p><div id="ratioSlider"></div></div>
 				<!-- <div class="form_line">
 					<p>Image : </p>
 					<input type="file" name="file" id="file" class="inputfile" accept="image/png" />

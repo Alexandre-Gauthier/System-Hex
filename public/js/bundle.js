@@ -241,9 +241,11 @@ const fillList = (id, array, onclick = null) => {
 	while (parent.firstChild) {
 		parent.removeChild(parent.firstChild);
 	}
-	for (let i = 0; i < array.length; i++) {
-		let item = array[i];
-		addElement(id, i, item, onclick);
+	if (array) {
+		for (let i = 0; i < array.length; i++) {
+			let item = array[i];
+			addElement(id, i, item, onclick);
+		}
 	}
 };
 
@@ -350,6 +352,7 @@ const createToken = () => {
 				"Color": "",
 				"Border": "",
 				"Img": "",
+				"iniRatio": "",
 				"listenedInputs": [],
 				"attributes": [],
 				"methods": [] };
@@ -391,7 +394,7 @@ const showToken = index => {
 		addAttributes('#listTokenAttributes', token.attributes, token);
 		addOpenEditor('#listTokenMethods', token.methods, token.name);
 		changeBtn('#tokenView', token.Color, token.Border);
-		addOnClickSaveItem('#tokenBtnSave', token, 'token', '#titleToken', '#listTokens', '#colorBGToken', '#colorBorderToken');
+		addOnClickSaveItem('#tokenBtnSave', token, 'token', '#titleToken', '#listTokens', '#colorBGToken', '#colorBorderToken', '#ratioSlider');
 		addOnClickdeleteElement('#tokenBtnDelete', token, 'token', 'deleteToken', system.tokens, '#listTokens');
 
 		$('#colorBGToken').colpick({
@@ -412,6 +415,11 @@ const showToken = index => {
 		document.querySelector('#addTokenMethod').onclick = () => {
 			window.location.href = "/methodEditor.html?token=" + token.name + "&method=new";
 		};
+
+		$("#ratioSlider").slider({
+			min: 0,
+			max: 100,
+			value: token.iniRatio });
 	} else {
 		formToken.style.display = 'none';
 	}
@@ -493,13 +501,13 @@ const addOnClickdeleteElement = (id, item, type, action, list, container) => {
 	};
 };
 
-const addOnClickSaveItem = (id, item, type, nameId, container, colorId = null, borderId = null) => {
+const addOnClickSaveItem = (id, item, type, nameId, container, colorId = null, borderId = null, sliderId = null) => {
 	document.querySelector(id).onclick = () => {
-		saveItem(item, type, nameId, container, colorId, borderId);
+		saveItem(item, type, nameId, container, colorId, borderId, sliderId);
 	};
 };
 
-const saveItem = (item, type, nameId = null, container = null, colorId = null, borderId = null) => {
+const saveItem = (item, type, nameId = null, container = null, colorId = null, borderId = null, sliderId = null) => {
 	let data = {};
 	if (nameId) {
 		data.name = document.querySelector(nameId).value;
@@ -512,6 +520,9 @@ const saveItem = (item, type, nameId = null, container = null, colorId = null, b
 	if (borderId) {
 		data.Border = document.querySelector(borderId).value;
 	}
+	if (sliderId) {
+		data.iniRatio = $(sliderId).slider("value");
+	}
 	let oldTitle = item.name;
 	updateAPI(oldTitle, type, 'saveItem', data, res => {
 		if (nameId) {
@@ -522,6 +533,9 @@ const saveItem = (item, type, nameId = null, container = null, colorId = null, b
 		}
 		if (borderId) {
 			item.Border = document.querySelector(borderId).value;
+		}
+		if (sliderId) {
+			item.iniRatio = $(sliderId).slider("value");
 		}
 		if (container) {
 			let node = findNode(document.querySelector(container), oldTitle);
@@ -762,6 +776,7 @@ const iniEditor = () => {
 
 		addAttributes('#listTokenAttributes', token.attributes, token, 'token');
 
+		console.log(token);
 		fillList('#listTokenMethods', token.methods);
 
 		if (getUrlVars()["method"] == 'new') {
@@ -1081,6 +1096,16 @@ const getInputs = () => {
 	let arr = [];
 	results.forEach(input => {
 		arr.push([input.name]);
+	});
+
+	return arr;
+};
+
+const getTokens = () => {
+	let results = system.tokens;
+	let arr = [];
+	results.forEach(token => {
+		arr.push([token.name]);
 	});
 
 	return arr;
@@ -1457,7 +1482,6 @@ class Decrement extends Piece {
 
 		this.node.style.display = "flex";
 		let results = getVar().concat(getAttributes());
-		console.log(results);
 		if (results.length > 0) {
 			this.addText("Diminuer ", "h3", this.node);
 			this.addSelect("select,variable", results);
@@ -1476,7 +1500,6 @@ class ChangeVariable extends Piece {
 
 		this.node.style.display = "flex";
 		let results = getVar().concat(getAttributes());
-		console.log(results);
 		if (results.length > 0) {
 			this.addSelect("select,variable", results);
 			this.addText(" est égal à ", "h3", this.node);
@@ -1508,6 +1531,20 @@ class BroadcastEffect extends Piece {
 		this.addText("Distribuer ", "h3", this.node);
 		this.addAnchor("broadcastEffect");
 		this.addSelect("select,effect", getInputs());
+		this.addAnchor("endGroup");
+	}
+}
+
+class CreateToken extends Piece {
+	constructor(parent) {
+		super(parent);
+		this.node.setAttribute("tags", "block,line,action");
+		this.node.style.backgroundColor = "#b4db85";
+
+		this.node.style.display = "flex";
+		this.addText("Créer ", "h3", this.node);
+		this.addAnchor("createToken");
+		this.addSelect("select,effect", getTokens());
 		this.addAnchor("endGroup");
 	}
 }
@@ -1657,6 +1694,10 @@ function outputNode(node) {
 			methodBody += "obj.broadcastEffect(";
 		}
 
+		if (hasTag('createToken', node)) {
+			methodBody += "obj.createToken(";
+		}
+
 		if (hasTag('capsule', node)) {
 			if (nodeIsEmpty(node, 1)) {
 				unresolvedInput++;
@@ -1665,7 +1706,6 @@ function outputNode(node) {
 		if (hasTag('dependent', node)) {
 			let prev = getPrev(node);
 			if (prev == null || hasTag("hint", prev)) {
-				console.log('danger');
 				unresolvedInput++;
 				node.style.border = "1px solid red";
 			} else {
@@ -1847,6 +1887,17 @@ class Element {
 		this.addInput(this.outputs, { name: 'destroyChild', elem: this.id });
 	}
 
+	createToken(name) {
+		if (!getToken(this.children, name)) {
+			let json = tokenTemplate[name];
+			let token = new Token(getId(), json.attributes, this, json.name, json.Color, json.Border);
+			token.installMethods(json.methods);
+			if (token) {
+				this.addToken(token);
+			}
+		}
+	}
+
 	addToken(token) {
 		if (!getToken(this.children, token.name)) {
 			this.children.push(token);
@@ -1877,7 +1928,7 @@ class Tile extends Element {
 	// Méthodes Test
 	// ---------------------------------------------------------------------------------------------
 	testToken() {
-		let range = 50;
+		let range = 58;
 
 		let min = 1;
 		let max = 100;
@@ -1899,8 +1950,6 @@ class Tile extends Element {
 	// Tick
 	// ---------------------------------------------------------------------------------------------
 	tick() {
-		this.switchInputs();
-		this.iniInputs(); // À modifier pour une méthode anonyme
 		super.tick();
 		this.drawTile();
 		this.checkOutputs();
@@ -1949,36 +1998,17 @@ class Tile extends Element {
 		this.nextInputs = [];
 	}
 
-	iniInputs() {
-		this.inputs.forEach(input => {
-			switch (input.name) {
-				case 'Feu':
-					let json = tokenTemplate.Fire;
-					let token = new Token(getId(), json.attributes, this, json.name, json.Color, json.Border);
-					token.installMethods(json.methods);
-					// let token = Object.create(tokenTemplate['Fire']);
-					if (token) {
-						this.addToken(token);
-					}
-					break;
-			}
-		});
-	}
-
 	checkOutputs() {
 		this.outputs.forEach(output => {
-			switch (output.name) {
-				case 'destroyChild':
-					deleteToken(this.children, output.elem);
-					this.colorToken = '';
-					this.borderToken = '';
-					deleteInput(this.outputs, output.name);
-					break;
-				case 'Feu':
-					this.addInput(this.nextInputs, output, true);
-					giveInput(output, this.getNeighbours());
-					deleteInput(this.outputs, output.name);
-					break;
+			if (output.name == 'destroyChild') {
+				deleteToken(this.children, output.elem);
+				this.colorToken = '';
+				this.borderToken = '';
+				deleteInput(this.outputs, output.name);
+			} else if (isInput(output.name)) {
+				this.addInput(this.nextInputs, output, true);
+				giveInput(output, this.getNeighbours());
+				deleteInput(this.outputs, output.name);
 			}
 		});
 	}
@@ -2100,12 +2130,14 @@ class Token extends Element {
 
 }
 
+var _this = this;
+
 const nbColumns = 24;
 
 let gap = 5;
 let nbRows = 14;
 const tilesList = [];
-const boardConfig = { width: 0, height: 0, size: 0, speed: 30, timer: 0 };
+const boardConfig = { width: 0, height: 0, size: 0, speed: 0, timer: 0, startingSpeed: 0 };
 
 const tileDic = {};
 const tokenTemplate = {};
@@ -2146,9 +2178,12 @@ const iniObservation = () => {
 	$("#speedSlider").slider({
 		min: -60,
 		max: 0,
-		value: 0,
+		value: boardConfig.startingSpeed,
 		slide: changeSpeed,
 		change: changeSpeed });
+
+	let speed = $("#speedSlider").slider("value");
+	boardConfig.speed = Math.abs(speed);
 
 	getApi('systemChoiceData', result => {
 		system = result;
@@ -2188,7 +2223,10 @@ const iniApp = () => {
 		for (let column = 0; column < nbColumns; column++) {
 			let tile = new Tile(getId(), system.tile.attributes, column, row, system.tile.Color, system.tile.Border);
 			tile.installMethods(system.tile.methods);
-			tile.testToken();
+			tile.myListenedInputs = [];
+			tile.listenedInputs = [];
+			// tile.testToken();
+			iniToken(tile);
 
 			let iniPosX = boardConfig.size,
 			    iniPosY = boardConfig.size;
@@ -2208,6 +2246,52 @@ const iniApp = () => {
 	tick();
 };
 
+const iniTokens = () => {
+	for (let i = 0; i < tilesList.length; i++) {
+		let tile = tilesList[i];
+		iniToken(tile);
+	}
+};
+
+const iniToken = tile => {
+	let min = 1;
+	let max = system.tokens.length * 100;
+	let randToken = Math.floor(Math.random() * (+max - +min)) + +min;
+	let chooseToken = getRandomToken(randToken);
+	if (chooseToken) {
+		let json = tokenTemplate[chooseToken];
+		let token = new Token(getId(), json.attributes, _this, json.name, json.Color, json.Border);
+		token.installMethods(json.methods);
+		tile.addToken(token);
+	}
+};
+
+const getRandomToken = randomNum => {
+	let total = 0;
+	let newTotal = 0;
+	for (let i = 0; i < system.tokens.length; i++) {
+		let token = system.tokens[i];
+		let actRatio = token.iniRatio + token.iniRatio / 100 * getRatio(token);
+		newTotal += actRatio;
+		if (randomNum > total && randomNum <= newTotal) {
+			return token.name;
+		}
+		total = newTotal;
+	}
+	return null;
+};
+
+const getRatio = mainToken => {
+	let res = 0;
+	for (let i = 0; i < system.tokens.length; i++) {
+		let token = system.tokens[i];
+		if (token != mainToken) {
+			res += 100 - token.iniRatio;
+		}
+	}
+	return res;
+};
+
 const changeSpeed = () => {
 	let speed = $("#speedSlider").slider("value");
 	boardConfig.speed = Math.abs(speed);
@@ -2216,6 +2300,29 @@ const changeSpeed = () => {
 
 const tick = () => {
 	ctx.clearRect(0, 0, boardConfig.width, boardConfig.height);
+	tilesSwitch();
+	tilesTick();
+	if (boardConfig.timer <= 0) {
+		boardConfig.timer = boardConfig.speed;
+	}
+	boardConfig.timer--;
+	clickEvent = false;
+	window.requestAnimationFrame(tick);
+};
+
+const tilesSwitch = () => {
+	for (let row = 0; row < nbRows; row++) {
+		for (let column = 0; column < nbColumns; column++) {
+			let tile = tilesList[row][column];
+
+			if (boardConfig.timer <= 0) {
+				tile.switchInputs(); // To Dispatch to workers
+			}
+		}
+	}
+};
+
+const tilesTick = () => {
 	for (let row = 0; row < nbRows; row++) {
 		for (let column = 0; column < nbColumns; column++) {
 			let tile = tilesList[row][column];
@@ -2226,12 +2333,6 @@ const tick = () => {
 			}
 		}
 	}
-	if (boardConfig.timer <= 0) {
-		boardConfig.timer = boardConfig.speed;
-	}
-	boardConfig.timer--;
-	clickEvent = false;
-	window.requestAnimationFrame(tick);
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -2291,4 +2392,11 @@ const getTemplateToken = name => {
 		}
 	}
 	return null;
+};
+
+const isInput = name => {
+	if (effectTemplate[name] != null) {
+		return true;
+	}
+	return false;
 };

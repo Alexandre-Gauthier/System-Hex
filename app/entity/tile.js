@@ -15,7 +15,7 @@ class Tile extends Element{
 	// Méthodes Test
 	// ---------------------------------------------------------------------------------------------
 	testToken(){
-		let range = 50;
+		let range = 58;
 
 		let min = 1;
 		let max = 100;
@@ -39,8 +39,6 @@ class Tile extends Element{
 	// Tick
 	// ---------------------------------------------------------------------------------------------
 	tick(){
-		this.switchInputs();
-		this.iniInputs(); // À modifier pour une méthode anonyme
 		super.tick();
 		this.drawTile();
 		this.checkOutputs();
@@ -91,36 +89,17 @@ class Tile extends Element{
 		this.nextInputs = [];
 	}
 
-	iniInputs(){
-		this.inputs.forEach(input=>{
-			switch(input.name){
-				case 'Feu':
-					let json = tokenTemplate.Fire;
-					let token = new Token(getId(),json.attributes,this,json.name,json.Color,json.Border);
-					token.installMethods(json.methods);
-					// let token = Object.create(tokenTemplate['Fire']);
-					if(token){
-						this.addToken(token)
-					}
-					break;
-			}
-		});
-	}
-
 	checkOutputs(){
 		this.outputs.forEach(output=>{
-			switch(output.name){
-				case 'destroyChild':
-					deleteToken(this.children,output.elem);
-					this.colorToken = '';
-					this.borderToken = '';
-					deleteInput(this.outputs,output.name);
-					break;
-				case 'Feu':
-					this.addInput(this.nextInputs,output,true);
-					giveInput(output,this.getNeighbours());
-					deleteInput(this.outputs,output.name);
-					break;
+			if(output.name == 'destroyChild'){
+				deleteToken(this.children,output.elem);
+				this.colorToken = '';
+				this.borderToken = '';
+				deleteInput(this.outputs,output.name);
+			}else if (isInput(output.name)){
+				this.addInput(this.nextInputs,output,true);
+				giveInput(output,this.getNeighbours());
+				deleteInput(this.outputs,output.name);
 			}
 		});
 	}

@@ -148,6 +148,18 @@ class Element{
 		this.addInput(this.outputs,{name:'destroyChild',elem:this.id})
 	}
 
+	createToken(name){
+		if(!getToken(this.children,name)){
+			let json = tokenTemplate[name];
+			let token = new Token(getId(),json.attributes,this,json.name,json.Color,json.Border);
+			token.installMethods(json.methods);
+			if(token){
+				this.addToken(token)
+			}
+		}
+
+	}
+
 	addToken(token){
 		if(!getToken(this.children,token.name)){
 			this.children.push(token);
