@@ -1,7 +1,8 @@
 class Element{
-	constructor(id,attributes,name){
+	constructor(id,attributes,name,tile){
 		this.id = id;
 		this.name = name;
+		this.tile = tile;
 
 		this.children = [];
 		this.attributes = {};
@@ -25,8 +26,8 @@ class Element{
 	// ---------------------------------------------------------------------------------------------
 	addListenedInputs(inputs){
 		inputs.forEach(input => {
-			this.addInput(this.myListenedInputs,input);
-			this.addInput(this.listenedInputs,input);
+			this.myListenedInputs.push(input);
+			this.listenedInputs.push(input);
 		});
 	}
 
@@ -34,7 +35,7 @@ class Element{
 		if(array && array.length > 0){
 			array.forEach(attribute=>{
 				let newAttribute = JSON.parse(JSON.stringify(attribute));
-				this.attributes[newAttribute.name] = newAttribute.value;
+				this.attributes[newAttribute.name] = Number(newAttribute.value);
 			});
 		}
 	}
@@ -46,7 +47,7 @@ class Element{
 				if(method.unresolved == 0){
 					try{
 						let newMethod = JSON.parse(JSON.stringify(method));
-						var f = new Function('obj', newMethod.body);
+						var f = new Function('obj','tile', newMethod.body);
 						this.methods.push(f);
 						this.addListenedInputs(newMethod.listenedInputs);
 					}catch(err){
@@ -84,6 +85,7 @@ class Element{
 	tick(){
 		this.pushInputsDown();
 		this.runChildren();
+		this.getListenedInput();
 		this.runMyMethods();
 		this.clearInputs();
 	}
@@ -102,23 +104,27 @@ class Element{
 
 	// Roule les enfants et récupère les outputs
 	runChildren(){
+		if(this.children.length>0){
+			this.listenedInputs = [];
+		}
 		this.children.forEach(child => {
-			this.getChildListenedInput(child.listenedInputs);
 			let result = child.tick();
 			result.forEach(output=>{
-
 				this.addInput(this.outputs,output);
 			});
 		});
 	}
 
-	getChildListenedInput(inputs){
+	getListenedInput(){
 		this.listenedInputs = [];
-		inputs.forEach(input=>{
-			this.addInput(this.listenedInputs,input);
+		this.children.forEach(child => {
+			child.listenedInputs.forEach(input=>{
+				this.listenedInputs.push(input);
+			});
 		});
+
 		this.myListenedInputs.forEach(input=>{
-			this.addInput(this.listenedInputs,input);
+			this.listenedInputs.push(input);
 		});
 	}
 
@@ -128,6 +134,7 @@ class Element{
 	runMyMethods(){
 		for(let i = 0; i<this.methods.length;i++){
 			this.methods[i](this);
+
 		}
 	}
 
@@ -143,21 +150,33 @@ class Element{
 		return getInput(this.inputs,name);
 	}
 
-	deleteToken(){
+	getTileAttribute(name){
+		let tileDic = getTile(this.tile);
+		return tileDic.attributes[name];
+	}
 
+	deleteToken(){
 		this.addInput(this.outputs,{name:'destroyChild',elem:this.id})
 	}
 
 	createToken(name){
 		if(!getToken(this.children,name)){
 			let json = tokenTemplate[name];
-			let token = new Token(getId(),json.attributes,this,json.name,json.Color,json.Border);
+			let token = new Token(getId(),json.attributes,this,this.tile,json.name,json.Color,json.Border);
 			token.installMethods(json.methods);
 			if(token){
 				this.addToken(token)
 			}
 		}
+	}
 
+	createEffect(name){
+		if(!getInput(this.inputs,name)){
+			let json = effectTemplate[name];
+			if(json){
+				this.addInput(this.inputs,json)
+			}
+		}
 	}
 
 	addToken(token){
@@ -169,6 +188,10 @@ class Element{
 	broadcastEffect(name){
 		let input = getInput(this.inputs,name);
 		if(input){
+			this.addInput(this.outputs,input);
+		}else{
+			this.createEffect(name);
+			let input = getInput(this.inputs,name);
 			this.addInput(this.outputs,input);
 		}
 	}

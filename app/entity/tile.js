@@ -1,6 +1,6 @@
 class Tile extends Element{
 	constructor(id,attributes,x,y,color='ede1c9',border='8e8a6b'){
-		super(id,attributes,'tile');
+		super(id,attributes,'tile',null);
 
 		this.stackColor = {ini:'#'+color,border:'#'+border,selected:'#436177'}
 		this.colorToken = '';
@@ -9,28 +9,13 @@ class Tile extends Element{
 		this.selected = false;
 		this.hexX = x;
 		this.hexY = y;
+		this.tileID = x+'-'+y
+		this.tile = this.tileID;
 	}
 
 	// ---------------------------------------------------------------------------------------------
 	// Méthodes Test
 	// ---------------------------------------------------------------------------------------------
-	testToken(){
-		let range = 58;
-
-		let min = 1;
-		let max = 100;
-		let randToken = Math.floor(Math.random() * (+max - +min)) + +min;
-		if (randToken >= 100-range){
-			try{
-				let json = tokenTemplate.Arbre;
-				let token = new Token(getId(),json.attributes,this,json.name,json.Color,json.Border);
-				token.installMethods(json.methods);
-				this.addToken(token);
-			}catch(err){
-
-			}
-		}
-	}
 	setOnFire(){
 		this.addInput(this.nextInputs,effectTemplate.Feu,true);
 		clickEvent = false;

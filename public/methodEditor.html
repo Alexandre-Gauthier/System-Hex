@@ -63,6 +63,7 @@
 			<button tags="line" onclick="createPiece(NewVariable)" >Créer Variable</button>
 			<button tags="line" onclick="createPiece(ChangeVariable)" >Affecter une Variable</button>
 			<button tags="valeur,condition" onclick="createPiece(GetLocaleVar)" >Variable</button>
+			<button tags="valeur,condition" onclick="createPiece(GetTileAtt)" >Attribut de Tuile</button>
 			<h5>Valeur</h5>
 			<button tags="valeur" onclick="createPiece(InputNumber)" >Entrer un nombre</button>
 			<button tags="valeur" onclick="createPiece(InputString)" >Entrer un nom</button>
@@ -73,8 +74,12 @@
 			<button tags="line" onclick="createPiece(Line)" >Code</button>
 			<h5>Action</h5>
 			<button tags="action,line" onclick="createPiece(CreateToken)" >Créer un Enfant</button>
+			<button tags="action,line" onclick="createPiece(CreateEffect)" >Ajouter un Effet</button>
 			<button tags="action,line" onclick="createPiece(DeleteToken)" >Supprimer le Jeton</button>
 			<button tags="action,line" onclick="createPiece(BroadcastEffect)" >Distribuer un Effet</button>
+			<h5>Dev</h5>
+			<button tags="action,line" onclick="createPiece(ConsoleOut)" >Console Log</button>
+			<button tags="valeur" onclick="createPiece(InputDev)" >DevString</button>
 
 		</div>
 

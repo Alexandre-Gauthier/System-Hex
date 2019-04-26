@@ -127,7 +127,7 @@ const inputScript = () =>{
 	});
 
 	inputs = document.querySelectorAll('.titleInput');
-	let titleLimit = /^[a-zA-Z0-9éèêà_]*$/;
+	let titleLimit = /^[a-zA-Z0-9_]*$/;
 
 	[].forEach.call(inputs, function(input) {
 		setInputFilter(input, function(value) {

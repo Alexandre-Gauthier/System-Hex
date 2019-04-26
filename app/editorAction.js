@@ -190,7 +190,7 @@ const showButton = () =>{
 					display = "block";
 				}
 			}else{
-				if(tag=="main" || tag=="block" || tag=="line" || tag=="action"){
+				if(tag=="main" || tag=="block" || tag=="line"){
 					display = "block";
 				}
 			}
@@ -391,6 +391,16 @@ const getAttributes = () =>{
 	let arr = [];
 	results.forEach(attribute=>{
 		arr.push([attribute.name,"obj.attributes['"+attribute.name+"']"]);
+	});
+
+	return arr;
+}
+
+const getTileAttributes = () =>{
+	let results = system.tile.attributes;
+	let arr = [];
+	results.forEach(attribute=>{
+		arr.push([attribute.name,"obj.getTileAttribute('"+attribute.name+"')"]);
 	});
 
 	return arr;
@@ -600,6 +610,20 @@ class GetLocaleVar extends Piece{
 	}
 }
 
+class GetTileAtt extends Piece{
+	constructor(parent){
+		super(parent);
+		this.node.setAttribute("tags","valeur,group");
+		this.node.style.backgroundColor = "#bbdd6e"
+		this.node.style.display = "flex";
+
+		let results = getTileAttributes();
+		if(results.length > 0){
+			this.addSelect("select,tileAtt",results);
+		}
+	}
+}
+
 class And extends Piece{
 	constructor(parent){
 		super(parent);
@@ -677,7 +701,7 @@ class Line extends Piece{
 		this.node.setAttribute("tags","line");
 		this.node.style.backgroundColor = "#bed8d3";
 
-		this.addCapsule("Faire","variable,valeur,math,group");
+		this.addCapsule("Faire","variable,valeur,math,group,action");
 		this.addAnchor("endLine");
 	}
 }
@@ -712,7 +736,18 @@ class InputString extends Piece{
 		this.node.style.backgroundColor = "#d7e094";
 
 		this.node.style.display = "flex";
-		this.addInput("Mot","input,string",/^[a-zA-Z0-9]*$/);
+		this.addInput("Mot","input,string",/^[a-zA-Z0-9.]*$/);
+	}
+}
+
+class InputDev extends Piece{
+	constructor(parent){
+		super(parent);
+		this.node.setAttribute("tags","valeur,math");
+		this.node.style.backgroundColor = "#d7e094";
+
+		this.node.style.display = "flex";
+		this.addInput("Mot","input",/^[a-zA-Z0-9.]*$/);
 	}
 }
 
@@ -731,6 +766,21 @@ class NewVariable extends Piece{
 		this.addAnchor("endLine");
 	}
 }
+
+class ConsoleOut extends Piece{
+	constructor(parent){
+		super(parent);
+		this.node.setAttribute("tags","valeur,math");
+		this.node.style.backgroundColor = "#d7e094";
+
+		this.node.style.display = "flex";
+		this.addAnchor("Console");
+		this.addCapsule("valeur","valeur");
+		this.addAnchor("endGroup");
+		this.addAnchor("endLine");
+	}
+}
+
 class Increment extends Piece{
 	constructor(parent){
 		super(parent);
@@ -795,6 +845,7 @@ class DeleteToken extends Piece{
 
 		this.addText("Supprimer le Jeton","h3",this.node);
 		this.addAnchor("deleteToken");
+		this.addAnchor("endLine");
 	}
 }
 
@@ -809,6 +860,7 @@ class BroadcastEffect extends Piece{
 		this.addAnchor("broadcastEffect");
 		this.addSelect("select,effect",getInputs());
 		this.addAnchor("endGroup");
+		this.addAnchor("endLine");
 	}
 }
 
@@ -819,10 +871,26 @@ class CreateToken extends Piece{
 		this.node.style.backgroundColor = "#b4db85";
 
 		this.node.style.display = "flex";
-		this.addText("Créer ","h3",this.node);
+		this.addText("Créer le Jeton ","h3",this.node);
 		this.addAnchor("createToken");
 		this.addSelect("select,effect",getTokens());
 		this.addAnchor("endGroup");
+		this.addAnchor("endLine");
+	}
+}
+
+class CreateEffect extends Piece{
+	constructor(parent){
+		super(parent);
+		this.node.setAttribute("tags","block,line,action");
+		this.node.style.backgroundColor = "#b4db85";
+
+		this.node.style.display = "flex";
+		this.addText("Ajouter l'effet ","h3",this.node);
+		this.addAnchor("createEffect");
+		this.addSelect("select,effect",getInputs());
+		this.addAnchor("endGroup");
+		this.addAnchor("endLine");
 	}
 }
 
@@ -888,6 +956,9 @@ function outputNode(node)
 			methodBody += "obj.getInput(";
 		}
 
+		if(hasTag('Console',node)){
+			methodBody += "console.log(";
+		}
 		if(hasTag('if',node)){
 			methodBody += "if";
 		}
@@ -949,6 +1020,10 @@ function outputNode(node)
 			let txt = node.value;
 			method.listenedInputs.push(txt);
 		}
+		if(hasTag('tileAtt',node)){
+			let txt = node.options[node.selectedIndex].text;
+			method.listenedInputs.push(txt);
+		}
 
 		if(hasTag('input',node)){
 			let txt = node.value;
@@ -980,6 +1055,9 @@ function outputNode(node)
 
 		if(hasTag('createToken',node)){
 			methodBody += "obj.createToken(";
+		}
+		if(hasTag('createEffect',node)){
+			methodBody += "obj.createEffect(";
 		}
 
 		if(hasTag('capsule',node)){

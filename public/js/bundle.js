@@ -155,7 +155,7 @@ const inputScript = () => {
 	});
 
 	inputs = document.querySelectorAll('.titleInput');
-	let titleLimit = /^[a-zA-Z0-9éèêà_]*$/;
+	let titleLimit = /^[a-zA-Z0-9_]*$/;
 
 	[].forEach.call(inputs, function (input) {
 		setInputFilter(input, function (value) {
@@ -319,7 +319,7 @@ const deleteAttribute = (attribute, node, element, type) => {
 
 const saveAttribute = (attribute, node, element, type) => {
 	let title = document.querySelector('#titleAttribute').value;
-	let value = document.querySelector('#valueAttribute').value;
+	let value = Number(document.querySelector('#valueAttribute').value);
 	let oldTitle = attribute.name;
 	let newAttribute = { name: title, value: value };
 
@@ -334,7 +334,7 @@ const saveAttribute = (attribute, node, element, type) => {
 
 const createAttribute = (id, element, type) => {
 	let title = document.querySelector('#titleAttribute').value;
-	let value = document.querySelector('#valueAttribute').value;
+	let value = Number(document.querySelector('#valueAttribute').value);
 	let attribute = { name: title, value: value };
 
 	updateAPI(element.name, type, 'addAttribute', { attribute: attribute }, res => {
@@ -451,8 +451,8 @@ const showEffect = index => {
 
 		fillInput('#titleEffect', effect.name);
 		addAttributes('#listEffectAttributes', effect.attributes, effect, 'effect');
-		addOnClickSaveItem('#effectBtnSave', effect, 'effects', '#titleEffect', '#listEffects');
-		addOnClickdeleteElement('#effectBtnDelete', effect, 'effects', 'deleteEffect', system.effects, '#listEffects');
+		addOnClickSaveItem('#effectBtnSave', effect, 'effect', '#titleEffect', '#listEffects');
+		addOnClickdeleteElement('#effectBtnDelete', effect, 'effect', 'deleteEffect', system.effects, '#listEffects');
 	} else {
 		formEffect.style.display = 'none';
 	}
@@ -719,6 +719,14 @@ function toDOM(obj) {
 		console.log(options);
 		addSelectOptions(node, options);
 	}
+
+	if (obj.tagName == "select" && hasTag('tileAtt', node)) {
+		clearSelectOptions(node);
+		let options = getTileAttributes();
+		console.log(options);
+		addSelectOptions(node, options);
+	}
+
 	if (obj.value) {
 		node.value = obj.value;
 		node.defaultValue = obj.value;
@@ -916,7 +924,7 @@ const showButton = () => {
 					display = "block";
 				}
 			} else {
-				if (tag == "main" || tag == "block" || tag == "line" || tag == "action") {
+				if (tag == "main" || tag == "block" || tag == "line") {
 					display = "block";
 				}
 			}
@@ -1116,6 +1124,16 @@ const getAttributes = () => {
 	let arr = [];
 	results.forEach(attribute => {
 		arr.push([attribute.name, "obj.attributes['" + attribute.name + "']"]);
+	});
+
+	return arr;
+};
+
+const getTileAttributes = () => {
+	let results = system.tile.attributes;
+	let arr = [];
+	results.forEach(attribute => {
+		arr.push([attribute.name, "obj.getTileAttribute('" + attribute.name + "')"]);
 	});
 
 	return arr;
@@ -1325,6 +1343,20 @@ class GetLocaleVar extends Piece {
 	}
 }
 
+class GetTileAtt extends Piece {
+	constructor(parent) {
+		super(parent);
+		this.node.setAttribute("tags", "valeur,group");
+		this.node.style.backgroundColor = "#bbdd6e";
+		this.node.style.display = "flex";
+
+		let results = getTileAttributes();
+		if (results.length > 0) {
+			this.addSelect("select,tileAtt", results);
+		}
+	}
+}
+
 class And extends Piece {
 	constructor(parent) {
 		super(parent);
@@ -1402,7 +1434,7 @@ class Line extends Piece {
 		this.node.setAttribute("tags", "line");
 		this.node.style.backgroundColor = "#bed8d3";
 
-		this.addCapsule("Faire", "variable,valeur,math,group");
+		this.addCapsule("Faire", "variable,valeur,math,group,action");
 		this.addAnchor("endLine");
 	}
 }
@@ -1437,7 +1469,18 @@ class InputString extends Piece {
 		this.node.style.backgroundColor = "#d7e094";
 
 		this.node.style.display = "flex";
-		this.addInput("Mot", "input,string", /^[a-zA-Z0-9]*$/);
+		this.addInput("Mot", "input,string", /^[a-zA-Z0-9.]*$/);
+	}
+}
+
+class InputDev extends Piece {
+	constructor(parent) {
+		super(parent);
+		this.node.setAttribute("tags", "valeur,math");
+		this.node.style.backgroundColor = "#d7e094";
+
+		this.node.style.display = "flex";
+		this.addInput("Mot", "input", /^[a-zA-Z0-9.]*$/);
 	}
 }
 
@@ -1456,6 +1499,21 @@ class NewVariable extends Piece {
 		this.addAnchor("endLine");
 	}
 }
+
+class ConsoleOut extends Piece {
+	constructor(parent) {
+		super(parent);
+		this.node.setAttribute("tags", "valeur,math");
+		this.node.style.backgroundColor = "#d7e094";
+
+		this.node.style.display = "flex";
+		this.addAnchor("Console");
+		this.addCapsule("valeur", "valeur");
+		this.addAnchor("endGroup");
+		this.addAnchor("endLine");
+	}
+}
+
 class Increment extends Piece {
 	constructor(parent) {
 		super(parent);
@@ -1518,6 +1576,7 @@ class DeleteToken extends Piece {
 
 		this.addText("Supprimer le Jeton", "h3", this.node);
 		this.addAnchor("deleteToken");
+		this.addAnchor("endLine");
 	}
 }
 
@@ -1532,6 +1591,7 @@ class BroadcastEffect extends Piece {
 		this.addAnchor("broadcastEffect");
 		this.addSelect("select,effect", getInputs());
 		this.addAnchor("endGroup");
+		this.addAnchor("endLine");
 	}
 }
 
@@ -1542,10 +1602,26 @@ class CreateToken extends Piece {
 		this.node.style.backgroundColor = "#b4db85";
 
 		this.node.style.display = "flex";
-		this.addText("Créer ", "h3", this.node);
+		this.addText("Créer le Jeton ", "h3", this.node);
 		this.addAnchor("createToken");
 		this.addSelect("select,effect", getTokens());
 		this.addAnchor("endGroup");
+		this.addAnchor("endLine");
+	}
+}
+
+class CreateEffect extends Piece {
+	constructor(parent) {
+		super(parent);
+		this.node.setAttribute("tags", "block,line,action");
+		this.node.style.backgroundColor = "#b4db85";
+
+		this.node.style.display = "flex";
+		this.addText("Ajouter l'effet ", "h3", this.node);
+		this.addAnchor("createEffect");
+		this.addSelect("select,effect", getInputs());
+		this.addAnchor("endGroup");
+		this.addAnchor("endLine");
 	}
 }
 
@@ -1604,6 +1680,9 @@ function outputNode(node) {
 			methodBody += "obj.getInput(";
 		}
 
+		if (hasTag('Console', node)) {
+			methodBody += "console.log(";
+		}
 		if (hasTag('if', node)) {
 			methodBody += "if";
 		}
@@ -1665,6 +1744,10 @@ function outputNode(node) {
 			let txt = node.value;
 			method.listenedInputs.push(txt);
 		}
+		if (hasTag('tileAtt', node)) {
+			let txt = node.options[node.selectedIndex].text;
+			method.listenedInputs.push(txt);
+		}
 
 		if (hasTag('input', node)) {
 			let txt = node.value;
@@ -1696,6 +1779,9 @@ function outputNode(node) {
 
 		if (hasTag('createToken', node)) {
 			methodBody += "obj.createToken(";
+		}
+		if (hasTag('createEffect', node)) {
+			methodBody += "obj.createEffect(";
 		}
 
 		if (hasTag('capsule', node)) {
@@ -1738,9 +1824,10 @@ function setInputFilter(textbox, inputFilter) {
 	});
 }
 class Element {
-	constructor(id, attributes, name) {
+	constructor(id, attributes, name, tile) {
 		this.id = id;
 		this.name = name;
+		this.tile = tile;
 
 		this.children = [];
 		this.attributes = {};
@@ -1764,8 +1851,8 @@ class Element {
 	// ---------------------------------------------------------------------------------------------
 	addListenedInputs(inputs) {
 		inputs.forEach(input => {
-			this.addInput(this.myListenedInputs, input);
-			this.addInput(this.listenedInputs, input);
+			this.myListenedInputs.push(input);
+			this.listenedInputs.push(input);
 		});
 	}
 
@@ -1773,7 +1860,7 @@ class Element {
 		if (array && array.length > 0) {
 			array.forEach(attribute => {
 				let newAttribute = JSON.parse(JSON.stringify(attribute));
-				this.attributes[newAttribute.name] = newAttribute.value;
+				this.attributes[newAttribute.name] = Number(newAttribute.value);
 			});
 		}
 	}
@@ -1785,7 +1872,7 @@ class Element {
 				if (method.unresolved == 0) {
 					try {
 						let newMethod = JSON.parse(JSON.stringify(method));
-						var f = new Function('obj', newMethod.body);
+						var f = new Function('obj', 'tile', newMethod.body);
 						this.methods.push(f);
 						this.addListenedInputs(newMethod.listenedInputs);
 					} catch (err) {
@@ -1823,6 +1910,7 @@ class Element {
 	tick() {
 		this.pushInputsDown();
 		this.runChildren();
+		this.getListenedInput();
 		this.runMyMethods();
 		this.clearInputs();
 	}
@@ -1841,23 +1929,27 @@ class Element {
 
 	// Roule les enfants et récupère les outputs
 	runChildren() {
+		if (this.children.length > 0) {
+			this.listenedInputs = [];
+		}
 		this.children.forEach(child => {
-			this.getChildListenedInput(child.listenedInputs);
 			let result = child.tick();
 			result.forEach(output => {
-
 				this.addInput(this.outputs, output);
 			});
 		});
 	}
 
-	getChildListenedInput(inputs) {
+	getListenedInput() {
 		this.listenedInputs = [];
-		inputs.forEach(input => {
-			this.addInput(this.listenedInputs, input);
+		this.children.forEach(child => {
+			child.listenedInputs.forEach(input => {
+				this.listenedInputs.push(input);
+			});
 		});
+
 		this.myListenedInputs.forEach(input => {
-			this.addInput(this.listenedInputs, input);
+			this.listenedInputs.push(input);
 		});
 	}
 
@@ -1882,18 +1974,31 @@ class Element {
 		return getInput(this.inputs, name);
 	}
 
-	deleteToken() {
+	getTileAttribute(name) {
+		let tileDic = getTile(this.tile);
+		return tileDic.attributes[name];
+	}
 
+	deleteToken() {
 		this.addInput(this.outputs, { name: 'destroyChild', elem: this.id });
 	}
 
 	createToken(name) {
 		if (!getToken(this.children, name)) {
 			let json = tokenTemplate[name];
-			let token = new Token(getId(), json.attributes, this, json.name, json.Color, json.Border);
+			let token = new Token(getId(), json.attributes, this, this.tile, json.name, json.Color, json.Border);
 			token.installMethods(json.methods);
 			if (token) {
 				this.addToken(token);
+			}
+		}
+	}
+
+	createEffect(name) {
+		if (!getInput(this.inputs, name)) {
+			let json = effectTemplate[name];
+			if (json) {
+				this.addInput(this.inputs, json);
 			}
 		}
 	}
@@ -1908,12 +2013,16 @@ class Element {
 		let input = getInput(this.inputs, name);
 		if (input) {
 			this.addInput(this.outputs, input);
+		} else {
+			this.createEffect(name);
+			let input = getInput(this.inputs, name);
+			this.addInput(this.outputs, input);
 		}
 	}
 }
 class Tile extends Element {
 	constructor(id, attributes, x, y, color = 'ede1c9', border = '8e8a6b') {
-		super(id, attributes, 'tile');
+		super(id, attributes, 'tile', null);
 
 		this.stackColor = { ini: '#' + color, border: '#' + border, selected: '#436177' };
 		this.colorToken = '';
@@ -1922,26 +2031,13 @@ class Tile extends Element {
 		this.selected = false;
 		this.hexX = x;
 		this.hexY = y;
+		this.tileID = x + '-' + y;
+		this.tile = this.tileID;
 	}
 
 	// ---------------------------------------------------------------------------------------------
 	// Méthodes Test
 	// ---------------------------------------------------------------------------------------------
-	testToken() {
-		let range = 58;
-
-		let min = 1;
-		let max = 100;
-		let randToken = Math.floor(Math.random() * (+max - +min)) + +min;
-		if (randToken >= 100 - range) {
-			try {
-				let json = tokenTemplate.Arbre;
-				let token = new Token(getId(), json.attributes, this, json.name, json.Color, json.Border);
-				token.installMethods(json.methods);
-				this.addToken(token);
-			} catch (err) {}
-		}
-	}
 	setOnFire() {
 		this.addInput(this.nextInputs, effectTemplate.Feu, true);
 		clickEvent = false;
@@ -2115,8 +2211,8 @@ class Tile extends Element {
 	}
 }
 class Token extends Element {
-	constructor(id, attributes, parent, name, color, border) {
-		super(id, attributes, name);
+	constructor(id, attributes, parent, tile, name, color, border) {
+		super(id, attributes, name, tile);
 		this.parent = parent;
 		this.color = '#' + color;
 		this.borderColor = '#' + border;
@@ -2124,20 +2220,17 @@ class Token extends Element {
 
 	tick() {
 		super.tick();
-
 		return this.outputs;
 	}
 
 }
-
-var _this = this;
 
 const nbColumns = 24;
 
 let gap = 5;
 let nbRows = 14;
 const tilesList = [];
-const boardConfig = { width: 0, height: 0, size: 0, speed: 0, timer: 0, startingSpeed: 0 };
+const boardConfig = { width: 0, height: 0, size: 0, speed: 0, timer: 0, startingSpeed: -20 };
 
 const tileDic = {};
 const tokenTemplate = {};
@@ -2225,7 +2318,6 @@ const iniApp = () => {
 			tile.installMethods(system.tile.methods);
 			tile.myListenedInputs = [];
 			tile.listenedInputs = [];
-			// tile.testToken();
 			iniToken(tile);
 
 			let iniPosX = boardConfig.size,
@@ -2260,7 +2352,7 @@ const iniToken = tile => {
 	let chooseToken = getRandomToken(randToken);
 	if (chooseToken) {
 		let json = tokenTemplate[chooseToken];
-		let token = new Token(getId(), json.attributes, _this, json.name, json.Color, json.Border);
+		let token = new Token(getId(), json.attributes, tile, tile.tileID, json.name, json.Color, json.Border);
 		token.installMethods(json.methods);
 		tile.addToken(token);
 	}
@@ -2331,6 +2423,9 @@ const tilesTick = () => {
 			if (boardConfig.timer <= 0) {
 				tile.tick(); // To Dispatch to workers
 			}
+			// if(tile.children.length>0){
+			// 	console.log(tile)
+			// }
 		}
 	}
 };
@@ -2379,9 +2474,13 @@ const getId = () => {
 
 const giveInput = (input, arr) => {
 	arr.forEach(tileId => {
-		let tile = tileDic[tileId];
+		let tile = getTile(tileId);
 		tile.addInput(tile.nextInputs, input, true);
 	});
+};
+
+const getTile = tileID => {
+	return tileDic[tileID];
 };
 
 const getTemplateToken = name => {

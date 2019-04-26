@@ -3,7 +3,7 @@ const nbColumns = 24;
 let gap = 5;
 let nbRows = 14;
 const tilesList = [];
-const boardConfig = {width:0,height:0,size:0,speed:0,timer:0,startingSpeed:0};
+const boardConfig = {width:0,height:0,size:0,speed:0,timer:0,startingSpeed:-20};
 
 const tileDic = {};
 const tokenTemplate = {};
@@ -93,7 +93,6 @@ const iniApp = () =>{
 			tile.installMethods(system.tile.methods);
 			tile.myListenedInputs = [];
 			tile.listenedInputs = [];
-			// tile.testToken();
 			iniToken(tile);
 
 			let iniPosX = boardConfig.size, iniPosY = boardConfig.size;
@@ -127,7 +126,7 @@ const iniToken = (tile) =>{
 	let chooseToken = getRandomToken(randToken);
 	if(chooseToken){
 		let json = tokenTemplate[chooseToken];
-		let token = new Token(getId(),json.attributes,this,json.name,json.Color,json.Border);
+		let token = new Token(getId(),json.attributes,tile,tile.tileID,json.name,json.Color,json.Border);
 		token.installMethods(json.methods);
 		tile.addToken(token);
 	}
@@ -198,6 +197,9 @@ const tilesTick = () =>{
 			if(boardConfig.timer <= 0){
 				tile.tick(); // To Dispatch to workers
 			}
+			// if(tile.children.length>0){
+			// 	console.log(tile)
+			// }
 		}
 	}
 }
@@ -246,9 +248,13 @@ const getId = () =>{
 
 const giveInput = (input,arr) =>{
 	arr.forEach(tileId => {
-		let tile = tileDic[tileId]
+		let tile = getTile(tileId);
 		tile.addInput(tile.nextInputs,input,true)
 	});
+}
+
+const getTile = (tileID) =>{
+	return tileDic[tileID]
 }
 
 const getTemplateToken = (name) =>{

@@ -83,6 +83,14 @@ function toJSON(node) {
 			console.log(options)
 			addSelectOptions(node,options);
 		}
+
+		if(obj.tagName == "select" && hasTag('tileAtt',node)){
+			clearSelectOptions(node);
+			let options = getTileAttributes();
+			console.log(options)
+			addSelectOptions(node,options);
+		}
+
 		if(obj.value){
 			node.value = obj.value;
 			node.defaultValue = obj.value;

@@ -142,7 +142,7 @@ const deleteAttribute = (attribute,node,element,type) =>{
 
 const saveAttribute = (attribute,node,element,type) =>{
 	let title = document.querySelector('#titleAttribute').value;
-	let value = document.querySelector('#valueAttribute').value
+	let value = Number(document.querySelector('#valueAttribute').value);
 	let oldTitle = attribute.name;
 	let newAttribute = {name:title,value:value};
 
@@ -157,7 +157,7 @@ const saveAttribute = (attribute,node,element,type) =>{
 
 const createAttribute = (id,element,type) =>{
 	let title = document.querySelector('#titleAttribute').value;
-	let value = document.querySelector('#valueAttribute').value
+	let value = Number(document.querySelector('#valueAttribute').value);
 	let attribute = {name:title,value:value}
 
 	updateAPI(element.name,type,'addAttribute',{attribute:attribute},(res)=>{
@@ -274,8 +274,8 @@ const showEffect = (index) =>{
 
 		fillInput('#titleEffect',effect.name);
 		addAttributes('#listEffectAttributes',effect.attributes,effect,'effect');
-		addOnClickSaveItem('#effectBtnSave',effect,'effects','#titleEffect','#listEffects');
-		addOnClickdeleteElement('#effectBtnDelete',effect,'effects','deleteEffect',system.effects,'#listEffects');
+		addOnClickSaveItem('#effectBtnSave',effect,'effect','#titleEffect','#listEffects');
+		addOnClickdeleteElement('#effectBtnDelete',effect,'effect','deleteEffect',system.effects,'#listEffects');
 	}else{
 		formEffect.style.display = 'none';
 	}
