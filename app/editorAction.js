@@ -583,6 +583,20 @@ class CheckInput extends Piece{
 	}
 }
 
+class CheckToken extends Piece{
+	constructor(parent){
+		super(parent);
+		this.node.setAttribute("tags","condition,group");
+		this.node.style.backgroundColor = "#bbdd6e"
+
+		this.node.style.display = "flex";
+		this.addText("L'élément possède ","h3",this.node);
+		this.addAnchor("checkToken");
+		this.addSelect("select,effect",getTokens());
+		this.addAnchor("endGroup");
+	}
+}
+
 class GetInput extends Piece{
 	constructor(parent){
 		super(parent);
@@ -952,6 +966,11 @@ function outputNode(node)
 		if(hasTag('checkInput',node)){
 			methodBody += "obj.inputExist(";
 		}
+
+		if(hasTag('checkToken',node)){
+			methodBody += "obj.tokenExist(";
+		}
+
 		if(hasTag('getInput',node)){
 			methodBody += "obj.getInput(";
 		}
@@ -1057,7 +1076,7 @@ function outputNode(node)
 			methodBody += "obj.createToken(";
 		}
 		if(hasTag('createEffect',node)){
-			methodBody += "obj.createEffect(";
+			methodBody += "obj.addOutputEffect(";
 		}
 
 		if(hasTag('capsule',node)){

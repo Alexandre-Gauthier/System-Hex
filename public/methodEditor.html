@@ -32,8 +32,7 @@
 		</div>
 	</div>
 	<div class="outer_form display_evenly">
-		<div class="inner_form full_height display_flex half_width">
-			<div class="center_form full_height half_width">
+			<div class="center_form full_height ">
 				<h2 id="tokenTitle"></h2>
 				<h5 class="first">Attributs</h5>
 					<div id="listTokenAttributes" class="list sublist" ></div>
@@ -42,7 +41,6 @@
 				<h5>Variables</h5>
 					<div id="listTokenVariables" class="list sublist" ></div>
 			</div>
-		</div>
 		<div id="listPieces" class="center_form full_height">
 			<h2>Pièces</h2>
 			<h5 class="first">Bloc</h5>
@@ -51,6 +49,7 @@
 			<button tags="block" onclick="createPiece(ElseIf)" >Sinon Si</button>
 			<h5>Condition</h5>
 			<button tags="condition" onclick="createPiece(CheckInput)" >Est affecté par</button>
+			<button tags="condition" onclick="createPiece(CheckToken)" >Possède</button>
 			<button tags="condition" onclick="createPiece(Comparaison)" >Comparaison</button>
 			<button tags="condition" onclick="createPiece(And)" >Et</button>
 			<button tags="condition" onclick="createPiece(Or)" >Ou</button>

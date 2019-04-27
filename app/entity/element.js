@@ -26,9 +26,15 @@ class Element{
 	// ---------------------------------------------------------------------------------------------
 	addListenedInputs(inputs){
 		inputs.forEach(input => {
-			this.myListenedInputs.push(input);
-			this.listenedInputs.push(input);
+			this.addListenedInput(this.myListenedInputs,input);
+			this.addListenedInput(this.listenedInputs,input);
 		});
+	}
+
+	addListenedInput(arr,input){
+		if(!arr.includes(input)){
+			arr.push(input);
+		}
 	}
 
 	createAttributes(array){
@@ -45,8 +51,8 @@ class Element{
 		if(methods){
 			methods.forEach(method =>{
 				if(method.unresolved == 0){
+					let newMethod = JSON.parse(JSON.stringify(method));
 					try{
-						let newMethod = JSON.parse(JSON.stringify(method));
 						var f = new Function('obj','tile', newMethod.body);
 						this.methods.push(f);
 						this.addListenedInputs(newMethod.listenedInputs);
@@ -104,9 +110,7 @@ class Element{
 
 	// Roule les enfants et récupère les outputs
 	runChildren(){
-		if(this.children.length>0){
-			this.listenedInputs = [];
-		}
+		this.outputs = [];
 		this.children.forEach(child => {
 			let result = child.tick();
 			result.forEach(output=>{
@@ -119,12 +123,12 @@ class Element{
 		this.listenedInputs = [];
 		this.children.forEach(child => {
 			child.listenedInputs.forEach(input=>{
-				this.listenedInputs.push(input);
+				this.addListenedInput(this.listenedInputs,input);
 			});
 		});
 
 		this.myListenedInputs.forEach(input=>{
-			this.listenedInputs.push(input);
+			this.addListenedInput(this.listenedInputs,input);
 		});
 	}
 
@@ -134,7 +138,6 @@ class Element{
 	runMyMethods(){
 		for(let i = 0; i<this.methods.length;i++){
 			this.methods[i](this);
-
 		}
 	}
 
@@ -144,6 +147,10 @@ class Element{
 
 	inputExist(name){
 		return getInput(this.inputs,name) ? true: false;
+	}
+
+	tokenExist(name){
+		return getToken(this.children,name) ? true: false;
 	}
 
 	getInput(name){
@@ -185,14 +192,24 @@ class Element{
 		}
 	}
 
+	addOutputEffect(name){
+		let input = getInput(this.inputs,name);
+
+		if(!input){
+			this.createEffect(name);
+			input = getInput(this.inputs,name);
+		}
+		input['target'] = 'self';
+		this.addInput(this.outputs,input);
+	}
+
 	broadcastEffect(name){
 		let input = getInput(this.inputs,name);
-		if(input){
-			this.addInput(this.outputs,input);
-		}else{
+		if(!input){
 			this.createEffect(name);
-			let input = getInput(this.inputs,name);
-			this.addInput(this.outputs,input);
+			input = getInput(this.inputs,name);
 		}
+		input['target'] = 'broad';
+		this.addInput(this.outputs,input);
 	}
 }

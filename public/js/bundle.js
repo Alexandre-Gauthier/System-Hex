@@ -1316,6 +1316,20 @@ class CheckInput extends Piece {
 	}
 }
 
+class CheckToken extends Piece {
+	constructor(parent) {
+		super(parent);
+		this.node.setAttribute("tags", "condition,group");
+		this.node.style.backgroundColor = "#bbdd6e";
+
+		this.node.style.display = "flex";
+		this.addText("L'élément possède ", "h3", this.node);
+		this.addAnchor("checkToken");
+		this.addSelect("select,effect", getTokens());
+		this.addAnchor("endGroup");
+	}
+}
+
 class GetInput extends Piece {
 	constructor(parent) {
 		super(parent);
@@ -1676,6 +1690,11 @@ function outputNode(node) {
 		if (hasTag('checkInput', node)) {
 			methodBody += "obj.inputExist(";
 		}
+
+		if (hasTag('checkToken', node)) {
+			methodBody += "obj.tokenExist(";
+		}
+
 		if (hasTag('getInput', node)) {
 			methodBody += "obj.getInput(";
 		}
@@ -1781,7 +1800,7 @@ function outputNode(node) {
 			methodBody += "obj.createToken(";
 		}
 		if (hasTag('createEffect', node)) {
-			methodBody += "obj.createEffect(";
+			methodBody += "obj.addOutputEffect(";
 		}
 
 		if (hasTag('capsule', node)) {
@@ -1851,9 +1870,15 @@ class Element {
 	// ---------------------------------------------------------------------------------------------
 	addListenedInputs(inputs) {
 		inputs.forEach(input => {
-			this.myListenedInputs.push(input);
-			this.listenedInputs.push(input);
+			this.addListenedInput(this.myListenedInputs, input);
+			this.addListenedInput(this.listenedInputs, input);
 		});
+	}
+
+	addListenedInput(arr, input) {
+		if (!arr.includes(input)) {
+			arr.push(input);
+		}
 	}
 
 	createAttributes(array) {
@@ -1870,8 +1895,8 @@ class Element {
 		if (methods) {
 			methods.forEach(method => {
 				if (method.unresolved == 0) {
+					let newMethod = JSON.parse(JSON.stringify(method));
 					try {
-						let newMethod = JSON.parse(JSON.stringify(method));
 						var f = new Function('obj', 'tile', newMethod.body);
 						this.methods.push(f);
 						this.addListenedInputs(newMethod.listenedInputs);
@@ -1929,9 +1954,7 @@ class Element {
 
 	// Roule les enfants et récupère les outputs
 	runChildren() {
-		if (this.children.length > 0) {
-			this.listenedInputs = [];
-		}
+		this.outputs = [];
 		this.children.forEach(child => {
 			let result = child.tick();
 			result.forEach(output => {
@@ -1944,12 +1967,12 @@ class Element {
 		this.listenedInputs = [];
 		this.children.forEach(child => {
 			child.listenedInputs.forEach(input => {
-				this.listenedInputs.push(input);
+				this.addListenedInput(this.listenedInputs, input);
 			});
 		});
 
 		this.myListenedInputs.forEach(input => {
-			this.listenedInputs.push(input);
+			this.addListenedInput(this.listenedInputs, input);
 		});
 	}
 
@@ -1968,6 +1991,10 @@ class Element {
 
 	inputExist(name) {
 		return getInput(this.inputs, name) ? true : false;
+	}
+
+	tokenExist(name) {
+		return getToken(this.children, name) ? true : false;
 	}
 
 	getInput(name) {
@@ -2009,23 +2036,33 @@ class Element {
 		}
 	}
 
+	addOutputEffect(name) {
+		let input = getInput(this.inputs, name);
+
+		if (!input) {
+			this.createEffect(name);
+			input = getInput(this.inputs, name);
+		}
+		input['target'] = 'self';
+		this.addInput(this.outputs, input);
+	}
+
 	broadcastEffect(name) {
 		let input = getInput(this.inputs, name);
-		if (input) {
-			this.addInput(this.outputs, input);
-		} else {
+		if (!input) {
 			this.createEffect(name);
-			let input = getInput(this.inputs, name);
-			this.addInput(this.outputs, input);
+			input = getInput(this.inputs, name);
 		}
+		input['target'] = 'broad';
+		this.addInput(this.outputs, input);
 	}
 }
 class Tile extends Element {
 	constructor(id, attributes, x, y, color = 'ede1c9', border = '8e8a6b') {
 		super(id, attributes, 'tile', null);
 
-		this.stackColor = { ini: '#' + color, border: '#' + border, selected: '#436177' };
-		this.colorToken = '';
+		this.stackColor = { ini: '#' + color, border: '#' + border, selected: '#76d2fc' //#436177
+		};this.colorToken = '';
 		this.borderToken = '';
 
 		this.selected = false;
@@ -2068,10 +2105,23 @@ class Tile extends Element {
 		if (posX > x - this.size + mod && posX < x + this.size - mod && posY > y - this.size + mod && posY < y + this.size - mod) {
 			this.selected = true;
 			if (clickEvent) {
-				this.setOnFire();
+				this.showTile();
 			}
+		} else if (selectedTile == this) {
+			this.selected = true;
 		} else {
 			this.selected = false;
+		}
+	}
+
+	showTile() {
+		let container = document.querySelector('#infoTile');
+		if (selectedTile != this) {
+			container.style.opacity = '1';
+			selectedTile = this;
+		} else {
+			container.style.opacity = '0';
+			selectedTile = null;
 		}
 	}
 
@@ -2102,9 +2152,16 @@ class Tile extends Element {
 				this.borderToken = '';
 				deleteInput(this.outputs, output.name);
 			} else if (isInput(output.name)) {
-				this.addInput(this.nextInputs, output, true);
-				giveInput(output, this.getNeighbours());
-				deleteInput(this.outputs, output.name);
+
+				if (output.target == 'self') {
+					this.addInput(this.nextInputs, output, true);
+					giveInput(output, [this.tileID]);
+					// deleteInput(this.outputs,output.name);
+				} else if (output.target == 'broad') {
+					this.addInput(this.nextInputs, output, true);
+					giveInput(output, this.getNeighbours());
+					deleteInput(this.outputs, output.name);
+				}
 			}
 		});
 	}
@@ -2242,6 +2299,8 @@ let canvas = null;
 let posX = 0;
 let posY = 0;
 let clickEvent = false;
+
+let selectedTile = null;
 
 let demoToken = null;
 
@@ -2399,6 +2458,11 @@ const tick = () => {
 	}
 	boardConfig.timer--;
 	clickEvent = false;
+
+	if (selectedTile) {
+		printInfo();
+	}
+
 	window.requestAnimationFrame(tick);
 };
 
@@ -2430,6 +2494,40 @@ const tilesTick = () => {
 	}
 };
 
+const printInfo = () => {
+	let container = document.querySelector('#infoTile');
+	let listAttributes = container.querySelector('#listAttributes');
+	listAttributes.innerHTML = "";
+	Object.keys(selectedTile.attributes).forEach(function (key) {
+		addListElement(listAttributes, key + '=' + selectedTile.attributes[key]);
+	});
+
+	printList(container.querySelector('#listListenedEffects'), selectedTile.listenedInputs);
+	printObjList(container.querySelector('#listEffects'), selectedTile.nextInputs);
+	printObjList(container.querySelector('#listTokens'), selectedTile.children);
+};
+
+const printList = (parent, list) => {
+	parent.innerHTML = "";
+	list.forEach(input => {
+		addListElement(parent, input);
+	});
+};
+
+const printObjList = (parent, list) => {
+	parent.innerHTML = "";
+	list.forEach(input => {
+		addListElement(parent, input.name);
+	});
+};
+
+const addListElement = (parent, text) => {
+	let newElem = document.createElement('a');
+	let txt = document.createTextNode(text);
+	newElem.appendChild(txt);
+	parent.appendChild(newElem);
+};
+
 // ---------------------------------------------------------------------------------------------
 // GENERAL FUNCTIONS
 // ---------------------------------------------------------------------------------------------
@@ -2452,6 +2550,15 @@ const getToken = (arr, token) => {
 const deleteInput = (arr, input) => {
 	for (let i = 0; i < arr.length; i++) {
 		if (arr[i].name === input) {
+			arr.splice(i, 1);
+		}
+	}
+};
+
+const deleteIncasedInput = (arr, container, input) => {
+	for (let i = 0; i < arr.length; i++) {
+		if (arr[i].name === container && arr[i].effect.name == input) {
+			console.log(arr[i], input);
 			arr.splice(i, 1);
 		}
 	}

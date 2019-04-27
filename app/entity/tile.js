@@ -2,7 +2,7 @@ class Tile extends Element{
 	constructor(id,attributes,x,y,color='ede1c9',border='8e8a6b'){
 		super(id,attributes,'tile',null);
 
-		this.stackColor = {ini:'#'+color,border:'#'+border,selected:'#436177'}
+		this.stackColor = {ini:'#'+color,border:'#'+border,selected:'#76d2fc'} //#436177
 		this.colorToken = '';
 		this.borderToken = '';
 
@@ -46,11 +46,24 @@ class Tile extends Element{
 		if(posX > x-this.size+mod && posX < x + this.size -mod && posY > y-this.size+mod && posY < y+this.size-mod){
 			this.selected = true;
 			if(clickEvent){
-				this.setOnFire();
+				this.showTile();
 			}
 		}
-		else{
+		else if(selectedTile == this){
+			this.selected = true;
+		}else{
 			this.selected = false;
+		}
+	}
+
+	showTile(){
+		let container = document.querySelector('#infoTile');
+		if(selectedTile != this){
+			container.style.opacity = '1';
+			selectedTile = this;
+		}else{
+			container.style.opacity = '0';
+			selectedTile = null;
 		}
 	}
 
@@ -82,9 +95,17 @@ class Tile extends Element{
 				this.borderToken = '';
 				deleteInput(this.outputs,output.name);
 			}else if (isInput(output.name)){
-				this.addInput(this.nextInputs,output,true);
-				giveInput(output,this.getNeighbours());
-				deleteInput(this.outputs,output.name);
+
+				if(output.target == 'self'){
+					this.addInput(this.nextInputs,output,true);
+					giveInput(output,[this.tileID]);
+					// deleteInput(this.outputs,output.name);
+				}else if(output.target == 'broad'){
+					this.addInput(this.nextInputs,output,true);
+					giveInput(output,this.getNeighbours());
+					deleteInput(this.outputs,output.name);
+				}
+
 			}
 		});
 	}

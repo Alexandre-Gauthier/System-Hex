@@ -16,6 +16,8 @@ let posX = 0;
 let posY = 0;
 let clickEvent = false;
 
+let selectedTile = null;
+
 let demoToken = null;
 
 const iniObservation = () =>{
@@ -173,6 +175,11 @@ const tick = () =>{
 	}
 	boardConfig.timer--;
 	clickEvent = false;
+
+	if(selectedTile){
+		printInfo();
+	}
+
 	window.requestAnimationFrame(tick);
 }
 
@@ -204,6 +211,41 @@ const tilesTick = () =>{
 	}
 }
 
+const printInfo = () =>{
+	let container = document.querySelector('#infoTile');
+	let listAttributes = container.querySelector('#listAttributes');
+	listAttributes.innerHTML = "";
+	Object.keys(selectedTile.attributes).forEach(function(key){
+		addListElement(listAttributes,key + '=' + selectedTile.attributes[key]);
+	 });
+
+	printList(container.querySelector('#listListenedEffects'),selectedTile.listenedInputs);
+	printObjList(container.querySelector('#listEffects'),selectedTile.nextInputs);
+	printObjList(container.querySelector('#listTokens'),selectedTile.children);
+}
+
+const printList = (parent,list) =>{
+	parent.innerHTML = "";
+	list.forEach(input=>{
+		addListElement(parent,input)
+	});
+}
+
+const printObjList = (parent,list) =>{
+	parent.innerHTML = "";
+	list.forEach(input=>{
+		addListElement(parent,input.name)
+	});
+}
+
+const addListElement = (parent,text) =>{
+	let newElem = document.createElement('a');
+	let txt = document.createTextNode(text);
+	newElem.appendChild(txt);
+	parent.appendChild(newElem);
+}
+
+
 // ---------------------------------------------------------------------------------------------
 // GENERAL FUNCTIONS
 // ---------------------------------------------------------------------------------------------
@@ -226,6 +268,15 @@ const getToken = (arr,token)=>{
 const deleteInput = (arr, input)=> {
 	for(let i = 0; i < arr.length;i++){
 		if(arr[i].name === input ){
+			arr.splice(i,1);
+		}
+	}
+}
+
+const deleteIncasedInput = (arr, container,input)=> {
+	for(let i = 0; i < arr.length;i++){
+		if(arr[i].name === container && arr[i].effect.name == input){
+			console.log(arr[i],input)
 			arr.splice(i,1);
 		}
 	}
