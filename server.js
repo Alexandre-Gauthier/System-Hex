@@ -12,11 +12,14 @@ const db = new MongoDB();
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080;
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
 app.use(cors());
 app.use(cookieParser());
 app.use(express.static('public'));
+
+app.use(bodyParser.json({limit: "100mb"}));
+app.use(bodyParser.urlencoded({limit: "100mb", extended: true, parameterLimit:100000}));
+app.use(express.json({limit: '50mb'}));
+
 
 app.use(session({
     key: 'user_sid',
@@ -301,7 +304,7 @@ app.post('/saveSystem', (req,res)=>{
 
 /* Route for editor */
 
-app.post('/saveMethod', (req,res)=>{
+app.post('/saveMethod' ,(req,res)=>{
     if (req.session.user && req.cookies.user_sid) {
         updateSystem(req,res,(item)=>{
             if(req.body.data.oldName == req.body.data.method.name ||
