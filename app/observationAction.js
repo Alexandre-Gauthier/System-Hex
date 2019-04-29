@@ -172,13 +172,14 @@ const tick = () =>{
 	tilesTick();
 	if(boardConfig.timer <= 0){
 		boardConfig.timer = boardConfig.speed;
+		if(selectedTile){
+			printInfo();
+		}
 	}
 	boardConfig.timer--;
 	clickEvent = false;
 
-	if(selectedTile){
-		printInfo();
-	}
+
 
 	window.requestAnimationFrame(tick);
 }
@@ -213,38 +214,56 @@ const tilesTick = () =>{
 
 const printInfo = () =>{
 	let container = document.querySelector('#infoTile');
+	setTextNode('#selectTitle',(selectedTile.name == 'tile')?"Tuile":selectedTile.name);
+
 	let listAttributes = container.querySelector('#listAttributes');
 	listAttributes.innerHTML = "";
-	Object.keys(selectedTile.attributes).forEach(function(key){
-		addListElement(listAttributes,key + '=' + selectedTile.attributes[key]);
-	 });
+	if(selectedTile.attributes){
+		Object.keys(selectedTile.attributes).forEach(function(key){
+			addListElement(listAttributes,key + '=' + selectedTile.attributes[key]);
+		 });
+	}
 
 	printList(container.querySelector('#listListenedEffects'),selectedTile.listenedInputs);
 	printObjList(container.querySelector('#listEffects'),selectedTile.nextInputs);
-	printObjList(container.querySelector('#listTokens'),selectedTile.children);
+	printObjList(container.querySelector('#listTokens'),selectedTile.children,selectElement);
 }
 
-const printList = (parent,list) =>{
+const printList = (parent,list,onclick=null) =>{
 	parent.innerHTML = "";
-	list.forEach(input=>{
-		addListElement(parent,input)
-	});
+	if(list){
+		list.forEach(input=>{
+			addListElement(parent,input,input,onclick)
+		});
+	}
 }
 
-const printObjList = (parent,list) =>{
+const printObjList = (parent,list,onclick=null) =>{
 	parent.innerHTML = "";
-	list.forEach(input=>{
-		addListElement(parent,input.name)
-	});
+	if(list){
+		list.forEach(input=>{
+			addListElement(parent,input.name,input,onclick)
+		});
+	}
 }
 
-const addListElement = (parent,text) =>{
+const addListElement = (parent,text,element=null,onclick=null) =>{
 	let newElem = document.createElement('a');
 	let txt = document.createTextNode(text);
 	newElem.appendChild(txt);
+
+	if(onclick){
+		newElem.onclick = () =>{
+			onclick(element);
+		}
+	}
+
 	parent.appendChild(newElem);
 }
 
+const selectElement = (element) =>{
+	selectedTile = element;
+}
 
 // ---------------------------------------------------------------------------------------------
 // GENERAL FUNCTIONS

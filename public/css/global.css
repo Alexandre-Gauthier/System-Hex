@@ -816,7 +816,7 @@ padding: 2px 16px;
 	color: #f2e7d0;
 }
 
-#speedSlider,#ratioSlider{
+.slider{
 	width: 100%;
 }
 
@@ -824,13 +824,13 @@ padding: 2px 16px;
 	height:12px;
 }
 
-#speedSlider.ui-slider-horizontal, #ratioSlider.ui-slider-horizontal {
+.slider.ui-slider-horizontal{
 	background: #c4bfae;
 	border: none;
 	border-radius:5px;
 }
 
-#speedSlider .ui-slider-handle,  #ratioSlider .ui-slider-handle{
+.slider .ui-slider-handle{
 	width: 12px;
 	height: 12px;
 	background: #ada895;
@@ -841,8 +841,7 @@ padding: 2px 16px;
 	top: 0px;
 }
 
-#speedSlider .ui-slider-handle:hover, #speedSlider:hover .ui-slider-handle,
-#ratioSlider .ui-slider-handle:hover,#ratioSlider:hover .ui-slider-handle
+.slider .ui-slider-handle:hover, .slider:hover .ui-slider-handle
 {
 	background: #999482;
 }

@@ -49,7 +49,7 @@ class Tile extends Element{
 				this.showTile();
 			}
 		}
-		else if(selectedTile == this){
+		else if(selectedTile == this || (selectedTile && selectedTile.tile == this.tile)){
 			this.selected = true;
 		}else{
 			this.selected = false;

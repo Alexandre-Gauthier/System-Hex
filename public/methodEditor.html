@@ -6,8 +6,10 @@
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title>System-Hex - Creation</title>
 	<link href="https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c:700" rel="stylesheet">
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 	<link rel="stylesheet" href="css/global.css">
-	<script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script src="js/bundle.js"></script>
 
 	<link rel="stylesheet" type="text/css" href="../css/colpick.css">
@@ -51,6 +53,7 @@
 			<button tags="condition" onclick="createPiece(CheckInput)" >Est affecté par</button>
 			<button tags="condition" onclick="createPiece(CheckToken)" >Possède</button>
 			<button tags="condition" onclick="createPiece(Comparaison)" >Comparaison</button>
+			<button tags="condition" onclick="createPiece(RandomEvent)" >Chance</button>
 			<button tags="condition" onclick="createPiece(And)" >Et</button>
 			<button tags="condition" onclick="createPiece(Or)" >Ou</button>
 			<h5>Arithmétique</h5>
@@ -79,6 +82,7 @@
 			<h5>Dev</h5>
 			<button tags="action,line" onclick="createPiece(ConsoleOut)" >Console Log</button>
 			<button tags="valeur" onclick="createPiece(InputDev)" >DevString</button>
+			<button tags="action,line" onclick="createPiece(ListenInput)" >Écouter Effet</button>
 
 		</div>
 

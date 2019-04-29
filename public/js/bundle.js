@@ -1245,6 +1245,18 @@ class Piece {
 
 		this.node.appendChild(selector);
 	}
+
+	addSlider(tags, min, max, defaut) {
+		let selector = document.createElement("div");
+		selector.setAttribute("tags", tags);
+		selector.setAttribute("class", "slider");
+		$(selector).slider({
+			min: min,
+			max: max,
+			value: defaut });
+
+		this.node.appendChild(selector);
+	}
 }
 
 class When extends Piece {
@@ -1310,6 +1322,23 @@ class CheckInput extends Piece {
 		this.addText("Jeton est affecté par ", "h3", this.node);
 		this.addAnchor("checkInput");
 		this.addSelect("select,effect", getInputs());
+		this.addAnchor("endGroup");
+	}
+}
+
+class RandomEvent extends Piece {
+	constructor(parent) {
+		super(parent);
+		this.node.setAttribute("tags", "condition,group");
+		this.node.style.backgroundColor = "#bbdd6e";
+
+		this.node.style.display = "flex";
+		this.addText("Chance que l'événement se produise", "h3", this.node);
+		this.addAnchor("randomEvent");
+		this.addInput("Nombre", "input", /^\d*\.?\d*$/);
+		this.addText("/", "h3", this.node);
+		this.addAnchor("separator");
+		this.addInput("Nombre", "input", /^\d*\.?\d*$/);
 		this.addAnchor("endGroup");
 	}
 }
@@ -1637,6 +1666,21 @@ class CreateEffect extends Piece {
 	}
 }
 
+class ListenInput extends Piece {
+	constructor(parent) {
+		super(parent);
+		this.node.setAttribute("tags", "block,line,action");
+		this.node.style.backgroundColor = "#b4db85";
+
+		this.node.style.display = "flex";
+		this.addText("Écouter l'effet ", "h3", this.node);
+		this.addAnchor("listenEffect");
+		this.addSelect("select,effect", getInputs());
+		this.addAnchor("endGroup");
+		this.addAnchor("endLine");
+	}
+}
+
 // ****************************************** To String Functions *******************************************
 
 const dom2String = () => {
@@ -1687,6 +1731,18 @@ function outputNode(node) {
 	if (node.nodeType === 1) {
 		if (hasTag('checkInput', node)) {
 			methodBody += "obj.inputExist(";
+		}
+
+		if (hasTag('randomEvent', node)) {
+			methodBody += "obj.randomPerc(";
+		}
+
+		if (hasTag('slider', node)) {
+			methodBody += $(node).slider("value");
+		}
+
+		if (hasTag('separator', node)) {
+			methodBody += ",";
 		}
 
 		if (hasTag('checkToken', node)) {
@@ -1799,6 +1855,10 @@ function outputNode(node) {
 		}
 		if (hasTag('createEffect', node)) {
 			methodBody += "obj.addOutputEffect(";
+		}
+
+		if (hasTag('listenEffect', node)) {
+			methodBody += "obj.listenInput(";
 		}
 
 		if (hasTag('capsule', node)) {
@@ -2034,6 +2094,18 @@ class Element {
 		}
 	}
 
+	randomPerc(num, denom) {
+		let min = 0;
+		let max = denom;
+		let randomNum = Math.floor(Math.random() * (+max - +min)) + +min;
+		if (randomNum < num) {
+			return true;
+		}
+		return false;
+	}
+
+	listenInput(name) {}
+
 	addOutputEffect(name) {
 		let input = getInput(this.inputs, name);
 
@@ -2105,7 +2177,7 @@ class Tile extends Element {
 			if (clickEvent) {
 				this.showTile();
 			}
-		} else if (selectedTile == this) {
+		} else if (selectedTile == this || selectedTile && selectedTile.tile == this.tile) {
 			this.selected = true;
 		} else {
 			this.selected = false;
@@ -2453,13 +2525,12 @@ const tick = () => {
 	tilesTick();
 	if (boardConfig.timer <= 0) {
 		boardConfig.timer = boardConfig.speed;
+		if (selectedTile) {
+			printInfo();
+		}
 	}
 	boardConfig.timer--;
 	clickEvent = false;
-
-	if (selectedTile) {
-		printInfo();
-	}
 
 	window.requestAnimationFrame(tick);
 };
@@ -2494,36 +2565,55 @@ const tilesTick = () => {
 
 const printInfo = () => {
 	let container = document.querySelector('#infoTile');
+	setTextNode('#selectTitle', selectedTile.name == 'tile' ? "Tuile" : selectedTile.name);
+
 	let listAttributes = container.querySelector('#listAttributes');
 	listAttributes.innerHTML = "";
-	Object.keys(selectedTile.attributes).forEach(function (key) {
-		addListElement(listAttributes, key + '=' + selectedTile.attributes[key]);
-	});
+	if (selectedTile.attributes) {
+		Object.keys(selectedTile.attributes).forEach(function (key) {
+			addListElement(listAttributes, key + '=' + selectedTile.attributes[key]);
+		});
+	}
 
 	printList(container.querySelector('#listListenedEffects'), selectedTile.listenedInputs);
 	printObjList(container.querySelector('#listEffects'), selectedTile.nextInputs);
-	printObjList(container.querySelector('#listTokens'), selectedTile.children);
+	printObjList(container.querySelector('#listTokens'), selectedTile.children, selectElement);
 };
 
-const printList = (parent, list) => {
+const printList = (parent, list, onclick = null) => {
 	parent.innerHTML = "";
-	list.forEach(input => {
-		addListElement(parent, input);
-	});
+	if (list) {
+		list.forEach(input => {
+			addListElement(parent, input, input, onclick);
+		});
+	}
 };
 
-const printObjList = (parent, list) => {
+const printObjList = (parent, list, onclick = null) => {
 	parent.innerHTML = "";
-	list.forEach(input => {
-		addListElement(parent, input.name);
-	});
+	if (list) {
+		list.forEach(input => {
+			addListElement(parent, input.name, input, onclick);
+		});
+	}
 };
 
-const addListElement = (parent, text) => {
+const addListElement = (parent, text, element = null, onclick = null) => {
 	let newElem = document.createElement('a');
 	let txt = document.createTextNode(text);
 	newElem.appendChild(txt);
+
+	if (onclick) {
+		newElem.onclick = () => {
+			onclick(element);
+		};
+	}
+
 	parent.appendChild(newElem);
+};
+
+const selectElement = element => {
+	selectedTile = element;
 };
 
 // ---------------------------------------------------------------------------------------------

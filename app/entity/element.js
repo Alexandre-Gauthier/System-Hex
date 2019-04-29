@@ -192,6 +192,20 @@ class Element{
 		}
 	}
 
+	randomPerc(num,denom){
+		let min = 0;
+		let max = denom;
+		let randomNum = Math.floor(Math.random() * (+max - +min)) + +min;
+		if(randomNum < num){
+			return true;
+		}
+		return false;
+	}
+
+	listenInput(name){
+
+	}
+
 	addOutputEffect(name){
 		let input = getInput(this.inputs,name);
 

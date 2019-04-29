@@ -514,6 +514,18 @@ class Piece{
 
 		this.node.appendChild(selector);
 	}
+
+	addSlider(tags,min,max,defaut){
+		let selector = document.createElement("div");
+		selector.setAttribute("tags",tags);
+		selector.setAttribute("class","slider");
+		$(selector).slider({
+			min: min,
+			max: max,
+			value: defaut});
+
+		this.node.appendChild(selector);
+	}
 }
 
 class When extends Piece{
@@ -579,6 +591,23 @@ class CheckInput extends Piece{
 		this.addText("Jeton est affecté par ","h3",this.node);
 		this.addAnchor("checkInput");
 		this.addSelect("select,effect",getInputs());
+		this.addAnchor("endGroup");
+	}
+}
+
+class RandomEvent extends Piece{
+	constructor(parent){
+		super(parent);
+		this.node.setAttribute("tags","condition,group");
+		this.node.style.backgroundColor = "#bbdd6e"
+
+		this.node.style.display = "flex";
+		this.addText("Chance que l'événement se produise","h3",this.node);
+		this.addAnchor("randomEvent");
+		this.addInput("Nombre","input",/^\d*\.?\d*$/);
+		this.addText("/","h3",this.node);
+		this.addAnchor("separator");
+		this.addInput("Nombre","input",/^\d*\.?\d*$/);
 		this.addAnchor("endGroup");
 	}
 }
@@ -908,6 +937,21 @@ class CreateEffect extends Piece{
 	}
 }
 
+class ListenInput extends Piece{
+	constructor(parent){
+		super(parent);
+		this.node.setAttribute("tags","block,line,action");
+		this.node.style.backgroundColor = "#b4db85";
+
+		this.node.style.display = "flex";
+		this.addText("Écouter l'effet ","h3",this.node);
+		this.addAnchor("listenEffect");
+		this.addSelect("select,effect",getInputs());
+		this.addAnchor("endGroup");
+		this.addAnchor("endLine");
+	}
+}
+
 // ****************************************** To String Functions *******************************************
 
 const dom2String = () =>{
@@ -965,6 +1009,18 @@ function outputNode(node)
 	{
 		if(hasTag('checkInput',node)){
 			methodBody += "obj.inputExist(";
+		}
+
+		if(hasTag('randomEvent',node)){
+			methodBody += "obj.randomPerc(";
+		}
+
+		if(hasTag('slider',node)){
+			methodBody += $( node ).slider("value");
+		}
+
+		if(hasTag('separator',node)){
+			methodBody += ",";
 		}
 
 		if(hasTag('checkToken',node)){
@@ -1077,6 +1133,10 @@ function outputNode(node)
 		}
 		if(hasTag('createEffect',node)){
 			methodBody += "obj.addOutputEffect(";
+		}
+
+		if(hasTag('listenEffect',node)){
+			methodBody += "obj.listenInput(";
 		}
 
 		if(hasTag('capsule',node)){
