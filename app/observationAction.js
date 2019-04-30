@@ -292,10 +292,10 @@ const deleteInput = (arr, input)=> {
 	}
 }
 
-const deleteIncasedInput = (arr, container,input)=> {
+const deleteIncasedInput = (arr, container,id)=> {
 	for(let i = 0; i < arr.length;i++){
-		if(arr[i].name === container && arr[i].effect.name == input){
-			console.log(arr[i],input)
+		if(arr[i].name === container && arr[i].elem == id){
+			console.log('DeleteInput',arr[i],id)
 			arr.splice(i,1);
 		}
 	}
@@ -304,6 +304,7 @@ const deleteIncasedInput = (arr, container,input)=> {
 const deleteToken = (arr, id)=> {
 	for(let i = 0; i < arr.length;i++){
 		if(arr[i].id === id ){
+			console.log('DeleteToken',arr[i],id)
 			arr.splice(i,1);
 		}
 	}

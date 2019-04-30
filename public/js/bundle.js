@@ -1970,13 +1970,23 @@ class Element {
 	addInput(arr, input, limit = false) {
 		if (limit) {
 			if (this.listenedInputs.includes(input.name)) {
-				if (!getInput(arr, input.name)) {
-					arr.push(JSON.parse(JSON.stringify(input)));
-				}
+				this.pushInput(arr, input);
 			}
 		} else {
-			if (!getInput(arr, input.name)) {
-				arr.push(JSON.parse(JSON.stringify(input)));
+			this.pushInput(arr, input);
+		}
+	}
+
+	pushInput(arr, input) {
+		let checkInput = getInput(arr, input.name);
+		if (!checkInput) {
+			arr.push(JSON.parse(JSON.stringify(input)));
+		} else {
+			if (input.elem && checkInput.elem) {
+				if (checkInput.elem != input.elem) {
+					console.log('pushInput', input);
+					arr.push(JSON.parse(JSON.stringify(input)));
+				}
 			}
 		}
 	}
@@ -2218,9 +2228,10 @@ class Tile extends Element {
 		this.outputs.forEach(output => {
 			if (output.name == 'destroyChild') {
 				deleteToken(this.children, output.elem);
+				deleteIncasedInput(this.outputs, 'destroyChild', output.elem);
 				this.colorToken = '';
 				this.borderToken = '';
-				deleteInput(this.outputs, output.name);
+				// deleteInput(this.outputs,output.name);
 			} else if (isInput(output.name)) {
 
 				if (output.target == 'self') {
@@ -2643,10 +2654,10 @@ const deleteInput = (arr, input) => {
 	}
 };
 
-const deleteIncasedInput = (arr, container, input) => {
+const deleteIncasedInput = (arr, container, id) => {
 	for (let i = 0; i < arr.length; i++) {
-		if (arr[i].name === container && arr[i].effect.name == input) {
-			console.log(arr[i], input);
+		if (arr[i].name === container && arr[i].elem == id) {
+			console.log('DeleteInput', arr[i], id);
 			arr.splice(i, 1);
 		}
 	}
@@ -2655,6 +2666,7 @@ const deleteIncasedInput = (arr, container, input) => {
 const deleteToken = (arr, id) => {
 	for (let i = 0; i < arr.length; i++) {
 		if (arr[i].id === id) {
+			console.log('DeleteToken', arr[i], id);
 			arr.splice(i, 1);
 		}
 	}

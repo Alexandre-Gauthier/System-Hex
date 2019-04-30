@@ -91,9 +91,10 @@ class Tile extends Element{
 		this.outputs.forEach(output=>{
 			if(output.name == 'destroyChild'){
 				deleteToken(this.children,output.elem);
+				deleteIncasedInput(this.outputs,'destroyChild',output.elem);
 				this.colorToken = '';
 				this.borderToken = '';
-				deleteInput(this.outputs,output.name);
+				// deleteInput(this.outputs,output.name);
 			}else if (isInput(output.name)){
 
 				if(output.target == 'self'){

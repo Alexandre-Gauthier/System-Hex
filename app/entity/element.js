@@ -68,15 +68,26 @@ class Element{
 	addInput(arr,input,limit=false){
 		if(limit){
 			if(this.listenedInputs.includes(input.name)){
-				if(!getInput(arr,input.name)){
+				this.pushInput(arr,input);
+			}
+		}else{
+			this.pushInput(arr,input);
+		}
+	}
+
+	pushInput(arr,input){
+		let checkInput = getInput(arr,input.name)
+		if(!checkInput){
+			arr.push(JSON.parse(JSON.stringify(input)));
+		}else{
+			if(input.elem && checkInput.elem){
+				if(checkInput.elem != input.elem){
+					console.log('pushInput',input)
 					arr.push(JSON.parse(JSON.stringify(input)));
 				}
 			}
-		}else{
-			if(!getInput(arr,input.name)){
-				arr.push(JSON.parse(JSON.stringify(input)));
-			}
 		}
+
 	}
 
 	addCoord(size,x,y){
@@ -115,6 +126,7 @@ class Element{
 			let result = child.tick();
 			result.forEach(output=>{
 				this.addInput(this.outputs,output);
+
 			});
 		});
 	}
@@ -163,7 +175,7 @@ class Element{
 	}
 
 	deleteToken(){
-		this.addInput(this.outputs,{name:'destroyChild',elem:this.id})
+		this.addInput(this.outputs,{name:'destroyChild',elem:this.id});
 	}
 
 	createToken(name){
