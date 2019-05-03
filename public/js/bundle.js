@@ -725,12 +725,23 @@ function toDOM(obj) {
 		addSelectOptions(node, options);
 	}
 
+	if (obj.tagName == "select" && hasTag('effect', node)) {
+		clearSelectOptions(node);
+		let options = getInputs();
+		addSelectOptions(node, options);
+	}
+
 	if (obj.value) {
 		node.value = obj.value;
 		node.defaultValue = obj.value;
 	}
 	return node;
 }
+
+const restoreSelectList = (list, options) => {
+	clearSelectOptions(list);
+	addSelectOptions(list, options);
+};
 
 // https://gist.github.com/sstur/7379870
 let inputs = { 'fire': { name: 'fire', power: 50 }, 'water': { name: 'water' } };
@@ -752,6 +763,8 @@ let unresolvedInput = 0;
 
 let token = null;
 let method = null;
+
+let isTile = false;
 
 const iniEditor = () => {
 	space = document.querySelector('#creationSpace');
@@ -778,6 +791,7 @@ const iniEditor = () => {
 			setTextNode('#tokenTitle', "Tiles");
 			addOnClickSaveMethod('#methodBtnSave', token, 'tile');
 			addOnClickDeleteMethod('#methodBtnDelete', token, 'tile');
+			isTile = true;
 		}
 
 		addAttributes('#listTokenAttributes', token.attributes, token, 'token');
@@ -920,10 +934,17 @@ const showButton = () => {
 			if (selectedPiece) {
 				if (selectedTags.indexOf(tag) >= 0 || tag == "main") {
 					display = "block";
+				} else if (tag == 'dependent' && nodeIsEmpty(selectedPiece, 2)) {
+					display = "none";
+				} else if (tag == 'notTile' && isTile) {
+					display = "none";
 				}
 			} else {
 				if (tag == "main" || tag == "block" || tag == "line") {
 					display = "block";
+					if (tag == 'dependent' && nodeIsEmpty(space, 1)) {
+						display = "none";
+					}
 				}
 			}
 		});
@@ -1149,23 +1170,28 @@ const getVar = () => {
 
 const clearSelectOptions = select => {
 	let length = select.options.length;
+	console.log('clear', select, length);
 	for (let i = 0; i < length; i++) {
+		console.log(i);
 		select.options[i] = null;
 	}
+	$(select).empty();
 };
 
 const addSelectOptions = (select, options) => {
-	options.forEach(option => {
-		let newOption = document.createElement("option");
-		let value = option[0];
-		if (option[1]) {
-			value = option[1];
-		}
-		newOption.setAttribute("value", value);
-		let text = document.createTextNode(option[0]);
-		newOption.appendChild(text);
-		select.appendChild(newOption);
-	});
+	if (options) {
+		options.forEach(option => {
+			let newOption = document.createElement("option");
+			let value = option[0];
+			if (option[1]) {
+				value = option[1];
+			}
+			newOption.setAttribute("value", value);
+			let text = document.createTextNode(option[0]);
+			newOption.appendChild(text);
+			select.appendChild(newOption);
+		});
+	}
 };
 
 // ****************************************** Class Pieces *******************************************
@@ -1352,7 +1378,7 @@ class CheckToken extends Piece {
 		this.node.style.display = "flex";
 		this.addText("L'élément possède ", "h3", this.node);
 		this.addAnchor("checkToken");
-		this.addSelect("select,effect", getTokens());
+		this.addSelect("select,token", getTokens());
 		this.addAnchor("endGroup");
 	}
 }
@@ -1645,7 +1671,7 @@ class CreateToken extends Piece {
 		this.node.style.display = "flex";
 		this.addText("Créer le Jeton ", "h3", this.node);
 		this.addAnchor("createToken");
-		this.addSelect("select,effect", getTokens());
+		this.addSelect("select,token", getTokens());
 		this.addAnchor("endGroup");
 		this.addAnchor("endLine");
 	}
@@ -1806,7 +1832,7 @@ function outputNode(node) {
 		}
 
 		if (hasTag('select', node)) {
-			if (hasTag('effect', node)) {
+			if (hasTag('effect', node) || hasTag('token', node)) {
 				methodBody += "'" + node.options[node.selectedIndex].value + "'";
 			} else {
 				methodBody += node.options[node.selectedIndex].value;

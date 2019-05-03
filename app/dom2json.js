@@ -89,11 +89,22 @@ function toJSON(node) {
 			addSelectOptions(node,options);
 		}
 
+		if(obj.tagName == "select" && hasTag('effect',node)){
+			clearSelectOptions(node);
+			let options = getInputs();
+			addSelectOptions(node,options);
+		}
+
 		if(obj.value){
 			node.value = obj.value;
 			node.defaultValue = obj.value;
 		}
 		return node;
+  }
+
+  const restoreSelectList = (list,options) =>{
+	clearSelectOptions(list);
+	addSelectOptions(list,options);
   }
 
   // https://gist.github.com/sstur/7379870

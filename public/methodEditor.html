@@ -47,15 +47,15 @@
 			<h2>Pièces</h2>
 			<h5 class="first">Bloc</h5>
 			<button tags="block" onclick="createPiece(When)" >Quand</button>
-			<button tags="block" onclick="createPiece(Else)" >Sinon</button>
-			<button tags="block" onclick="createPiece(ElseIf)" >Sinon Si</button>
+			<button tags="block,dependent" onclick="createPiece(Else)" >Sinon</button>
+			<button tags="block,dependent" onclick="createPiece(ElseIf)" >Sinon Si</button>
 			<h5>Condition</h5>
 			<button tags="condition" onclick="createPiece(CheckInput)" >Est affecté par</button>
 			<button tags="condition" onclick="createPiece(CheckToken)" >Possède</button>
 			<button tags="condition" onclick="createPiece(Comparaison)" >Comparaison</button>
 			<button tags="condition" onclick="createPiece(RandomEvent)" >Chance</button>
-			<button tags="condition" onclick="createPiece(And)" >Et</button>
-			<button tags="condition" onclick="createPiece(Or)" >Ou</button>
+			<button tags="condition,dependent" onclick="createPiece(And)" >Et</button>
+			<button tags="condition,dependent" onclick="createPiece(Or)" >Ou</button>
 			<h5>Arithmétique</h5>
 			<button tags="math" onclick="createPiece(MathBloc)" >Math</button>
 			<button tags="line" onclick="createPiece(Increment)" >Augmenter</button>
@@ -65,7 +65,7 @@
 			<button tags="line" onclick="createPiece(NewVariable)" >Créer Variable</button>
 			<button tags="line" onclick="createPiece(ChangeVariable)" >Affecter une Variable</button>
 			<button tags="valeur,condition" onclick="createPiece(GetLocaleVar)" >Variable</button>
-			<button tags="valeur,condition" onclick="createPiece(GetTileAtt)" >Attribut de Tuile</button>
+			<button tags="valeur,condition,notTile" onclick="createPiece(GetTileAtt)" >Attribut de Tuile</button>
 			<h5>Valeur</h5>
 			<button tags="valeur" onclick="createPiece(InputNumber)" >Entrer un nombre</button>
 			<button tags="valeur" onclick="createPiece(InputString)" >Entrer un nom</button>
