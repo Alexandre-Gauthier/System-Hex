@@ -14,13 +14,6 @@ class Tile extends Element{
 	}
 
 	// ---------------------------------------------------------------------------------------------
-	// Méthodes Test
-	// ---------------------------------------------------------------------------------------------
-	setOnFire(){
-		this.addInput(this.nextInputs,effectTemplate.Feu,true);
-		clickEvent = false;
-	}
-	// ---------------------------------------------------------------------------------------------
 	// Tick
 	// ---------------------------------------------------------------------------------------------
 	tick(){
@@ -88,27 +81,40 @@ class Tile extends Element{
 	}
 
 	checkOutputs(){
-		this.outputs.forEach(output=>{
+		for(let i = 0; i<this.outputs.length;i++){
+			let output = this.outputs[i];
+
 			if(output.name == 'destroyChild'){
 				deleteToken(this.children,output.elem);
-				deleteIncasedInput(this.outputs,'destroyChild',output.elem);
 				this.colorToken = '';
 				this.borderToken = '';
-				// deleteInput(this.outputs,output.name);
+				this.outputs.splice(i,1);
+				i--;
 			}else if (isInput(output.name)){
 
 				if(output.target == 'self'){
 					this.addInput(this.nextInputs,output,true);
 					giveInput(output,[this.tileID]);
-					// deleteInput(this.outputs,output.name);
+					this.outputs.splice(i,1);
+					i--;
 				}else if(output.target == 'broad'){
 					this.addInput(this.nextInputs,output,true);
 					giveInput(output,this.getNeighbours());
-					deleteInput(this.outputs,output.name);
+					this.outputs.splice(i,1);
+					i--;
+				}
+				else if(output.target == 'one'){
+					console.log('TARGET_ONE')
+					this.addInput(this.nextInputs,output,true);
+					let neighbours = this.getNeighbours()
+					let target = neighbours[Math.floor(Math.random()*neighbours.length)];
+					giveInput(output,[target]);
+					this.outputs.splice(i,1);
+					i--;
 				}
 
 			}
-		});
+		}
 	}
 
 	getNeighbours(){

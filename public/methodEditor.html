@@ -50,8 +50,8 @@
 			<button tags="block,dependent" onclick="createPiece(Else)" >Sinon</button>
 			<button tags="block,dependent" onclick="createPiece(ElseIf)" >Sinon Si</button>
 			<h5>Condition</h5>
-			<button tags="condition" onclick="createPiece(CheckInput)" >Est affecté par</button>
-			<button tags="condition" onclick="createPiece(CheckToken)" >Possède</button>
+			<button tags="condition" onclick="createPiece(CheckInput)" >Est affecté par l'effet</button>
+			<button tags="condition" onclick="createPiece(CheckToken)" >Possède le jeton</button>
 			<button tags="condition" onclick="createPiece(Comparaison)" >Comparaison</button>
 			<button tags="condition" onclick="createPiece(RandomEvent)" >Chance</button>
 			<button tags="condition,dependent" onclick="createPiece(And)" >Et</button>
@@ -62,7 +62,7 @@
 			<button tags="line" onclick="createPiece(Decrement)" >Diminuer</button>
 			<button tags="math" onclick="createPiece(GroupMath)" >Groupe</button>
 			<h5>Variable</h5>
-			<button tags="line" onclick="createPiece(NewVariable)" >Créer Variable</button>
+			<button tags="line" onclick="createPiece(NewVariable)" >Créer une Variable</button>
 			<button tags="line" onclick="createPiece(ChangeVariable)" >Affecter une Variable</button>
 			<button tags="valeur,condition" onclick="createPiece(GetLocaleVar)" >Variable</button>
 			<button tags="valeur,condition,notTile" onclick="createPiece(GetTileAtt)" >Attribut de Tuile</button>
@@ -78,7 +78,8 @@
 			<button tags="action,line" onclick="createPiece(CreateToken)" >Créer un Enfant</button>
 			<button tags="action,line" onclick="createPiece(CreateEffect)" >Ajouter un Effet</button>
 			<button tags="action,line" onclick="createPiece(DeleteToken)" >Supprimer le Jeton</button>
-			<button tags="action,line" onclick="createPiece(BroadcastEffect)" >Distribuer un Effet</button>
+			<button tags="action,line" onclick="createPiece(BroadcastEffect)" >Distribuer un Effet aux voisins</button>
+			<button tags="action,line" onclick="createPiece(GiveEffect)" >Distribuer un Effet à un voisin</button>
 			<h5>Dev</h5>
 			<button tags="action,line" onclick="createPiece(ConsoleOut)" >Console Log</button>
 			<button tags="valeur" onclick="createPiece(InputDev)" >DevString</button>

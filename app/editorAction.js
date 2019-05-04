@@ -50,8 +50,8 @@ const iniEditor = () =>{
 
 		addAttributes('#listTokenAttributes',token.attributes,token,'token');
 
-		console.log(token)
-		fillList('#listTokenMethods',token.methods);
+		console.log(token);
+		addOpenEditor('#listTokenMethods',token.methods,token.name);
 
 
 		if(getUrlVars()["method"] == 'new'){
@@ -64,8 +64,18 @@ const iniEditor = () =>{
 			methodBody = method.body;
 			restoreDOM();
 		}
+		getSelectedMethod();
 	});
 	setTextNode('#editorHeader','Éditeur ('+unresolvedInput+')');
+}
+
+const getSelectedMethod = () =>{
+	let nodes = document.querySelector('#listTokenMethods').childNodes;
+	nodes.forEach(node=>{
+		if(node.innerHTML == method.name){
+			node.style.color = '#344c7c';
+		}
+	});
 }
 
 const setTextNode = (id,text) =>{
@@ -78,6 +88,7 @@ const addOnClickSaveMethod = (id,key,type='token') =>{
 		if(document.querySelector('#titleMethod').value != ""){
 			let data = {oldName:method.name};
 			method.name = document.querySelector('#titleMethod').value;
+
 			data['method'] = method;
 			updateAPI(key,type,'saveMethod',data,(res)=>{
 				let tokenStr = "";
@@ -427,9 +438,7 @@ const getVar = () =>{
 
 const clearSelectOptions = (select) =>{
 	let length = select.options.length;
-	console.log('clear',select,length)
 	for (let i = 0; i < length; i++) {
-		console.log(i)
 		select.options[i] = null;
 	}
 	$(select).empty();
@@ -602,7 +611,7 @@ class CheckInput extends Piece{
 		this.node.style.backgroundColor = "#bbdd6e"
 
 		this.node.style.display = "flex";
-		this.addText("Jeton est affecté par ","h3",this.node);
+		this.addText("Jeton est affecté par l'effet ","h3",this.node);
 		this.addAnchor("checkInput");
 		this.addSelect("select,effect",getInputs());
 		this.addAnchor("endGroup");
@@ -633,7 +642,7 @@ class CheckToken extends Piece{
 		this.node.style.backgroundColor = "#bbdd6e"
 
 		this.node.style.display = "flex";
-		this.addText("L'élément possède ","h3",this.node);
+		this.addText("L'élément possède le jeton ","h3",this.node);
 		this.addAnchor("checkToken");
 		this.addSelect("select,token",getTokens());
 		this.addAnchor("endGroup");
@@ -671,7 +680,7 @@ class GetTileAtt extends Piece{
 	constructor(parent){
 		super(parent);
 		this.node.setAttribute("tags","valeur,group");
-		this.node.style.backgroundColor = "#bbdd6e"
+		this.node.style.backgroundColor = "#6eddbd"
 		this.node.style.display = "flex";
 
 		let results = getTileAttributes();
@@ -916,6 +925,23 @@ class BroadcastEffect extends Piece{
 		this.addText("Distribuer ","h3",this.node);
 		this.addAnchor("broadcastEffect");
 		this.addSelect("select,effect",getInputs());
+		this.addText(" à tous les voisins","h3",this.node);
+		this.addAnchor("endGroup");
+		this.addAnchor("endLine");
+	}
+}
+
+class GiveEffect extends Piece{
+	constructor(parent){
+		super(parent);
+		this.node.setAttribute("tags","block,line,action");
+		this.node.style.backgroundColor = "#b4db85";
+
+		this.node.style.display = "flex";
+		this.addText("Partager ","h3",this.node);
+		this.addAnchor("shareEffect");
+		this.addSelect("select,effect",getInputs());
+		this.addText(" à un voisin aléatoire","h3",this.node);
 		this.addAnchor("endGroup");
 		this.addAnchor("endLine");
 	}
@@ -1142,11 +1168,15 @@ function outputNode(node)
 			methodBody += "obj.broadcastEffect(";
 		}
 
+		if(hasTag('shareEffect',node)){
+			methodBody += "obj.shareEffect(";
+		}
+
 		if(hasTag('createToken',node)){
 			methodBody += "obj.createToken(";
 		}
 		if(hasTag('createEffect',node)){
-			methodBody += "obj.addOutputEffect(";
+			methodBody += "obj.putEffect(";
 		}
 
 		if(hasTag('listenEffect',node)){

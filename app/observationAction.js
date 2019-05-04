@@ -214,7 +214,7 @@ const tilesTick = () =>{
 
 const printInfo = () =>{
 	let container = document.querySelector('#infoTile');
-	setTextNode('#selectTitle',(selectedTile.name == 'tile')?"Tuile":selectedTile.name);
+	setTextNode('#selectTitle',(selectedTile.name == 'tile')?"Tuile":selectedTile.name+" "+selectedTile.id);
 
 	let listAttributes = container.querySelector('#listAttributes');
 	listAttributes.innerHTML = "";
@@ -295,7 +295,6 @@ const deleteInput = (arr, input)=> {
 const deleteIncasedInput = (arr, container,id)=> {
 	for(let i = 0; i < arr.length;i++){
 		if(arr[i].name === container && arr[i].elem == id){
-			console.log('DeleteInput',arr[i],id)
 			arr.splice(i,1);
 		}
 	}
@@ -304,7 +303,6 @@ const deleteIncasedInput = (arr, container,id)=> {
 const deleteToken = (arr, id)=> {
 	for(let i = 0; i < arr.length;i++){
 		if(arr[i].id === id ){
-			console.log('DeleteToken',arr[i],id)
 			arr.splice(i,1);
 		}
 	}

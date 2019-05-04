@@ -8,6 +8,7 @@ class Token extends Element{
 
 	tick(){
 		super.tick();
+
 		return this.outputs;
 	}
 

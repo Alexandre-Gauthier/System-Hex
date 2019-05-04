@@ -731,6 +731,12 @@ function toDOM(obj) {
 		addSelectOptions(node, options);
 	}
 
+	if (obj.tagName == "select" && hasTag('token', node)) {
+		clearSelectOptions(node);
+		let options = getTokens();
+		addSelectOptions(node, options);
+	}
+
 	if (obj.value) {
 		node.value = obj.value;
 		node.defaultValue = obj.value;
@@ -797,7 +803,7 @@ const iniEditor = () => {
 		addAttributes('#listTokenAttributes', token.attributes, token, 'token');
 
 		console.log(token);
-		fillList('#listTokenMethods', token.methods);
+		addOpenEditor('#listTokenMethods', token.methods, token.name);
 
 		if (getUrlVars()["method"] == 'new') {
 			method = { name: '', body: '', dom: '', listenedInputs: [], unresolved: 0 };
@@ -809,8 +815,18 @@ const iniEditor = () => {
 			methodBody = method.body;
 			restoreDOM();
 		}
+		getSelectedMethod();
 	});
 	setTextNode('#editorHeader', 'Éditeur (' + unresolvedInput + ')');
+};
+
+const getSelectedMethod = () => {
+	let nodes = document.querySelector('#listTokenMethods').childNodes;
+	nodes.forEach(node => {
+		if (node.innerHTML == method.name) {
+			node.style.color = '#344c7c';
+		}
+	});
 };
 
 const setTextNode = (id, text) => {
@@ -823,6 +839,7 @@ const addOnClickSaveMethod = (id, key, type = 'token') => {
 		if (document.querySelector('#titleMethod').value != "") {
 			let data = { oldName: method.name };
 			method.name = document.querySelector('#titleMethod').value;
+
 			data['method'] = method;
 			updateAPI(key, type, 'saveMethod', data, res => {
 				let tokenStr = "";
@@ -1170,9 +1187,7 @@ const getVar = () => {
 
 const clearSelectOptions = select => {
 	let length = select.options.length;
-	console.log('clear', select, length);
 	for (let i = 0; i < length; i++) {
-		console.log(i);
 		select.options[i] = null;
 	}
 	$(select).empty();
@@ -1345,7 +1360,7 @@ class CheckInput extends Piece {
 		this.node.style.backgroundColor = "#bbdd6e";
 
 		this.node.style.display = "flex";
-		this.addText("Jeton est affecté par ", "h3", this.node);
+		this.addText("Jeton est affecté par l'effet ", "h3", this.node);
 		this.addAnchor("checkInput");
 		this.addSelect("select,effect", getInputs());
 		this.addAnchor("endGroup");
@@ -1376,7 +1391,7 @@ class CheckToken extends Piece {
 		this.node.style.backgroundColor = "#bbdd6e";
 
 		this.node.style.display = "flex";
-		this.addText("L'élément possède ", "h3", this.node);
+		this.addText("L'élément possède le jeton ", "h3", this.node);
 		this.addAnchor("checkToken");
 		this.addSelect("select,token", getTokens());
 		this.addAnchor("endGroup");
@@ -1414,7 +1429,7 @@ class GetTileAtt extends Piece {
 	constructor(parent) {
 		super(parent);
 		this.node.setAttribute("tags", "valeur,group");
-		this.node.style.backgroundColor = "#bbdd6e";
+		this.node.style.backgroundColor = "#6eddbd";
 		this.node.style.display = "flex";
 
 		let results = getTileAttributes();
@@ -1657,6 +1672,23 @@ class BroadcastEffect extends Piece {
 		this.addText("Distribuer ", "h3", this.node);
 		this.addAnchor("broadcastEffect");
 		this.addSelect("select,effect", getInputs());
+		this.addText(" à tous les voisins", "h3", this.node);
+		this.addAnchor("endGroup");
+		this.addAnchor("endLine");
+	}
+}
+
+class GiveEffect extends Piece {
+	constructor(parent) {
+		super(parent);
+		this.node.setAttribute("tags", "block,line,action");
+		this.node.style.backgroundColor = "#b4db85";
+
+		this.node.style.display = "flex";
+		this.addText("Partager ", "h3", this.node);
+		this.addAnchor("shareEffect");
+		this.addSelect("select,effect", getInputs());
+		this.addText(" à un voisin aléatoire", "h3", this.node);
 		this.addAnchor("endGroup");
 		this.addAnchor("endLine");
 	}
@@ -1876,11 +1908,15 @@ function outputNode(node) {
 			methodBody += "obj.broadcastEffect(";
 		}
 
+		if (hasTag('shareEffect', node)) {
+			methodBody += "obj.shareEffect(";
+		}
+
 		if (hasTag('createToken', node)) {
 			methodBody += "obj.createToken(";
 		}
 		if (hasTag('createEffect', node)) {
-			methodBody += "obj.addOutputEffect(";
+			methodBody += "obj.putEffect(";
 		}
 
 		if (hasTag('listenEffect', node)) {
@@ -1987,6 +2023,8 @@ class Element {
 					} catch (err) {
 						console.error('METHOD', newMethod.name, 'HAS AN ERROR');
 					}
+				} else {
+					console.error('METHOD', newMethod.name, 'IS UNRESOLVED');
 				}
 			});
 		}
@@ -2009,8 +2047,8 @@ class Element {
 			arr.push(JSON.parse(JSON.stringify(input)));
 		} else {
 			if (input.elem && checkInput.elem) {
+
 				if (checkInput.elem != input.elem) {
-					console.log('pushInput', input);
 					arr.push(JSON.parse(JSON.stringify(input)));
 				}
 			}
@@ -2052,6 +2090,9 @@ class Element {
 		this.children.forEach(child => {
 			let result = child.tick();
 			result.forEach(output => {
+				if (output.elemName == 'Fire') {
+					console.log('RUN_CHILDREN', this.name, output);
+				}
 				this.addInput(this.outputs, output);
 			});
 		});
@@ -2101,7 +2142,7 @@ class Element {
 	}
 
 	deleteToken() {
-		this.addInput(this.outputs, { name: 'destroyChild', elem: this.id });
+		this.addInput(this.outputs, { name: 'destroyChild', elem: this.id, elemName: this.name });
 	}
 
 	createToken(name) {
@@ -2142,24 +2183,25 @@ class Element {
 
 	listenInput(name) {}
 
-	addOutputEffect(name) {
-		let input = getInput(this.inputs, name);
-
-		if (!input) {
-			this.createEffect(name);
-			input = getInput(this.inputs, name);
-		}
-		input['target'] = 'self';
-		this.addInput(this.outputs, input);
+	putEffect(name) {
+		this.addOutputEffect(name, 'self');
 	}
 
 	broadcastEffect(name) {
+		this.addOutputEffect(name, 'broad');
+	}
+
+	shareEffect(name) {
+		this.addOutputEffect(name, 'one');
+	}
+
+	addOutputEffect(name, target = 'self') {
 		let input = getInput(this.inputs, name);
 		if (!input) {
 			this.createEffect(name);
 			input = getInput(this.inputs, name);
 		}
-		input['target'] = 'broad';
+		input['target'] = target;
 		this.addInput(this.outputs, input);
 	}
 }
@@ -2178,13 +2220,6 @@ class Tile extends Element {
 		this.tile = this.tileID;
 	}
 
-	// ---------------------------------------------------------------------------------------------
-	// Méthodes Test
-	// ---------------------------------------------------------------------------------------------
-	setOnFire() {
-		this.addInput(this.nextInputs, effectTemplate.Feu, true);
-		clickEvent = false;
-	}
 	// ---------------------------------------------------------------------------------------------
 	// Tick
 	// ---------------------------------------------------------------------------------------------
@@ -2251,26 +2286,38 @@ class Tile extends Element {
 	}
 
 	checkOutputs() {
-		this.outputs.forEach(output => {
+		for (let i = 0; i < this.outputs.length; i++) {
+			let output = this.outputs[i];
+
 			if (output.name == 'destroyChild') {
 				deleteToken(this.children, output.elem);
-				deleteIncasedInput(this.outputs, 'destroyChild', output.elem);
 				this.colorToken = '';
 				this.borderToken = '';
-				// deleteInput(this.outputs,output.name);
+				this.outputs.splice(i, 1);
+				i--;
 			} else if (isInput(output.name)) {
 
 				if (output.target == 'self') {
 					this.addInput(this.nextInputs, output, true);
 					giveInput(output, [this.tileID]);
-					// deleteInput(this.outputs,output.name);
+					this.outputs.splice(i, 1);
+					i--;
 				} else if (output.target == 'broad') {
 					this.addInput(this.nextInputs, output, true);
 					giveInput(output, this.getNeighbours());
-					deleteInput(this.outputs, output.name);
+					this.outputs.splice(i, 1);
+					i--;
+				} else if (output.target == 'one') {
+					console.log('TARGET_ONE');
+					this.addInput(this.nextInputs, output, true);
+					let neighbours = this.getNeighbours();
+					let target = neighbours[Math.floor(Math.random() * neighbours.length)];
+					giveInput(output, [target]);
+					this.outputs.splice(i, 1);
+					i--;
 				}
 			}
-		});
+		}
 	}
 
 	getNeighbours() {
@@ -2384,6 +2431,7 @@ class Token extends Element {
 
 	tick() {
 		super.tick();
+
 		return this.outputs;
 	}
 
@@ -2602,7 +2650,7 @@ const tilesTick = () => {
 
 const printInfo = () => {
 	let container = document.querySelector('#infoTile');
-	setTextNode('#selectTitle', selectedTile.name == 'tile' ? "Tuile" : selectedTile.name);
+	setTextNode('#selectTitle', selectedTile.name == 'tile' ? "Tuile" : selectedTile.name + " " + selectedTile.id);
 
 	let listAttributes = container.querySelector('#listAttributes');
 	listAttributes.innerHTML = "";
@@ -2683,7 +2731,6 @@ const deleteInput = (arr, input) => {
 const deleteIncasedInput = (arr, container, id) => {
 	for (let i = 0; i < arr.length; i++) {
 		if (arr[i].name === container && arr[i].elem == id) {
-			console.log('DeleteInput', arr[i], id);
 			arr.splice(i, 1);
 		}
 	}
@@ -2692,7 +2739,6 @@ const deleteIncasedInput = (arr, container, id) => {
 const deleteToken = (arr, id) => {
 	for (let i = 0; i < arr.length; i++) {
 		if (arr[i].id === id) {
-			console.log('DeleteToken', arr[i], id);
 			arr.splice(i, 1);
 		}
 	}

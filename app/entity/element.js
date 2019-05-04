@@ -59,6 +59,8 @@ class Element{
 					}catch(err){
 						console.error('METHOD',newMethod.name,'HAS AN ERROR');
 					}
+				}else{
+					console.error('METHOD',newMethod.name,'IS UNRESOLVED');
 				}
 			});
 		}
@@ -81,8 +83,8 @@ class Element{
 			arr.push(JSON.parse(JSON.stringify(input)));
 		}else{
 			if(input.elem && checkInput.elem){
+
 				if(checkInput.elem != input.elem){
-					console.log('pushInput',input)
 					arr.push(JSON.parse(JSON.stringify(input)));
 				}
 			}
@@ -125,6 +127,7 @@ class Element{
 		this.children.forEach(child => {
 			let result = child.tick();
 			result.forEach(output=>{
+				if(output.elemName == 'Fire'){console.log('RUN_CHILDREN',this.name,output);}
 				this.addInput(this.outputs,output);
 
 			});
@@ -175,7 +178,7 @@ class Element{
 	}
 
 	deleteToken(){
-		this.addInput(this.outputs,{name:'destroyChild',elem:this.id});
+		this.addInput(this.outputs,{name:'destroyChild',elem:this.id,elemName:this.name});
 	}
 
 	createToken(name){
@@ -218,24 +221,25 @@ class Element{
 
 	}
 
-	addOutputEffect(name){
-		let input = getInput(this.inputs,name);
-
-		if(!input){
-			this.createEffect(name);
-			input = getInput(this.inputs,name);
-		}
-		input['target'] = 'self';
-		this.addInput(this.outputs,input);
+	putEffect(name){
+		this.addOutputEffect(name,'self');
 	}
 
 	broadcastEffect(name){
+		this.addOutputEffect(name,'broad');
+	}
+
+	shareEffect(name){
+		this.addOutputEffect(name,'one');
+	}
+
+	addOutputEffect(name,target='self'){
 		let input = getInput(this.inputs,name);
 		if(!input){
 			this.createEffect(name);
 			input = getInput(this.inputs,name);
 		}
-		input['target'] = 'broad';
+		input['target'] = target;
 		this.addInput(this.outputs,input);
 	}
 }

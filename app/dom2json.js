@@ -95,6 +95,12 @@ function toJSON(node) {
 			addSelectOptions(node,options);
 		}
 
+		if(obj.tagName == "select" && hasTag('token',node)){
+			clearSelectOptions(node);
+			let options = getTokens();
+			addSelectOptions(node,options);
+		}
+
 		if(obj.value){
 			node.value = obj.value;
 			node.defaultValue = obj.value;
