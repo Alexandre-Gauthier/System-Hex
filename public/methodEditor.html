@@ -23,13 +23,16 @@
 		<input type="text" class="titleInput" id="titleMethod" name="titleMethod" placeholder="Nom" maxlength="20">
 		<div class="header_menu">
 			<a href="#">
-				<div id="methodBtnSave" class="button_square save"></div>
+				<div id="methodBtnActive" class="button_square">Désactiver</div>
 			</a>
 			<a href="#">
-				<div id="methodBtnDelete" class="button_square delete"></div>
+				<div id="methodBtnSave" class="button_square save">Enregistrer</div>
+			</a>
+			<a href="#">
+				<div id="methodBtnDelete" class="button_square delete">Supprimer</div>
 			</a>
 			<a href="dashboard.html">
-				<div class="button_square close"></div>
+				<div class="button_square close">Retour</div>
 			</a>
 		</div>
 	</div>
@@ -79,7 +82,7 @@
 			<button tags="action,line" onclick="createPiece(CreateEffect)" >Ajouter un Effet</button>
 			<button tags="action,line" onclick="createPiece(DeleteToken)" >Supprimer le Jeton</button>
 			<button tags="action,line" onclick="createPiece(BroadcastEffect)" >Distribuer un Effet aux voisins</button>
-			<button tags="action,line" onclick="createPiece(GiveEffect)" >Distribuer un Effet à un voisin</button>
+			<button tags="action,line" onclick="createPiece(GiveEffect)" >Distribuer un Effet à x voisins</button>
 			<h5>Dev</h5>
 			<button tags="action,line" onclick="createPiece(ConsoleOut)" >Console Log</button>
 			<button tags="valeur" onclick="createPiece(InputDev)" >DevString</button>

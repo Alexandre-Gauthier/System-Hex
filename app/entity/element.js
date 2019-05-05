@@ -50,14 +50,18 @@ class Element{
 	installMethods(methods){
 		if(methods){
 			methods.forEach(method =>{
+				let newMethod = JSON.parse(JSON.stringify(method));
 				if(method.unresolved == 0){
-					let newMethod = JSON.parse(JSON.stringify(method));
-					try{
-						var f = new Function('obj','tile', newMethod.body);
-						this.methods.push(f);
-						this.addListenedInputs(newMethod.listenedInputs);
-					}catch(err){
-						console.error('METHOD',newMethod.name,'HAS AN ERROR');
+					if(method['active'] == null || method['active'] == true){
+						try{
+							var f = new Function('obj','tile', newMethod.body);
+							this.methods.push(f);
+							this.addListenedInputs(newMethod.listenedInputs);
+						}catch(err){
+							console.error('METHOD',newMethod.name,'HAS AN ERROR');
+						}
+					}else{
+						console.error('METHOD',newMethod.name,'IS INACTIVE');
 					}
 				}else{
 					console.error('METHOD',newMethod.name,'IS UNRESOLVED');
@@ -229,17 +233,18 @@ class Element{
 		this.addOutputEffect(name,'broad');
 	}
 
-	shareEffect(name){
-		this.addOutputEffect(name,'one');
+	shareEffect(name,number){
+		this.addOutputEffect(name,'share',number);
 	}
 
-	addOutputEffect(name,target='self'){
+	addOutputEffect(name,target='self',data){
 		let input = getInput(this.inputs,name);
 		if(!input){
 			this.createEffect(name);
 			input = getInput(this.inputs,name);
 		}
 		input['target'] = target;
+		input['data'] = data;
 		this.addInput(this.outputs,input);
 	}
 }

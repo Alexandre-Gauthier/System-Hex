@@ -40,11 +40,13 @@ const iniEditor = () =>{
 			setTextNode('#tokenTitle',token.name);
 			addOnClickSaveMethod('#methodBtnSave',token.name,'token');
 			addOnClickDeleteMethod('#methodBtnDelete',token.name,'token');
+			addOnClickToggleMethod('#methodBtnActive',token.name,'token');
 		}else{
 			token = system.tile;
 			setTextNode('#tokenTitle',"Tiles");
 			addOnClickSaveMethod('#methodBtnSave',token,'tile');
 			addOnClickDeleteMethod('#methodBtnDelete',token,'tile');
+			addOnClickToggleMethod('#methodBtnActive',token,'tile');
 			isTile = true;
 		}
 
@@ -55,7 +57,7 @@ const iniEditor = () =>{
 
 
 		if(getUrlVars()["method"] == 'new'){
-			method = {name:'',body:'',dom:'',listenedInputs:[],unresolved:0};
+			method = {name:'',body:'',dom:'',listenedInputs:[],unresolved:0,active:true};
 			token.methods.push(method);
 		}else{
 			method = findElement(token.methods,'name',getUrlVars()["method"],true);
@@ -63,6 +65,12 @@ const iniEditor = () =>{
 			dom2JSON = method.dom;
 			methodBody = method.body;
 			restoreDOM();
+		}
+		console.log(method);
+		if(method['active'] != 'undefined' && method['active'] == false){
+			let btn = document.querySelector('#methodBtnActive')
+			btn.innerHTML = "Activer";
+			btn.classList.add("delete");
 		}
 		getSelectedMethod();
 	});
@@ -82,24 +90,39 @@ const setTextNode = (id,text) =>{
 	document.querySelector(id).innerHTML = text;
 }
 
+const addOnClickToggleMethod = (id,key,type='token') =>{
+	document.querySelector(id).onclick = () =>{
+		if(method['active'] != 'undefined'){
+			method['active'] = !method['active'];
+		}else{
+			method['active'] = false;
+		}
+		saveMethod(key,type);
+	}
+}
+
 const addOnClickSaveMethod = (id,key,type='token') =>{
 	document.querySelector(id).onclick = () =>{
-		dom2String();
-		if(document.querySelector('#titleMethod').value != ""){
-			let data = {oldName:method.name};
-			method.name = document.querySelector('#titleMethod').value;
+		saveMethod(key,type);
+	}
+}
 
-			data['method'] = method;
-			updateAPI(key,type,'saveMethod',data,(res)=>{
-				let tokenStr = "";
-				if(getUrlVars()["token"]){
-					tokenStr = "token="+token.name+"&";
-				}
-				window.location.href = "/methodEditor.html?"+tokenStr+"method="+method.name;
-			});
-		}else{
-			alert('Entrez un nom');
-		}
+const saveMethod =(key,type='token') =>{
+	dom2String();
+	if(document.querySelector('#titleMethod').value != ""){
+		let data = {oldName:method.name};
+		method.name = document.querySelector('#titleMethod').value;
+
+		data['method'] = method;
+		updateAPI(key,type,'saveMethod',data,(res)=>{
+			let tokenStr = "";
+			if(getUrlVars()["token"]){
+				tokenStr = "token="+token.name+"&";
+			}
+			window.location.href = "/methodEditor.html?"+tokenStr+"method="+method.name;
+		});
+	}else{
+		alert('Entrez un nom');
 	}
 }
 
@@ -941,7 +964,10 @@ class GiveEffect extends Piece{
 		this.addText("Partager ","h3",this.node);
 		this.addAnchor("shareEffect");
 		this.addSelect("select,effect",getInputs());
-		this.addText(" à un voisin aléatoire","h3",this.node);
+		this.addText(" à ","h3",this.node);
+		this.addAnchor("separator");
+		this.addSelect("select,comparaison",[["1","1"],["2","2"],["3","3"],["4","4"],["5","5"],["6","6"]]);
+		this.addText(" voisin aléatoire","h3",this.node);
 		this.addAnchor("endGroup");
 		this.addAnchor("endLine");
 	}

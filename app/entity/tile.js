@@ -103,12 +103,13 @@ class Tile extends Element{
 					this.outputs.splice(i,1);
 					i--;
 				}
-				else if(output.target == 'one'){
+				else if(output.target == 'share'){
 					console.log('TARGET_ONE')
 					this.addInput(this.nextInputs,output,true);
 					let neighbours = this.getNeighbours()
-					let target = neighbours[Math.floor(Math.random()*neighbours.length)];
-					giveInput(output,[target]);
+					shuffle(neighbours);
+					let targets = neighbours.slice(0,output.data);
+					giveInput(output,targets);
 					this.outputs.splice(i,1);
 					i--;
 				}

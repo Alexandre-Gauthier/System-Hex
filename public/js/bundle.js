@@ -182,8 +182,14 @@ function getUrlVars() {
 let system = null;
 let modal = null;
 
+let selectedItem = null;
+
 const iniDashboard = () => {
 	getApi('systemChoiceData', result => {
+		document.querySelector('.header_bar').onclick = event => {
+			event.stopPropagation();
+			hideForm();
+		};
 		system = result;
 		addOnClickSaveSystem('#systemBtnSave');
 		fillInput('#titleSystem', system.title);
@@ -257,10 +263,11 @@ const addElement = (id, index, item, onclick) => {
 
 	if (onclick) {
 		newElem.onclick = () => {
-			onclick(index);
+			onclick(index, newElem);
 		};
 	}
 	parent.appendChild(newElem);
+	return newElem;
 };
 
 const addAttributes = (id, array, element, type = 'token') => {
@@ -378,11 +385,17 @@ const createEffect = () => {
 	}
 };
 
-const showToken = index => {
+const showToken = (index, elem) => {
 	let formToken = document.querySelector('#formToken');
 	let formEffect = document.querySelector('#formEffect');
 	let display = document.querySelector('#formToken').style.display;
-	if (display == 'none') {
+	if (selectedItem != elem || display == 'none') {
+		if (selectedItem) {
+			selectedItem.style.color = "#8e8a6b";
+		}
+		selectedItem = elem;
+		elem.style.color = "#344c7c";
+
 		formToken.style.display = 'block';
 		formEffect.style.display = 'none';
 		let token = system.tokens[index];
@@ -422,6 +435,7 @@ const showToken = index => {
 			value: token.iniRatio });
 	} else {
 		formToken.style.display = 'none';
+		selectedItem.style.color = "#8e8a6b";
 	}
 };
 
@@ -439,11 +453,17 @@ const changeBtn = (id, bg, border) => {
 	}
 };
 
-const showEffect = index => {
+const showEffect = (index, elem) => {
 	let formToken = document.querySelector('#formToken');
 	let formEffect = document.querySelector('#formEffect');
 	let display = document.querySelector('#formEffect').style.display;
-	if (display == 'none') {
+	if (selectedItem != elem || display == 'none') {
+		if (selectedItem) {
+			selectedItem.style.color = "#8e8a6b";
+		}
+		selectedItem = elem;
+		elem.style.color = "#344c7c";
+
 		formEffect.style.display = 'block';
 		formToken.style.display = 'none';
 		let effect = system.effects[index];
@@ -455,7 +475,17 @@ const showEffect = index => {
 		addOnClickdeleteElement('#effectBtnDelete', effect, 'effect', 'deleteEffect', system.effects, '#listEffects');
 	} else {
 		formEffect.style.display = 'none';
+		selectedItem.style.color = "#8e8a6b";
 	}
+};
+
+const hideForm = () => {
+	if (selectedItem) {
+		selectedItem.style.color = "#8e8a6b";
+	}
+	selectedItem = null;
+	formEffect.style.display = 'none';
+	formToken.style.display = 'none';
 };
 
 const addOpenEditor = (id, array, name) => {
@@ -466,13 +496,16 @@ const addOpenEditor = (id, array, name) => {
 	if (array) {
 		for (let i = 0; i < array.length; i++) {
 			let item = array[i];
-			addElement(id, i, item, () => {
+			let elem = addElement(id, i, item, () => {
 				let tokenStr = "";
 				if (name) {
 					tokenStr = "token=" + name + "&";
 				}
 				window.location.href = "/methodEditor.html?" + tokenStr + "method=" + item.name;
 			});
+			if (item['active'] != 'undefined' && item['active'] == false) {
+				elem.style.color = "#bfbb9c";
+			}
 		}
 	}
 };
@@ -792,11 +825,13 @@ const iniEditor = () => {
 			setTextNode('#tokenTitle', token.name);
 			addOnClickSaveMethod('#methodBtnSave', token.name, 'token');
 			addOnClickDeleteMethod('#methodBtnDelete', token.name, 'token');
+			addOnClickToggleMethod('#methodBtnActive', token.name, 'token');
 		} else {
 			token = system.tile;
 			setTextNode('#tokenTitle', "Tiles");
 			addOnClickSaveMethod('#methodBtnSave', token, 'tile');
 			addOnClickDeleteMethod('#methodBtnDelete', token, 'tile');
+			addOnClickToggleMethod('#methodBtnActive', token, 'tile');
 			isTile = true;
 		}
 
@@ -806,7 +841,7 @@ const iniEditor = () => {
 		addOpenEditor('#listTokenMethods', token.methods, token.name);
 
 		if (getUrlVars()["method"] == 'new') {
-			method = { name: '', body: '', dom: '', listenedInputs: [], unresolved: 0 };
+			method = { name: '', body: '', dom: '', listenedInputs: [], unresolved: 0, active: true };
 			token.methods.push(method);
 		} else {
 			method = findElement(token.methods, 'name', getUrlVars()["method"], true);
@@ -814,6 +849,12 @@ const iniEditor = () => {
 			dom2JSON = method.dom;
 			methodBody = method.body;
 			restoreDOM();
+		}
+		console.log(method);
+		if (method['active'] != 'undefined' && method['active'] == false) {
+			let btn = document.querySelector('#methodBtnActive');
+			btn.innerHTML = "Activer";
+			btn.classList.add("delete");
 		}
 		getSelectedMethod();
 	});
@@ -833,25 +874,40 @@ const setTextNode = (id, text) => {
 	document.querySelector(id).innerHTML = text;
 };
 
+const addOnClickToggleMethod = (id, key, type = 'token') => {
+	document.querySelector(id).onclick = () => {
+		if (method['active'] != 'undefined') {
+			method['active'] = !method['active'];
+		} else {
+			method['active'] = false;
+		}
+		saveMethod(key, type);
+	};
+};
+
 const addOnClickSaveMethod = (id, key, type = 'token') => {
 	document.querySelector(id).onclick = () => {
-		dom2String();
-		if (document.querySelector('#titleMethod').value != "") {
-			let data = { oldName: method.name };
-			method.name = document.querySelector('#titleMethod').value;
-
-			data['method'] = method;
-			updateAPI(key, type, 'saveMethod', data, res => {
-				let tokenStr = "";
-				if (getUrlVars()["token"]) {
-					tokenStr = "token=" + token.name + "&";
-				}
-				window.location.href = "/methodEditor.html?" + tokenStr + "method=" + method.name;
-			});
-		} else {
-			alert('Entrez un nom');
-		}
+		saveMethod(key, type);
 	};
+};
+
+const saveMethod = (key, type = 'token') => {
+	dom2String();
+	if (document.querySelector('#titleMethod').value != "") {
+		let data = { oldName: method.name };
+		method.name = document.querySelector('#titleMethod').value;
+
+		data['method'] = method;
+		updateAPI(key, type, 'saveMethod', data, res => {
+			let tokenStr = "";
+			if (getUrlVars()["token"]) {
+				tokenStr = "token=" + token.name + "&";
+			}
+			window.location.href = "/methodEditor.html?" + tokenStr + "method=" + method.name;
+		});
+	} else {
+		alert('Entrez un nom');
+	}
 };
 
 const addOnClickDeleteMethod = (id, key, type = 'token') => {
@@ -1688,7 +1744,10 @@ class GiveEffect extends Piece {
 		this.addText("Partager ", "h3", this.node);
 		this.addAnchor("shareEffect");
 		this.addSelect("select,effect", getInputs());
-		this.addText(" à un voisin aléatoire", "h3", this.node);
+		this.addText(" à ", "h3", this.node);
+		this.addAnchor("separator");
+		this.addSelect("select,comparaison", [["1", "1"], ["2", "2"], ["3", "3"], ["4", "4"], ["5", "5"], ["6", "6"]]);
+		this.addText(" voisin aléatoire", "h3", this.node);
 		this.addAnchor("endGroup");
 		this.addAnchor("endLine");
 	}
@@ -2014,14 +2073,18 @@ class Element {
 	installMethods(methods) {
 		if (methods) {
 			methods.forEach(method => {
+				let newMethod = JSON.parse(JSON.stringify(method));
 				if (method.unresolved == 0) {
-					let newMethod = JSON.parse(JSON.stringify(method));
-					try {
-						var f = new Function('obj', 'tile', newMethod.body);
-						this.methods.push(f);
-						this.addListenedInputs(newMethod.listenedInputs);
-					} catch (err) {
-						console.error('METHOD', newMethod.name, 'HAS AN ERROR');
+					if (method['active'] == null || method['active'] == true) {
+						try {
+							var f = new Function('obj', 'tile', newMethod.body);
+							this.methods.push(f);
+							this.addListenedInputs(newMethod.listenedInputs);
+						} catch (err) {
+							console.error('METHOD', newMethod.name, 'HAS AN ERROR');
+						}
+					} else {
+						console.error('METHOD', newMethod.name, 'IS INACTIVE');
 					}
 				} else {
 					console.error('METHOD', newMethod.name, 'IS UNRESOLVED');
@@ -2191,17 +2254,18 @@ class Element {
 		this.addOutputEffect(name, 'broad');
 	}
 
-	shareEffect(name) {
-		this.addOutputEffect(name, 'one');
+	shareEffect(name, number) {
+		this.addOutputEffect(name, 'share', number);
 	}
 
-	addOutputEffect(name, target = 'self') {
+	addOutputEffect(name, target = 'self', data) {
 		let input = getInput(this.inputs, name);
 		if (!input) {
 			this.createEffect(name);
 			input = getInput(this.inputs, name);
 		}
 		input['target'] = target;
+		input['data'] = data;
 		this.addInput(this.outputs, input);
 	}
 }
@@ -2307,12 +2371,13 @@ class Tile extends Element {
 					giveInput(output, this.getNeighbours());
 					this.outputs.splice(i, 1);
 					i--;
-				} else if (output.target == 'one') {
+				} else if (output.target == 'share') {
 					console.log('TARGET_ONE');
 					this.addInput(this.nextInputs, output, true);
 					let neighbours = this.getNeighbours();
-					let target = neighbours[Math.floor(Math.random() * neighbours.length)];
-					giveInput(output, [target]);
+					shuffle(neighbours);
+					let targets = neighbours.slice(0, output.data);
+					giveInput(output, targets);
 					this.outputs.splice(i, 1);
 					i--;
 				}
@@ -2530,8 +2595,8 @@ const iniApp = () => {
 		for (let column = 0; column < nbColumns; column++) {
 			let tile = new Tile(getId(), system.tile.attributes, column, row, system.tile.Color, system.tile.Border);
 			tile.installMethods(system.tile.methods);
-			tile.myListenedInputs = [];
-			tile.listenedInputs = [];
+			// tile.myListenedInputs = [];
+			// tile.listenedInputs = [];
 			iniToken(tile);
 
 			let iniPosX = boardConfig.size,
@@ -2778,3 +2843,12 @@ const isInput = name => {
 	}
 	return false;
 };
+
+// https://alvinalexander.com/source-code/javascript-multiple-random-unique-elements-from-array
+function shuffle(a) {
+	for (let i = a.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[a[i], a[j]] = [a[j], a[i]];
+	}
+	return a;
+}

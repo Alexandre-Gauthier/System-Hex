@@ -1,8 +1,14 @@
 let system = null;
 let modal = null;
 
+let selectedItem = null;
+
 const iniDashboard = () =>{
 	getApi('systemChoiceData',(result)=>{
+		document.querySelector('.header_bar').onclick = (event) =>{
+			event.stopPropagation();
+			hideForm();
+		}
 		system = result;
 		addOnClickSaveSystem('#systemBtnSave');
 		fillInput('#titleSystem',system.title);
@@ -79,10 +85,11 @@ const addElement = (id,index,item,onclick) =>{
 
 	if(onclick){
 		newElem.onclick = () =>{
-			onclick(index);
+			onclick(index,newElem);
 		}
 	}
 	parent.appendChild(newElem);
+	return newElem;
 }
 
 const addAttributes = (id,array,element,type='token') =>{
@@ -201,11 +208,17 @@ const createEffect = () =>{
 	}
 }
 
-const showToken = (index) =>{
+const showToken = (index,elem) =>{
 	let formToken = document.querySelector('#formToken');
 	let formEffect = document.querySelector('#formEffect');
 	let display = document.querySelector('#formToken').style.display;
-	if(display == 'none'){
+	if(selectedItem!= elem || display == 'none'){
+		if(selectedItem){
+			selectedItem.style.color = "#8e8a6b";
+		}
+		selectedItem = elem;
+		elem.style.color = "#344c7c";
+
 		formToken.style.display = 'block';
 		formEffect.style.display = 'none';
 		let token = system.tokens[index];
@@ -245,8 +258,11 @@ const showToken = (index) =>{
 			value: token.iniRatio});
 	}else{
 		formToken.style.display = 'none';
+		selectedItem.style.color = "#8e8a6b";
 	}
 }
+
+
 
 const changeBtn = (id,bg,border) =>{
 	let btn = document.querySelector(id);
@@ -262,11 +278,17 @@ const changeBtn = (id,bg,border) =>{
 	}
 }
 
-const showEffect = (index) =>{
+const showEffect = (index,elem) =>{
 	let formToken = document.querySelector('#formToken');
 	let formEffect = document.querySelector('#formEffect');
 	let display = document.querySelector('#formEffect').style.display;
-	if(display == 'none'){
+	if(selectedItem != elem || display == 'none'){
+		if(selectedItem){
+			selectedItem.style.color = "#8e8a6b";
+		}
+		selectedItem = elem;
+		elem.style.color = "#344c7c";
+
 		formEffect.style.display = 'block';
 		formToken.style.display = 'none';
 		let effect = system.effects[index];
@@ -278,7 +300,17 @@ const showEffect = (index) =>{
 		addOnClickdeleteElement('#effectBtnDelete',effect,'effect','deleteEffect',system.effects,'#listEffects');
 	}else{
 		formEffect.style.display = 'none';
+		selectedItem.style.color = "#8e8a6b";
 	}
+}
+
+const hideForm = () =>{
+	if(selectedItem){
+		selectedItem.style.color = "#8e8a6b";
+	}
+	selectedItem = null;
+	formEffect.style.display = 'none';
+	formToken.style.display = 'none';
 }
 
 const addOpenEditor = (id,array,name) =>{
@@ -289,13 +321,17 @@ const addOpenEditor = (id,array,name) =>{
 	if(array){
 		for(let i = 0; i < array.length;i++){
 			let item = array[i];
-			addElement(id,i,item,()=>{
+			let elem = addElement(id,i,item,()=>{
 				let tokenStr = "";
 				if(name){
 					tokenStr = "token="+name+"&";
 				}
 				window.location.href = "/methodEditor.html?"+tokenStr+"method="+item.name;
 			});
+			if(item['active'] != 'undefined' && item['active'] == false){
+				elem.style.color = "#bfbb9c";
+			}
+
 		}
 	}
 

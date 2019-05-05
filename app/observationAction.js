@@ -93,8 +93,8 @@ const iniApp = () =>{
 		for(let column = 0;column<nbColumns;column++){
 			let tile = new Tile(getId(),system.tile.attributes,column,row,system.tile.Color,system.tile.Border);
 			tile.installMethods(system.tile.methods);
-			tile.myListenedInputs = [];
-			tile.listenedInputs = [];
+			// tile.myListenedInputs = [];
+			// tile.listenedInputs = [];
 			iniToken(tile);
 
 			let iniPosX = boardConfig.size, iniPosY = boardConfig.size;
@@ -341,4 +341,13 @@ const isInput = (name) =>{
 		return true;
 	}
 	return false;
+}
+
+// https://alvinalexander.com/source-code/javascript-multiple-random-unique-elements-from-array
+function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
 }
