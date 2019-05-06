@@ -1,4 +1,4 @@
-const nbColumns = 24;
+const nbColumns = 36;
 
 let gap = 5;
 let nbRows = 14;
@@ -59,6 +59,7 @@ const iniObservation = () =>{
 		iniApp();
 	});
 
+	document.querySelector('#methodBtnReset').onclick = iniBoard;
 }
 
 
@@ -87,14 +88,19 @@ const iniApp = () =>{
 		}
 	}
 
+	iniBoard();
+
+	tick();
+}
+
+const iniBoard = () =>{
+	tilesList.length = 0;
 	// Create board
 	for(let row = 0;row<nbRows;row++){
 		let tileRow = [];
 		for(let column = 0;column<nbColumns;column++){
 			let tile = new Tile(getId(),system.tile.attributes,column,row,system.tile.Color,system.tile.Border);
 			tile.installMethods(system.tile.methods);
-			// tile.myListenedInputs = [];
-			// tile.listenedInputs = [];
 			iniToken(tile);
 
 			let iniPosX = boardConfig.size, iniPosY = boardConfig.size;
@@ -111,7 +117,6 @@ const iniApp = () =>{
 		tilesList.push(tileRow);
 	}
 
-	tick();
 }
 
 const iniTokens = () =>{

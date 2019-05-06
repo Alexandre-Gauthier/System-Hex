@@ -449,6 +449,19 @@ const getTileAttributes = () =>{
 	return arr;
 }
 
+const getEffectAttributes = () =>{
+	let arr = [];
+	let results = [];
+	system.effects.forEach(effect=>{
+		effect.attributes.forEach(attribute=>{
+			arr.push([effect.name+"->"+attribute.name,"obj.getEffectAttribute('"+effect.name+"','"+attribute.name+"')"]);
+		});
+	});
+
+	return arr;
+}
+
+
 const getVar = () =>{
 	let results = Object.keys(localeVars);
 	let arr = [];
@@ -530,7 +543,7 @@ class Piece{
 
 		this.node.onchange = function() {
 			dom2String();
-		  }
+		}
 
 		addSelectOptions(selector,options);
 	}
@@ -709,6 +722,20 @@ class GetTileAtt extends Piece{
 		let results = getTileAttributes();
 		if(results.length > 0){
 			this.addSelect("select,tileAtt",results);
+		}
+	}
+}
+
+class GetEffectAtt extends Piece{
+	constructor(parent){
+		super(parent);
+		this.node.setAttribute("tags","valeur,group");
+		this.node.style.backgroundColor = "#6eddbd"
+		this.node.style.display = "flex";
+
+		let results = getEffectAttributes();
+		if(results.length > 0){
+			this.addSelect("select,effectAtt",results);
 		}
 	}
 }
@@ -1087,6 +1114,10 @@ function outputNode(node)
 
 		if(hasTag('separator',node)){
 			methodBody += ",";
+		}
+
+		if(hasTag('getEffectAttribute',node)){
+			methodBody += "obj.getEffectAttribute(";
 		}
 
 		if(hasTag('checkToken',node)){

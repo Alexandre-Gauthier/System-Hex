@@ -1231,6 +1231,18 @@ const getTileAttributes = () => {
 	return arr;
 };
 
+const getEffectAttributes = searchName => {
+	let arr = [];
+	let results = [];
+	system.effects.forEach(effect => {
+		effect.attributes.forEach(attribute => {
+			arr.push([effect.name + "->" + attribute.name, "obj.getEffectAttribute('" + effect.name + "','" + attribute.name + "')"]);
+		});
+	});
+
+	return arr;
+};
+
 const getVar = () => {
 	let results = Object.keys(localeVars);
 	let arr = [];
@@ -1491,6 +1503,20 @@ class GetTileAtt extends Piece {
 		let results = getTileAttributes();
 		if (results.length > 0) {
 			this.addSelect("select,tileAtt", results);
+		}
+	}
+}
+
+class GetEffectAtt extends Piece {
+	constructor(parent) {
+		super(parent);
+		this.node.setAttribute("tags", "valeur,group");
+		this.node.style.backgroundColor = "#6eddbd";
+		this.node.style.display = "flex";
+
+		let results = getEffectAttributes();
+		if (results.length > 0) {
+			this.addSelect("select,effectAtt", results);
 		}
 	}
 }
@@ -1860,6 +1886,10 @@ function outputNode(node) {
 
 		if (hasTag('separator', node)) {
 			methodBody += ",";
+		}
+
+		if (hasTag('getEffectAttribute', node)) {
+			methodBody += "obj.getEffectAttribute(";
 		}
 
 		if (hasTag('checkToken', node)) {
@@ -2502,7 +2532,7 @@ class Token extends Element {
 
 }
 
-const nbColumns = 24;
+const nbColumns = 36;
 
 let gap = 5;
 let nbRows = 14;
@@ -2562,6 +2592,8 @@ const iniObservation = () => {
 		setTextNode('#titleSystem', system.title);
 		iniApp();
 	});
+
+	document.querySelector('#methodBtnReset').onclick = iniBoard;
 };
 
 const iniApp = () => {
@@ -2589,14 +2621,19 @@ const iniApp = () => {
 		}
 	}
 
+	iniBoard();
+
+	tick();
+};
+
+const iniBoard = () => {
+	tilesList.length = 0;
 	// Create board
 	for (let row = 0; row < nbRows; row++) {
 		let tileRow = [];
 		for (let column = 0; column < nbColumns; column++) {
 			let tile = new Tile(getId(), system.tile.attributes, column, row, system.tile.Color, system.tile.Border);
 			tile.installMethods(system.tile.methods);
-			// tile.myListenedInputs = [];
-			// tile.listenedInputs = [];
 			iniToken(tile);
 
 			let iniPosX = boardConfig.size,
@@ -2613,8 +2650,6 @@ const iniApp = () => {
 		}
 		tilesList.push(tileRow);
 	}
-
-	tick();
 };
 
 const iniTokens = () => {
