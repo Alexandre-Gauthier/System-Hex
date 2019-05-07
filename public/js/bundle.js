@@ -1231,7 +1231,7 @@ const getTileAttributes = () => {
 	return arr;
 };
 
-const getEffectAttributes = searchName => {
+const getEffectAttributes = () => {
 	let arr = [];
 	let results = [];
 	system.effects.forEach(effect => {

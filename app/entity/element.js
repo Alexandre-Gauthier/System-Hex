@@ -181,6 +181,13 @@ class Element{
 		return tileDic.attributes[name];
 	}
 
+	getEffectAttribute(effect,name){
+		let input = getInput(this.inputs,effect)
+		if(input){
+			return input.attributes[name];
+		}
+	}
+
 	deleteToken(){
 		this.addInput(this.outputs,{name:'destroyChild',elem:this.id,elemName:this.name});
 	}
