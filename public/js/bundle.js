@@ -2234,6 +2234,15 @@ class Element {
 		return tileDic.attributes[name];
 	}
 
+	getEffectAttribute(effect, name) {
+		let input = getInput(this.inputs, effect);
+		if (input) {
+			return input.attributes[name];
+		} else {
+			return effectTemplate[effect].attributes[name];
+		}
+	}
+
 	deleteToken() {
 		this.addInput(this.outputs, { name: 'destroyChild', elem: this.id, elemName: this.name });
 	}
@@ -2532,7 +2541,7 @@ class Token extends Element {
 
 }
 
-const nbColumns = 36;
+const nbColumns = 24;
 
 let gap = 5;
 let nbRows = 14;
@@ -2602,6 +2611,12 @@ const iniApp = () => {
 		let json = system.effects[i];
 		try {
 			let effect = json;
+			let attributes = {};
+			effect.attributes.forEach(attribute => {
+				let newAttribute = JSON.parse(JSON.stringify(attribute));
+				attributes[newAttribute.name] = Number(newAttribute.value);
+			});
+			effect.attributes = attributes;
 			effectTemplate[effect.name] = effect;
 			console.log(effect);
 		} catch (err) {

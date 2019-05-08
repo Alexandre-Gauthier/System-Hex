@@ -182,9 +182,11 @@ class Element{
 	}
 
 	getEffectAttribute(effect,name){
-		let input = getInput(this.inputs,effect)
+		let input = getInput(this.inputs,effect);
 		if(input){
 			return input.attributes[name];
+		}else{
+			return effectTemplate[effect].attributes[name];
 		}
 	}
 

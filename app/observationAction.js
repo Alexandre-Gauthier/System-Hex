@@ -1,4 +1,4 @@
-const nbColumns = 36;
+const nbColumns = 24;
 
 let gap = 5;
 let nbRows = 14;
@@ -69,6 +69,12 @@ const iniApp = () =>{
 		let json = system.effects[i];
 		try{
 			let effect = json;
+			let attributes = {};
+			effect.attributes.forEach(attribute=>{
+				let newAttribute = JSON.parse(JSON.stringify(attribute));
+				attributes[newAttribute.name] = Number(newAttribute.value);
+			});
+			effect.attributes = attributes;
 			effectTemplate[effect.name] = effect;
 			console.log(effect)
 		}catch(err){
