@@ -63,13 +63,15 @@
 			<button tags="math" onclick="createPiece(MathBloc)" >Math</button>
 			<button tags="line" onclick="createPiece(Increment)" >Augmenter</button>
 			<button tags="line" onclick="createPiece(Decrement)" >Diminuer</button>
-			<button tags="math" onclick="createPiece(GroupMath)" >Groupe</button>
+			<button tags="math,group" onclick="createPiece(GroupMath)" >Groupe</button>
 			<h5>Variable</h5>
 			<button tags="line" onclick="createPiece(NewVariable)" >Créer une Variable</button>
 			<button tags="line" onclick="createPiece(ChangeVariable)" >Affecter une Variable</button>
 			<button tags="valeur,condition" onclick="createPiece(GetLocaleVar)" >Variable</button>
 			<button tags="valeur,condition,notTile" onclick="createPiece(GetTileAtt)" >Attribut de Tuile</button>
 			<button tags="valeur,condition" onclick="createPiece(GetEffectAtt)" >Attribut d'Effet</button>
+			<button tags="valeur,condition" onclick="createPiece(GetEffectNeighbors)" >Observer voisins par effet</button>
+			<button tags="valeur,condition" onclick="createPiece(GetTokenNeighbors)" >Observer voisins par jeton</button>
 			<h5>Valeur</h5>
 			<button tags="valeur" onclick="createPiece(InputNumber)" >Entrer un nombre</button>
 			<button tags="valeur" onclick="createPiece(InputString)" >Entrer un nom</button>

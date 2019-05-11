@@ -164,51 +164,55 @@ const select=(event,node)=>{
 }
 
 const activeUpBtn = () =>{
+	let btn = document.querySelector('#editorBtnUp');
 	if(selectedPiece && selectedPiece.getAttribute("class")=="newPiece"){
 		let prev = getPrev(selectedPiece)
 		if(prev && !hasTag('hint',prev)){
-			document.querySelector('#editorBtnUp').classList.add("active");
+			btn.classList.add("active");
 		}else{
-			document.querySelector('#editorBtnUp').classList.remove("active");
+			btn.classList.remove("active");
 		}
 	}else{
-		document.querySelector('#editorBtnUp').classList.remove("active");
+		btn.classList.remove("active");
 	}
 }
 
 const activeDownBtn = () =>{
+	let btn = document.querySelector('#editorBtnDown');
 	if(selectedPiece && selectedPiece.getAttribute("class")=="newPiece"){
 		if(getNext(selectedPiece)){
-			document.querySelector('#editorBtnDown').classList.add("active");
+			btn.classList.add("active");
 		}else{
-			document.querySelector('#editorBtnDown').classList.remove("active");
+			btn.classList.remove("active");
 		}
 	}else{
-		document.querySelector('#editorBtnDown').classList.remove("active");
+		btn.classList.remove("active");
 	}
 }
 
 const activeDeleteBtn = () =>{
+	let btn = document.querySelector('#editorBtnDelete');
 	if(selectedPiece && !hasTag('capsule',selectedPiece)){
-		document.querySelector('#editorBtnDelete').classList.add("active");
-		document.querySelector('#editorBtnDelete').classList.add("delete");
+		btn.classList.add("active");
+		btn.classList.add("delete");
 	}else{
-		document.querySelector('#editorBtnDelete').classList.remove("active");
-		document.querySelector('#editorBtnDelete').classList.remove("delete");
+		btn.classList.remove("active");
+		btn.classList.remove("delete");
 	}
 }
 
 const activeMoveBtn = () =>{
+	let btn = document.querySelector('#editorBtnMove');
 	if((selectedPiece && !hasTag('capsule',selectedPiece)) || savedPiece){
-		document.querySelector('#editorBtnMove').classList.add("active");
-
+		btn.classList.add("active");
 	}else{
-		document.querySelector('#editorBtnMove').classList.remove("active");
+		btn.classList.remove("active");
 	}
+
 	if(savedPiece){
-		document.querySelector('#editorBtnMove').classList.add("move");
+		btn.classList.add("move");
 	}else{
-		document.querySelector('#editorBtnMove').classList.remove("move");
+		btn.classList.remove("move");
 	}
 }
 
@@ -654,6 +658,36 @@ class CheckInput extends Piece{
 	}
 }
 
+class GetEffectNeighbors extends Piece{
+	constructor(parent){
+		super(parent);
+		this.node.setAttribute("tags","valeur,math,group");
+		this.node.style.backgroundColor = "#bbdd6e"
+
+		this.node.style.display = "flex";
+		this.addText("Combien de voisins possède l'effet ","h3",this.node);
+		this.addAnchor("getEffectNeighbors");
+		this.addSelect("select,effect",getInputs());
+		this.addText(" ?","h3",this.node);
+		this.addAnchor("endGroup");
+	}
+}
+
+class GetTokenNeighbors extends Piece{
+	constructor(parent){
+		super(parent);
+		this.node.setAttribute("tags","valeur,math,group");
+		this.node.style.backgroundColor = "#bbdd6e"
+
+		this.node.style.display = "flex";
+		this.addText("Combien de voisins possède le jeton","h3",this.node);
+		this.addAnchor("getTokenNeighbors");
+		this.addSelect("select,token",getTokens());
+		this.addText(" ?","h3",this.node);
+		this.addAnchor("endGroup");
+	}
+}
+
 class RandomEvent extends Piece{
 	constructor(parent){
 		super(parent);
@@ -799,7 +833,7 @@ class GroupMath extends Piece{
 class Not extends Piece{
 	constructor(parent){
 		super(parent);
-		this.node.setAttribute("tags","group");
+		this.node.setAttribute("tags","condition,math,group");
 		this.node.style.backgroundColor = "#d68f7a";
 
 		this.node.style.display = "flex";
@@ -1106,6 +1140,14 @@ function outputNode(node)
 
 		if(hasTag('randomEvent',node)){
 			methodBody += "obj.randomPerc(";
+		}
+
+		if(hasTag('getEffectNeighbors',node)){
+			methodBody += "obj.getEffectNeighbors(";
+		}
+
+		if(hasTag('getTokenNeighbors',node)){
+			methodBody += "obj.getTokenNeighbors(";
 		}
 
 		if(hasTag('slider',node)){

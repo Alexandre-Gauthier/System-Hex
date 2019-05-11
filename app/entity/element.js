@@ -234,6 +234,34 @@ class Element{
 
 	}
 
+	getEffectNeighbors(effect){
+		let tileDic = getTile(this.tile);
+		let res = 0;
+
+		let neighbors = getNeighbours(tileDic.hexX,tileDic.hexY);
+		neighbors.forEach(tileId => {
+			let tile = getTile(tileId);
+			if(getInput(tile.inputs,effect)){
+				res++;
+			}
+		});
+		return res;
+	}
+
+	getTokenNeighbors(token){
+		let tileDic = getTile(this.tile);
+		let res = 0;
+
+		let neighbors = getNeighbours(tileDic.hexX,tileDic.hexY);
+		neighbors.forEach(tileId => {
+			let tile = getTile(tileId);
+			if(getInput(tile.children,token)){
+				res++;
+			}
+		});
+		return res;
+	}
+
 	putEffect(name){
 		this.addOutputEffect(name,'self');
 	}

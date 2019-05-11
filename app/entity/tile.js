@@ -99,14 +99,13 @@ class Tile extends Element{
 					i--;
 				}else if(output.target == 'broad'){
 					this.addInput(this.nextInputs,output,true);
-					giveInput(output,this.getNeighbours());
+					giveInput(output,getNeighbours(this.hexX,this.hexY));
 					this.outputs.splice(i,1);
 					i--;
 				}
 				else if(output.target == 'share'){
-					console.log('TARGET_ONE')
 					this.addInput(this.nextInputs,output,true);
-					let neighbours = this.getNeighbours()
+					let neighbours = getNeighbours(this.hexX,this.hexY);
 					shuffle(neighbours);
 					let targets = neighbours.slice(0,output.data);
 					giveInput(output,targets);
@@ -118,29 +117,29 @@ class Tile extends Element{
 		}
 	}
 
-	getNeighbours(){
-		let keyVoisin = [];
-		let x = this.hexX;
-		let y = this.hexY;
-		if(x%2 == 0){
-			if(x>0){keyVoisin.push((x-1)+'-'+y);}
-			if(y>0){keyVoisin.push(x+'-'+(y-1));}
-			if(x<nbColumns-1){keyVoisin.push((x+1)+'-'+y);}
+	// getNeighbours(){
+	// 	let keyVoisin = [];
+	// 	let x = this.hexX;
+	// 	let y = this.hexY;
+	// 	if(x%2 == 0){
+	// 		if(x>0){keyVoisin.push((x-1)+'-'+y);}
+	// 		if(y>0){keyVoisin.push(x+'-'+(y-1));}
+	// 		if(x<nbColumns-1){keyVoisin.push((x+1)+'-'+y);}
 
-			if(y<nbRows-1&&x>0){keyVoisin.push((x-1)+'-'+(y+1));}
-			if(y<nbRows-1){keyVoisin.push(x+'-'+(y+1));}
-			if(y<nbRows-1&&x<nbColumns-1){keyVoisin.push((x+1)+'-'+(y+1));}
-		}else{
-			if(y>0&&x>0){keyVoisin.push((x-1)+'-'+(y-1));}
-			if(y>0){keyVoisin.push(x+'-'+(y-1));}
-			if(y>0&&x<nbColumns-1){keyVoisin.push((x+1)+'-'+(y-1));}
+	// 		if(y<nbRows-1&&x>0){keyVoisin.push((x-1)+'-'+(y+1));}
+	// 		if(y<nbRows-1){keyVoisin.push(x+'-'+(y+1));}
+	// 		if(y<nbRows-1&&x<nbColumns-1){keyVoisin.push((x+1)+'-'+(y+1));}
+	// 	}else{
+	// 		if(y>0&&x>0){keyVoisin.push((x-1)+'-'+(y-1));}
+	// 		if(y>0){keyVoisin.push(x+'-'+(y-1));}
+	// 		if(y>0&&x<nbColumns-1){keyVoisin.push((x+1)+'-'+(y-1));}
 
-			if(x>0){keyVoisin.push((x-1)+'-'+y);}
-			if(y<nbRows-1){keyVoisin.push(x+'-'+(y+1));}
-			if(x<nbColumns-1){keyVoisin.push((x+1)+'-'+y);}
-		}
-		return keyVoisin;
-	}
+	// 		if(x>0){keyVoisin.push((x-1)+'-'+y);}
+	// 		if(y<nbRows-1){keyVoisin.push(x+'-'+(y+1));}
+	// 		if(x<nbColumns-1){keyVoisin.push((x+1)+'-'+y);}
+	// 	}
+	// 	return keyVoisin;
+	// }
 
 	// ---------------------------------------------------------------------------------------------
 	// Méthodes d'Affichage

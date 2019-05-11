@@ -384,11 +384,11 @@ const insertSystem = (req,res) =>{
     let newSystem = {"id":0,
                     "title":req.body.name,
                     "board":{"Color":"",
-                        "Attributes":[],
+                        "attributes":[],
                         "methods":[]},
                     "tile":{"Color":"",
                         "Border":"",
-                        "Attributes":[],
+                        "attributes":[],
                         "methods":[]},
                     "tokens":[],
                     "effects":[]

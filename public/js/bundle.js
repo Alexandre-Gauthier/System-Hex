@@ -343,8 +343,9 @@ const createAttribute = (id, element, type) => {
 	let title = document.querySelector('#titleAttribute').value;
 	let value = Number(document.querySelector('#valueAttribute').value);
 	let attribute = { name: title, value: value };
+	let name = element.name ? element.name : 'tile';
 
-	updateAPI(element.name, type, 'addAttribute', { attribute: attribute }, res => {
+	updateAPI(name, type, 'addAttribute', { attribute: attribute }, res => {
 		element.attributes.push(attribute);
 		addAttribute(id, attribute, element, type);
 		hideModal();
@@ -948,50 +949,55 @@ const select = (event, node) => {
 };
 
 const activeUpBtn = () => {
+	let btn = document.querySelector('#editorBtnUp');
 	if (selectedPiece && selectedPiece.getAttribute("class") == "newPiece") {
 		let prev = getPrev(selectedPiece);
 		if (prev && !hasTag('hint', prev)) {
-			document.querySelector('#editorBtnUp').classList.add("active");
+			btn.classList.add("active");
 		} else {
-			document.querySelector('#editorBtnUp').classList.remove("active");
+			btn.classList.remove("active");
 		}
 	} else {
-		document.querySelector('#editorBtnUp').classList.remove("active");
+		btn.classList.remove("active");
 	}
 };
 
 const activeDownBtn = () => {
+	let btn = document.querySelector('#editorBtnDown');
 	if (selectedPiece && selectedPiece.getAttribute("class") == "newPiece") {
 		if (getNext(selectedPiece)) {
-			document.querySelector('#editorBtnDown').classList.add("active");
+			btn.classList.add("active");
 		} else {
-			document.querySelector('#editorBtnDown').classList.remove("active");
+			btn.classList.remove("active");
 		}
 	} else {
-		document.querySelector('#editorBtnDown').classList.remove("active");
+		btn.classList.remove("active");
 	}
 };
 
 const activeDeleteBtn = () => {
+	let btn = document.querySelector('#editorBtnDelete');
 	if (selectedPiece && !hasTag('capsule', selectedPiece)) {
-		document.querySelector('#editorBtnDelete').classList.add("active");
-		document.querySelector('#editorBtnDelete').classList.add("delete");
+		btn.classList.add("active");
+		btn.classList.add("delete");
 	} else {
-		document.querySelector('#editorBtnDelete').classList.remove("active");
-		document.querySelector('#editorBtnDelete').classList.remove("delete");
+		btn.classList.remove("active");
+		btn.classList.remove("delete");
 	}
 };
 
 const activeMoveBtn = () => {
+	let btn = document.querySelector('#editorBtnMove');
 	if (selectedPiece && !hasTag('capsule', selectedPiece) || savedPiece) {
-		document.querySelector('#editorBtnMove').classList.add("active");
+		btn.classList.add("active");
 	} else {
-		document.querySelector('#editorBtnMove').classList.remove("active");
+		btn.classList.remove("active");
 	}
+
 	if (savedPiece) {
-		document.querySelector('#editorBtnMove').classList.add("move");
+		btn.classList.add("move");
 	} else {
-		document.querySelector('#editorBtnMove').classList.remove("move");
+		btn.classList.remove("move");
 	}
 };
 
@@ -1435,6 +1441,36 @@ class CheckInput extends Piece {
 	}
 }
 
+class GetEffectNeighbors extends Piece {
+	constructor(parent) {
+		super(parent);
+		this.node.setAttribute("tags", "valeur,math,group");
+		this.node.style.backgroundColor = "#bbdd6e";
+
+		this.node.style.display = "flex";
+		this.addText("Combien de voisins possède l'effet ", "h3", this.node);
+		this.addAnchor("getEffectNeighbors");
+		this.addSelect("select,effect", getInputs());
+		this.addText(" ?", "h3", this.node);
+		this.addAnchor("endGroup");
+	}
+}
+
+class GetTokenNeighbors extends Piece {
+	constructor(parent) {
+		super(parent);
+		this.node.setAttribute("tags", "valeur,math,group");
+		this.node.style.backgroundColor = "#bbdd6e";
+
+		this.node.style.display = "flex";
+		this.addText("Combien de voisins possède le jeton", "h3", this.node);
+		this.addAnchor("getTokenNeighbors");
+		this.addSelect("select,token", getTokens());
+		this.addText(" ?", "h3", this.node);
+		this.addAnchor("endGroup");
+	}
+}
+
 class RandomEvent extends Piece {
 	constructor(parent) {
 		super(parent);
@@ -1580,7 +1616,7 @@ class GroupMath extends Piece {
 class Not extends Piece {
 	constructor(parent) {
 		super(parent);
-		this.node.setAttribute("tags", "group");
+		this.node.setAttribute("tags", "condition,math,group");
 		this.node.style.backgroundColor = "#d68f7a";
 
 		this.node.style.display = "flex";
@@ -1878,6 +1914,14 @@ function outputNode(node) {
 
 		if (hasTag('randomEvent', node)) {
 			methodBody += "obj.randomPerc(";
+		}
+
+		if (hasTag('getEffectNeighbors', node)) {
+			methodBody += "obj.getEffectNeighbors(";
+		}
+
+		if (hasTag('getTokenNeighbors', node)) {
+			methodBody += "obj.getTokenNeighbors(";
 		}
 
 		if (hasTag('slider', node)) {
@@ -2285,6 +2329,34 @@ class Element {
 
 	listenInput(name) {}
 
+	getEffectNeighbors(effect) {
+		let tileDic = getTile(this.tile);
+		let res = 0;
+
+		let neighbors = getNeighbours(tileDic.hexX, tileDic.hexY);
+		neighbors.forEach(tileId => {
+			let tile = getTile(tileId);
+			if (getInput(tile.inputs, effect)) {
+				res++;
+			}
+		});
+		return res;
+	}
+
+	getTokenNeighbors(token) {
+		let tileDic = getTile(this.tile);
+		let res = 0;
+
+		let neighbors = getNeighbours(tileDic.hexX, tileDic.hexY);
+		neighbors.forEach(tileId => {
+			let tile = getTile(tileId);
+			if (getInput(tile.children, token)) {
+				res++;
+			}
+		});
+		return res;
+	}
+
 	putEffect(name) {
 		this.addOutputEffect(name, 'self');
 	}
@@ -2407,13 +2479,12 @@ class Tile extends Element {
 					i--;
 				} else if (output.target == 'broad') {
 					this.addInput(this.nextInputs, output, true);
-					giveInput(output, this.getNeighbours());
+					giveInput(output, getNeighbours(this.hexX, this.hexY));
 					this.outputs.splice(i, 1);
 					i--;
 				} else if (output.target == 'share') {
-					console.log('TARGET_ONE');
 					this.addInput(this.nextInputs, output, true);
-					let neighbours = this.getNeighbours();
+					let neighbours = getNeighbours(this.hexX, this.hexY);
 					shuffle(neighbours);
 					let targets = neighbours.slice(0, output.data);
 					giveInput(output, targets);
@@ -2424,53 +2495,29 @@ class Tile extends Element {
 		}
 	}
 
-	getNeighbours() {
-		let keyVoisin = [];
-		let x = this.hexX;
-		let y = this.hexY;
-		if (x % 2 == 0) {
-			if (x > 0) {
-				keyVoisin.push(x - 1 + '-' + y);
-			}
-			if (y > 0) {
-				keyVoisin.push(x + '-' + (y - 1));
-			}
-			if (x < nbColumns - 1) {
-				keyVoisin.push(x + 1 + '-' + y);
-			}
+	// getNeighbours(){
+	// 	let keyVoisin = [];
+	// 	let x = this.hexX;
+	// 	let y = this.hexY;
+	// 	if(x%2 == 0){
+	// 		if(x>0){keyVoisin.push((x-1)+'-'+y);}
+	// 		if(y>0){keyVoisin.push(x+'-'+(y-1));}
+	// 		if(x<nbColumns-1){keyVoisin.push((x+1)+'-'+y);}
 
-			if (y < nbRows - 1 && x > 0) {
-				keyVoisin.push(x - 1 + '-' + (y + 1));
-			}
-			if (y < nbRows - 1) {
-				keyVoisin.push(x + '-' + (y + 1));
-			}
-			if (y < nbRows - 1 && x < nbColumns - 1) {
-				keyVoisin.push(x + 1 + '-' + (y + 1));
-			}
-		} else {
-			if (y > 0 && x > 0) {
-				keyVoisin.push(x - 1 + '-' + (y - 1));
-			}
-			if (y > 0) {
-				keyVoisin.push(x + '-' + (y - 1));
-			}
-			if (y > 0 && x < nbColumns - 1) {
-				keyVoisin.push(x + 1 + '-' + (y - 1));
-			}
+	// 		if(y<nbRows-1&&x>0){keyVoisin.push((x-1)+'-'+(y+1));}
+	// 		if(y<nbRows-1){keyVoisin.push(x+'-'+(y+1));}
+	// 		if(y<nbRows-1&&x<nbColumns-1){keyVoisin.push((x+1)+'-'+(y+1));}
+	// 	}else{
+	// 		if(y>0&&x>0){keyVoisin.push((x-1)+'-'+(y-1));}
+	// 		if(y>0){keyVoisin.push(x+'-'+(y-1));}
+	// 		if(y>0&&x<nbColumns-1){keyVoisin.push((x+1)+'-'+(y-1));}
 
-			if (x > 0) {
-				keyVoisin.push(x - 1 + '-' + y);
-			}
-			if (y < nbRows - 1) {
-				keyVoisin.push(x + '-' + (y + 1));
-			}
-			if (x < nbColumns - 1) {
-				keyVoisin.push(x + 1 + '-' + y);
-			}
-		}
-		return keyVoisin;
-	}
+	// 		if(x>0){keyVoisin.push((x-1)+'-'+y);}
+	// 		if(y<nbRows-1){keyVoisin.push(x+'-'+(y+1));}
+	// 		if(x<nbColumns-1){keyVoisin.push((x+1)+'-'+y);}
+	// 	}
+	// 	return keyVoisin;
+	// }
 
 	// ---------------------------------------------------------------------------------------------
 	// Méthodes d'Affichage
@@ -2541,7 +2588,7 @@ class Token extends Element {
 
 }
 
-const nbColumns = 24;
+const nbColumns = 36;
 
 let gap = 5;
 let nbRows = 14;
@@ -2562,6 +2609,7 @@ let clickEvent = false;
 let selectedTile = null;
 
 let demoToken = null;
+let paused = false;
 
 const iniObservation = () => {
 	canvas = document.querySelector('#mainCanvas');
@@ -2599,10 +2647,24 @@ const iniObservation = () => {
 	getApi('systemChoiceData', result => {
 		system = result;
 		setTextNode('#titleSystem', system.title);
+
 		iniApp();
 	});
 
-	document.querySelector('#methodBtnReset').onclick = iniBoard;
+	document.querySelector('#btnReset').onclick = iniBoard;
+	document.querySelector('#btnPause').onclick = simPause;
+};
+
+const simPause = () => {
+	paused = !paused;
+	let btn = document.querySelector('#btnPause');
+	if (paused) {
+		btn.innerHTML = "Reprendre";
+		btn.classList.add("active");
+	} else {
+		btn.innerHTML = "Pause";
+		btn.classList.remove("active");
+	}
 };
 
 const iniApp = () => {
@@ -2636,8 +2698,12 @@ const iniApp = () => {
 		}
 	}
 
+	let color = system.board.Color;
+	console.log(color);
+	if (color && color != "" && color != " ") {
+		document.body.style.backgroundColor = '#' + color;
+	}
 	iniBoard();
-
 	tick();
 };
 
@@ -2725,9 +2791,9 @@ const tick = () => {
 	tilesTick();
 	if (boardConfig.timer <= 0) {
 		boardConfig.timer = boardConfig.speed;
-		if (selectedTile) {
-			printInfo();
-		}
+	}
+	if (selectedTile) {
+		printInfo();
 	}
 	boardConfig.timer--;
 	clickEvent = false;
@@ -2740,8 +2806,8 @@ const tilesSwitch = () => {
 		for (let column = 0; column < nbColumns; column++) {
 			let tile = tilesList[row][column];
 
-			if (boardConfig.timer <= 0) {
-				tile.switchInputs(); // To Dispatch to workers
+			if (boardConfig.timer <= 0 && !paused) {
+				tile.switchInputs();
 			}
 		}
 	}
@@ -2753,12 +2819,9 @@ const tilesTick = () => {
 			let tile = tilesList[row][column];
 
 			tile.continuousTick(clickEvent);
-			if (boardConfig.timer <= 0) {
-				tile.tick(); // To Dispatch to workers
+			if (boardConfig.timer <= 0 && !paused) {
+				tile.tick();
 			}
-			// if(tile.children.length>0){
-			// 	console.log(tile)
-			// }
 		}
 	}
 };
@@ -2781,19 +2844,55 @@ const printInfo = () => {
 };
 
 const printList = (parent, list, onclick = null) => {
-	parent.innerHTML = "";
+	// parent.innerHTML = "";
+	// if(list){
+	// 	list.forEach(input=>{
+	// 		addListElement(parent,input,input,onclick)
+	// 	});
+	// }
+	let actNodes = [];
+	parent.childNodes.forEach(node => {
+		if (!list.includes(node.innerHTML)) {
+			node.remove();
+		} else {
+
+			actNodes.push(node.innerHTML);
+		}
+	});
+
 	if (list) {
 		list.forEach(input => {
-			addListElement(parent, input, input, onclick);
+
+			if (!actNodes.includes(input)) {
+				addListElement(parent, input, input, onclick);
+			}
 		});
 	}
 };
 
 const printObjList = (parent, list, onclick = null) => {
-	parent.innerHTML = "";
+	// parent.innerHTML = "";
+	let actNodes = [];
+	let listNames = [];
+	let nodeNames = [];
+	list.forEach(input => {
+		listNames.push(input.name);
+	});
+	// parent.childNodes.forEach(node=>{
+	// 	nodeNames.push(node.innerHTML);
+	// });
+	parent.childNodes.forEach(node => {
+		if (!listNames.includes(node.innerHTML) || actNodes.includes(node.innerHTML)) {
+			node.remove();
+		} else if (!actNodes.includes(node.innerHTML)) {
+			actNodes.push(node.innerHTML);
+		}
+	});
 	if (list) {
 		list.forEach(input => {
-			addListElement(parent, input.name, input, onclick);
+			if (!actNodes.includes(input.name)) {
+				addListElement(parent, input.name, input, onclick);
+			}
 		});
 	}
 };
@@ -2892,6 +2991,52 @@ const isInput = name => {
 		return true;
 	}
 	return false;
+};
+
+const getNeighbours = (x, y) => {
+	let keyVoisin = [];
+	if (x % 2 == 0) {
+		if (x > 0) {
+			keyVoisin.push(x - 1 + '-' + y);
+		}
+		if (y > 0) {
+			keyVoisin.push(x + '-' + (y - 1));
+		}
+		if (x < nbColumns - 1) {
+			keyVoisin.push(x + 1 + '-' + y);
+		}
+
+		if (y < nbRows - 1 && x > 0) {
+			keyVoisin.push(x - 1 + '-' + (y + 1));
+		}
+		if (y < nbRows - 1) {
+			keyVoisin.push(x + '-' + (y + 1));
+		}
+		if (y < nbRows - 1 && x < nbColumns - 1) {
+			keyVoisin.push(x + 1 + '-' + (y + 1));
+		}
+	} else {
+		if (y > 0 && x > 0) {
+			keyVoisin.push(x - 1 + '-' + (y - 1));
+		}
+		if (y > 0) {
+			keyVoisin.push(x + '-' + (y - 1));
+		}
+		if (y > 0 && x < nbColumns - 1) {
+			keyVoisin.push(x + 1 + '-' + (y - 1));
+		}
+
+		if (x > 0) {
+			keyVoisin.push(x - 1 + '-' + y);
+		}
+		if (y < nbRows - 1) {
+			keyVoisin.push(x + '-' + (y + 1));
+		}
+		if (x < nbColumns - 1) {
+			keyVoisin.push(x + 1 + '-' + y);
+		}
+	}
+	return keyVoisin;
 };
 
 // https://alvinalexander.com/source-code/javascript-multiple-random-unique-elements-from-array

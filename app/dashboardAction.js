@@ -166,8 +166,9 @@ const createAttribute = (id,element,type) =>{
 	let title = document.querySelector('#titleAttribute').value;
 	let value = Number(document.querySelector('#valueAttribute').value);
 	let attribute = {name:title,value:value}
+	let name = (element.name)?element.name:'tile';
 
-	updateAPI(element.name,type,'addAttribute',{attribute:attribute},(res)=>{
+	updateAPI(name,type,'addAttribute',{attribute:attribute},(res)=>{
 		element.attributes.push(attribute);
 		addAttribute(id,attribute,element,type);
 		hideModal();

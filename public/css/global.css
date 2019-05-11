@@ -668,15 +668,17 @@ padding: 2px 16px;
 	pointer-events: none;
 }
 
-#editorWindow #editorAction .button_square.active{
+#editorWindow #editorAction .button_square.active,.button_square.active{
 	border: 3px solid #4166a0;
 	background-color: #7299d8;
 	pointer-events: all;
+	color: #4166a0;
 }
 
-#editorWindow #editorAction .button_square.active:hover{
+#editorWindow #editorAction .button_square.active:hover,.button_square.active:hover{
 	background-color: #7ea5e5;
 	border-color: #4c74b2;
+	color: #4c74b2;
 }
 
 #editorWindow #editorAction .button_square.delete{
