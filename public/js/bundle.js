@@ -2227,9 +2227,6 @@ class Element {
 		this.children.forEach(child => {
 			let result = child.tick();
 			result.forEach(output => {
-				if (output.elemName == 'Fire') {
-					console.log('RUN_CHILDREN', this.name, output);
-				}
 				this.addInput(this.outputs, output);
 			});
 		});
@@ -2611,6 +2608,14 @@ let selectedTile = null;
 let demoToken = null;
 let paused = false;
 
+let btnEffect = null;
+let selectedEffect = null;
+let effectIndex = 0;
+
+let btnToken = null;
+let selectedToken = null;
+let tokenIndex = 0;
+
 const iniObservation = () => {
 	canvas = document.querySelector('#mainCanvas');
 	ctx = canvas.getContext('2d');
@@ -2653,6 +2658,74 @@ const iniObservation = () => {
 
 	document.querySelector('#btnReset').onclick = iniBoard;
 	document.querySelector('#btnPause').onclick = simPause;
+
+	document.querySelector('#effect_left').onclick = () => {
+		let nb = Object.keys(effectTemplate).length;
+		effectIndex--;
+		if (effectIndex < 0) {
+			effectIndex = nb - 1;
+		}
+		btnEffect.innerHTML = Object.keys(effectTemplate)[effectIndex];
+		selectedEffect = null;
+		btnEffect.classList.remove("active");
+	};
+
+	document.querySelector('#effect_right').onclick = () => {
+		let nb = Object.keys(effectTemplate).length;
+		effectIndex++;
+		if (effectIndex >= nb) {
+			effectIndex = 0;
+		}
+		btnEffect.innerHTML = Object.keys(effectTemplate)[effectIndex];
+		selectedEffect = null;
+		btnEffect.classList.remove("active");
+	};
+
+	document.querySelector('#token_left').onclick = () => {
+		let nb = Object.keys(tokenTemplate).length;
+		tokenIndex--;
+		if (tokenIndex < 0) {
+			tokenIndex = nb - 1;
+		}
+		btnToken.innerHTML = Object.keys(tokenTemplate)[tokenIndex];
+		selectedToken = null;
+		btnToken.classList.remove("active");
+	};
+
+	document.querySelector('#token_right').onclick = () => {
+		let nb = Object.keys(tokenTemplate).length;
+		tokenIndex++;
+		if (tokenIndex >= nb) {
+			tokenIndex = 0;
+		}
+		btnToken.innerHTML = Object.keys(tokenTemplate)[tokenIndex];
+		selectedToken = null;
+		btnToken.classList.remove("active");
+	};
+};
+
+const selectEffect = () => {
+	if (selectedEffect == null) {
+		selectedEffect = btnEffect.innerHTML;
+		selectedToken = null;
+		btnEffect.classList.add("active");
+		btnToken.classList.remove("active");
+	} else {
+		selectedEffect = null;
+		btnEffect.classList.remove("active");
+	}
+};
+
+const selectToken = () => {
+	if (selectedToken == null) {
+		selectedEffect = null;
+		selectedToken = btnToken.innerHTML;
+		btnToken.classList.add("active");
+		btnEffect.classList.remove("active");
+	} else {
+		selectedToken = null;
+		btnToken.classList.remove("active");
+	}
 };
 
 const simPause = () => {
@@ -2703,6 +2776,23 @@ const iniApp = () => {
 	if (color && color != "" && color != " ") {
 		document.body.style.backgroundColor = '#' + color;
 	}
+
+	if (Object.keys(effectTemplate).length <= 0) {
+		document.querySelector('#effect_selection').style.display = 'none';
+	} else {
+		btnEffect = document.querySelector('#effect_select');
+		btnEffect.onclick = selectEffect;
+		btnEffect.innerHTML = Object.keys(effectTemplate)[effectIndex];
+	}
+
+	if (Object.keys(tokenTemplate).length <= 0) {
+		document.querySelector('#token_selection').style.display = 'none';
+	} else {
+		btnToken = document.querySelector('#token_select');
+		btnToken.onclick = selectToken;
+		btnToken.innerHTML = Object.keys(tokenTemplate)[tokenIndex];
+	}
+
 	iniBoard();
 	tick();
 };

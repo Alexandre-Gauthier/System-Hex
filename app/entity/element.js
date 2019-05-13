@@ -131,9 +131,7 @@ class Element{
 		this.children.forEach(child => {
 			let result = child.tick();
 			result.forEach(output=>{
-				if(output.elemName == 'Fire'){console.log('RUN_CHILDREN',this.name,output);}
 				this.addInput(this.outputs,output);
-
 			});
 		});
 	}

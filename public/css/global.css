@@ -212,6 +212,7 @@ a > .inner_form:hover h1{
 	padding: 5px;
 	border-radius: 10px;
 	margin-left:5px;
+	margin-right:5px;
 	cursor: pointer;
 	font-size:20px;
 	font-weight: bold;
@@ -848,4 +849,23 @@ padding: 2px 16px;
 .slider .ui-slider-handle:hover, .slider:hover .ui-slider-handle
 {
 	background: #999482;
+}
+
+.observation_container{
+	height: 82%;
+}
+
+.arrow_button{
+	color: #f2e7d0;
+	font-weight: bold;
+	font-size: 20px;
+	cursor:pointer;
+}
+
+.arrow_button:hover{
+	color: #ada895;
+}
+
+p.arrow_button{
+	margin-right: 10px;
 }
