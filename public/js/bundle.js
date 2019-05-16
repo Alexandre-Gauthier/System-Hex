@@ -2417,7 +2417,13 @@ class Tile extends Element {
 		let y = this.posY;
 		if (posX > x - this.size + mod && posX < x + this.size - mod && posY > y - this.size + mod && posY < y + this.size - mod) {
 			this.selected = true;
-			if (clickEvent) {
+			if (clickEvent && selectedEffect == null && selectedToken == null) {
+				this.showTile();
+			} else if (clickEvent && selectedEffect != null) {
+				this.createEffect(selectedEffect);
+				this.showTile();
+			} else if (clickEvent && selectedToken != null) {
+				this.createToken(selectedToken);
 				this.showTile();
 			}
 		} else if (selectedTile == this || selectedTile && selectedTile.tile == this.tile) {
@@ -2491,30 +2497,6 @@ class Tile extends Element {
 			}
 		}
 	}
-
-	// getNeighbours(){
-	// 	let keyVoisin = [];
-	// 	let x = this.hexX;
-	// 	let y = this.hexY;
-	// 	if(x%2 == 0){
-	// 		if(x>0){keyVoisin.push((x-1)+'-'+y);}
-	// 		if(y>0){keyVoisin.push(x+'-'+(y-1));}
-	// 		if(x<nbColumns-1){keyVoisin.push((x+1)+'-'+y);}
-
-	// 		if(y<nbRows-1&&x>0){keyVoisin.push((x-1)+'-'+(y+1));}
-	// 		if(y<nbRows-1){keyVoisin.push(x+'-'+(y+1));}
-	// 		if(y<nbRows-1&&x<nbColumns-1){keyVoisin.push((x+1)+'-'+(y+1));}
-	// 	}else{
-	// 		if(y>0&&x>0){keyVoisin.push((x-1)+'-'+(y-1));}
-	// 		if(y>0){keyVoisin.push(x+'-'+(y-1));}
-	// 		if(y>0&&x<nbColumns-1){keyVoisin.push((x+1)+'-'+(y-1));}
-
-	// 		if(x>0){keyVoisin.push((x-1)+'-'+y);}
-	// 		if(y<nbRows-1){keyVoisin.push(x+'-'+(y+1));}
-	// 		if(x<nbColumns-1){keyVoisin.push((x+1)+'-'+y);}
-	// 	}
-	// 	return keyVoisin;
-	// }
 
 	// ---------------------------------------------------------------------------------------------
 	// Méthodes d'Affichage
@@ -2918,7 +2900,24 @@ const tilesTick = () => {
 
 const printInfo = () => {
 	let container = document.querySelector('#infoTile');
-	setTextNode('#selectTitle', selectedTile.name == 'tile' ? "Tuile" : selectedTile.name + " " + selectedTile.id);
+	let btnDelete = document.querySelector('#elementDelete');
+	if (selectedTile.name != 'tile') {
+		setTextNode('#selectTitle', selectedTile.name + " - " + selectedTile.id);
+		btnDelete.style.display = "block";
+		btnDelete.onclick = () => {
+			let tile = getTile(selectedTile.tile);
+			let arr = tile.children;
+			for (let i = 0; i < arr.length; i++) {
+				if (arr[i].name == selectedTile.name) {
+					arr.splice(i, 1);
+					i--;
+				}
+			}
+		};
+	} else {
+		setTextNode('#selectTitle', "Tuile - " + selectedTile.id);
+		btnDelete.style.display = "none";
+	}
 
 	let listAttributes = container.querySelector('#listAttributes');
 	listAttributes.innerHTML = "";
@@ -2934,12 +2933,6 @@ const printInfo = () => {
 };
 
 const printList = (parent, list, onclick = null) => {
-	// parent.innerHTML = "";
-	// if(list){
-	// 	list.forEach(input=>{
-	// 		addListElement(parent,input,input,onclick)
-	// 	});
-	// }
 	let actNodes = [];
 	parent.childNodes.forEach(node => {
 		if (!list.includes(node.innerHTML)) {
