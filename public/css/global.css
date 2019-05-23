@@ -34,6 +34,15 @@ h1{
 	padding:0 20px 20px 20px;
 	box-sizing: border-box;
 }
+.outer_form .link img{
+	opacity: 1;
+	transition: all 0.5s;
+}
+
+.outer_form .link:hover img{
+	opacity: 0.8;
+	transition: all 0.5s;
+}
 
 .center_flex{
 	display: flex;
@@ -89,6 +98,10 @@ h1{
 	margin-left: 0px;
 }
 
+.centered{
+	margin-left: auto !important;
+	margin-right: auto !important;
+}
 
 .center_form .boxInput, .center_form select{
 	display:block;

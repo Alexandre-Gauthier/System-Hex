@@ -19,8 +19,8 @@ const iniDashboard = () =>{
 		addOnClickModal('#addTileAttribute','#listTileAttributes',system.tile,'tile');
 
 		fillInput('#colorBGBoard',system.board.Color);
-		addAttributes('#listBoardAttributes',system.board.attributes,system.board,'board');
-		addOnClickModal('#addBoardAttribute','#listBoardAttributes',system.board,'board');
+		// addAttributes('#listBoardAttributes',system.board.attributes,system.board,'board');
+		// addOnClickModal('#addBoardAttribute','#listBoardAttributes',system.board,'board');
 
 		addOpenEditor('#listTileMethods',system.tile.methods,null);
 		fillList('#listTokens',system.tokens,showToken);
