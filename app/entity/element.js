@@ -60,8 +60,6 @@ class Element{
 						}catch(err){
 							console.error('METHOD',newMethod.name,'HAS AN ERROR');
 						}
-					}else{
-						console.error('METHOD',newMethod.name,'IS INACTIVE');
 					}
 				}else{
 					console.error('METHOD',newMethod.name,'IS UNRESOLVED');

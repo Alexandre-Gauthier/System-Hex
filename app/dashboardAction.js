@@ -224,7 +224,6 @@ const showToken = (index,elem) =>{
 		formEffect.style.display = 'none';
 		let token = system.tokens[index];
 		addOnClickModal('#addTokenAttribute','#listTokenAttributes',token,'token');
-		console.log(token.name)
 		fillInput('#titleToken',token.name);
 		fillInput('#colorBGToken',token.Color);
 		fillInput('#colorBorderToken',token.Border);

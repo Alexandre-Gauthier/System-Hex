@@ -151,10 +151,6 @@ class Tile extends Element{
 		canvas.strokeStyle = this.getBorderColor();
 		canvas.stroke();
 		canvas.restore();
-
-		// canvas.font = "10px Arial";
-		// canvas.fillStyle = 'black';
-		// ctx.fillText(this.hexX+"-"+this.hexY, x-9, y+4);
 	}
 
 	getBorderColor(){

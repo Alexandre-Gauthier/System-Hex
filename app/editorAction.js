@@ -22,7 +22,7 @@ let isTile = false;
 
 const iniEditor = () =>{
 	space = document.querySelector('#creationSpace');
-	stringBody = document.querySelector('#stringBody');
+	// stringBody = document.querySelector('#stringBody');
 
 	space.onclick=(e)=>{
 		if(selectedPiece){
@@ -52,7 +52,6 @@ const iniEditor = () =>{
 
 		addAttributes('#listTokenAttributes',token.attributes,token,'token');
 
-		console.log(token);
 		addOpenEditor('#listTokenMethods',token.methods,token.name);
 
 
@@ -66,10 +65,9 @@ const iniEditor = () =>{
 			methodBody = method.body;
 			restoreDOM();
 		}
-		console.log(method);
 		if(method['active'] != 'undefined' && method['active'] == false){
 			let btn = document.querySelector('#methodBtnActive')
-			btn.innerHTML = "Activer";
+			btn.innerHTML = "<img src='images/play_icon.png' alt=''>";
 			btn.classList.add("delete");
 		}
 		getSelectedMethod();
@@ -780,7 +778,6 @@ class And extends Piece{
 		this.node.setAttribute("tags","condition,dependent,group");
 		this.node.style.backgroundColor = "#ddb46e"
 
-		//this.node.style.display = "flex";
 		this.addText("Et","h3",this.node);
 		this.addAnchor("and");
 		this.addCapsule("valeur","condition");
@@ -793,7 +790,6 @@ class Or extends Piece{
 		this.node.setAttribute("tags","condition,dependent,group");
 		this.node.style.backgroundColor = "#ddb46e"
 
-		//this.node.style.display = "flex";
 		this.addText("Ou","h3",this.node);
 		this.addAnchor("or");
 		this.addCapsule("valeur","condition");

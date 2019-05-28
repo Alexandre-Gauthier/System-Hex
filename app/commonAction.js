@@ -11,7 +11,6 @@ const getApi = (route,action) =>{
 		if(request.readyState === 4){
 			if (request.status >= 200 && request.status < 400) {
 				let data = JSON.parse(request.response);
-				console.log('Response:',data);
 				action(data);
 			} else {
 				console.log('error');
@@ -62,14 +61,6 @@ const dialogScript = () =>{
 
 		// Get the <span> element that closes the modal
 		var span = document.querySelector("#closeBtn");
-
-		// When the user clicks the button, open the modal
-		// btns.forEach(btn=>{
-		// 	btn.onclick = ()=> {
-		// 		modal.style.display = "block";
-		// 	}
-		// })
-
 
 		// When the user clicks on <span> (x), close the modal
 		span.onclick = function() {

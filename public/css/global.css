@@ -229,6 +229,7 @@ a > .inner_form:hover h1{
 	cursor: pointer;
 	font-size:20px;
 	font-weight: bold;
+	text-align: center;
 }
 
 .button_square.save{
@@ -247,6 +248,7 @@ a > .inner_form:hover h1{
 	background-color: #6d6a6b;
 	color: #3f3738;
 	border-color: #3f3738;
+	filter: grayscale(100%);
 }
 
 .button_square.delete:hover{
@@ -265,6 +267,11 @@ a > .inner_form:hover h1{
 	background-color: #bc604f;
 	color: #703634;
 	border-color: #703634;
+}
+
+.button_square img{
+
+	max-height:100%;
 }
 
 .full_height{
@@ -680,6 +687,17 @@ padding: 2px 16px;
 	border: 3px solid #bfbfbf;
 	background-color: #d1d1d1;
 	pointer-events: none;
+
+}
+
+#editorWindow #editorAction .button_square img{
+	filter: grayscale(100%);
+	opacity: .5;
+}
+
+#editorWindow #editorAction .button_square.active img{
+	filter: none;
+	opacity: 1;
 }
 
 #editorWindow #editorAction .button_square.active,.button_square.active{
@@ -711,6 +729,10 @@ padding: 2px 16px;
 	background-color: #81a061;
 	color: #647a48;
 	border-color: #647a48;
+}
+
+#editorWindow #editorAction .button_square.move img{
+	filter: hue-rotate(210deg) !important;
 }
 
 #editorWindow #editorAction .button_square.move:hover{

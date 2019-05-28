@@ -44,7 +44,6 @@ const getApi = (route, action) => {
 		if (request.readyState === 4) {
 			if (request.status >= 200 && request.status < 400) {
 				let data = JSON.parse(request.response);
-				console.log('Response:', data);
 				action(data);
 			} else {
 				console.log('error');
@@ -95,14 +94,6 @@ const dialogScript = () => {
 
 		// Get the <span> element that closes the modal
 		var span = document.querySelector("#closeBtn");
-
-		// When the user clicks the button, open the modal
-		// btns.forEach(btn=>{
-		// 	btn.onclick = ()=> {
-		// 		modal.style.display = "block";
-		// 	}
-		// })
-
 
 		// When the user clicks on <span> (x), close the modal
 		span.onclick = function () {
@@ -401,7 +392,6 @@ const showToken = (index, elem) => {
 		formEffect.style.display = 'none';
 		let token = system.tokens[index];
 		addOnClickModal('#addTokenAttribute', '#listTokenAttributes', token, 'token');
-		console.log(token.name);
 		fillInput('#titleToken', token.name);
 		fillInput('#colorBGToken', token.Color);
 		fillInput('#colorBorderToken', token.Border);
@@ -638,29 +628,6 @@ const deleteSystem = () => {
 		}, params);
 	}
 };
-let board = { attributes: [], color: '#ede1c9' };
-
-let iniTile = { attributes: [], color: '#ede1c9', border: '#8e8a6b', selected: '#436177', methods: [{ name: 'onFire', arguments: 'obj', body: "" }] };
-
-let iniTokenArbre = { name: 'Arbre',
-						color: '#8dae7f',
-						border: '#547048',
-						attributes: { durability: 500 },
-						listenedInputs: ['fire'],
-						methods: [{ name: 'dealFire', arguments: 'obj', body: "let input = getInput(obj.inputs,'fire'); if(input){obj.attributes['durability'] -= input.power;obj.addInput(obj.outputs,input);}" }, { name: 'destroyToken', arguments: 'obj', body: "if(obj.attributes['durability']<=0){obj.addInput(obj.outputs,{name:'destroyChild',elem:obj.id})}" }]
-};
-
-let iniTokenFire = { name: 'Fire',
-						color: '#f4b642',
-						border: '#995037',
-						attributes: {},
-						listenedInputs: ['fire'],
-						methods: [{ name: 'destroyToken', arguments: 'obj', body: "if(!getInput(obj.inputs,'fire')){obj.addInput(obj.outputs,{name:'destroyChild',elem:obj.id})}" }]
-};
-
-let inputFire = { name: 'fire',
-						power: 10
-};
 function toJSON(node) {
 	node = node || this;
 	var obj = {
@@ -808,7 +775,7 @@ let isTile = false;
 
 const iniEditor = () => {
 	space = document.querySelector('#creationSpace');
-	stringBody = document.querySelector('#stringBody');
+	// stringBody = document.querySelector('#stringBody');
 
 	space.onclick = e => {
 		if (selectedPiece) {
@@ -838,7 +805,6 @@ const iniEditor = () => {
 
 		addAttributes('#listTokenAttributes', token.attributes, token, 'token');
 
-		console.log(token);
 		addOpenEditor('#listTokenMethods', token.methods, token.name);
 
 		if (getUrlVars()["method"] == 'new') {
@@ -851,10 +817,9 @@ const iniEditor = () => {
 			methodBody = method.body;
 			restoreDOM();
 		}
-		console.log(method);
 		if (method['active'] != 'undefined' && method['active'] == false) {
 			let btn = document.querySelector('#methodBtnActive');
-			btn.innerHTML = "Activer";
+			btn.innerHTML = "<img src='images/play_icon.png' alt=''>";
 			btn.classList.add("delete");
 		}
 		getSelectedMethod();
@@ -1563,7 +1528,6 @@ class And extends Piece {
 		this.node.setAttribute("tags", "condition,dependent,group");
 		this.node.style.backgroundColor = "#ddb46e";
 
-		//this.node.style.display = "flex";
 		this.addText("Et", "h3", this.node);
 		this.addAnchor("and");
 		this.addCapsule("valeur", "condition");
@@ -1576,7 +1540,6 @@ class Or extends Piece {
 		this.node.setAttribute("tags", "condition,dependent,group");
 		this.node.style.backgroundColor = "#ddb46e";
 
-		//this.node.style.display = "flex";
 		this.addText("Ou", "h3", this.node);
 		this.addAnchor("or");
 		this.addCapsule("valeur", "condition");
@@ -2157,8 +2120,6 @@ class Element {
 						} catch (err) {
 							console.error('METHOD', newMethod.name, 'HAS AN ERROR');
 						}
-					} else {
-						console.error('METHOD', newMethod.name, 'IS INACTIVE');
 					}
 				} else {
 					console.error('METHOD', newMethod.name, 'IS UNRESOLVED');
@@ -2525,10 +2486,6 @@ class Tile extends Element {
 		canvas.strokeStyle = this.getBorderColor();
 		canvas.stroke();
 		canvas.restore();
-
-		// canvas.font = "10px Arial";
-		// canvas.fillStyle = 'black';
-		// ctx.fillText(this.hexX+"-"+this.hexY, x-9, y+4);
 	}
 
 	getBorderColor() {
@@ -2714,10 +2671,10 @@ const simPause = () => {
 	paused = !paused;
 	let btn = document.querySelector('#btnPause');
 	if (paused) {
-		btn.innerHTML = "Reprendre";
+		btn.innerHTML = "<img src='images/play_icon.png' alt=''>";
 		btn.classList.add("active");
 	} else {
-		btn.innerHTML = "Pause";
+		btn.innerHTML = "<img src='images/pause_icon.png' alt=''>";
 		btn.classList.remove("active");
 	}
 };
@@ -2735,7 +2692,6 @@ const iniApp = () => {
 			});
 			effect.attributes = attributes;
 			effectTemplate[effect.name] = effect;
-			console.log(effect);
 		} catch (err) {
 			console.error(json.name, 'ERROR_CONSTRUCTION_METHOD');
 		}
@@ -2747,14 +2703,12 @@ const iniApp = () => {
 		try {
 			let token = json;
 			tokenTemplate[token.name] = token;
-			console.log(token);
 		} catch (err) {
 			console.error(json.name, 'ERROR_CONSTRUCTION_METHOD');
 		}
 	}
 
 	let color = system.board.Color;
-	console.log(color);
 	if (color && color != "" && color != " ") {
 		document.body.style.backgroundColor = '#' + color;
 	}
@@ -2854,7 +2808,6 @@ const getRatio = mainToken => {
 const changeSpeed = () => {
 	let speed = $("#speedSlider").slider("value");
 	boardConfig.speed = Math.abs(speed);
-	console.log(boardConfig.speed);
 };
 
 const tick = () => {
@@ -2954,16 +2907,13 @@ const printList = (parent, list, onclick = null) => {
 };
 
 const printObjList = (parent, list, onclick = null) => {
-	// parent.innerHTML = "";
 	let actNodes = [];
 	let listNames = [];
 	let nodeNames = [];
 	list.forEach(input => {
 		listNames.push(input.name);
 	});
-	// parent.childNodes.forEach(node=>{
-	// 	nodeNames.push(node.innerHTML);
-	// });
+
 	parent.childNodes.forEach(node => {
 		if (!listNames.includes(node.innerHTML) || actNodes.includes(node.innerHTML)) {
 			node.remove();

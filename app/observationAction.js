@@ -147,10 +147,10 @@ const simPause = () =>{
 	paused = !paused;
 	let btn = document.querySelector('#btnPause');
 	if(paused){
-		btn.innerHTML = "Reprendre";
+		btn.innerHTML = "<img src='images/play_icon.png' alt=''>";
 		btn.classList.add("active");
 	}else{
-		btn.innerHTML = "Pause";
+		btn.innerHTML = "<img src='images/pause_icon.png' alt=''>";
 		btn.classList.remove("active");
 	}
 }
@@ -168,7 +168,6 @@ const iniApp = () =>{
 			});
 			effect.attributes = attributes;
 			effectTemplate[effect.name] = effect;
-			console.log(effect)
 		}catch(err){
 			console.error(json.name,'ERROR_CONSTRUCTION_METHOD');
 		}
@@ -180,14 +179,12 @@ const iniApp = () =>{
 		try{
 			let token = json;
 			tokenTemplate[token.name] = token;
-			console.log(token)
 		}catch(err){
 			console.error(json.name,'ERROR_CONSTRUCTION_METHOD');
 		}
 	}
 
 	let color = system.board.Color;
-	console.log(color)
 	if(color && color != "" && color != " "){
 		document.body.style.backgroundColor = '#'+color;
 	}
@@ -287,7 +284,6 @@ const getRatio = (mainToken) =>{
 const changeSpeed = () =>{
 	let speed = $( "#speedSlider").slider("value");
 	boardConfig.speed = Math.abs(speed);
-	console.log(boardConfig.speed);
 }
 
 const tick = () =>{
@@ -387,16 +383,13 @@ const printList = (parent,list,onclick=null) =>{
 }
 
 const printObjList = (parent,list,onclick=null) =>{
-	// parent.innerHTML = "";
 	let actNodes = [];
 	let listNames = [];
 	let nodeNames = [];
 	list.forEach(input=>{
 		listNames.push(input.name);
 	});
-	// parent.childNodes.forEach(node=>{
-	// 	nodeNames.push(node.innerHTML);
-	// });
+
 	parent.childNodes.forEach(node=>{
 		if(!listNames.includes(node.innerHTML) || actNodes.includes(node.innerHTML)){
 			node.remove();
