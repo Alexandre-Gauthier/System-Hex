@@ -186,6 +186,13 @@ class Element{
 		}
 	}
 
+	changeEffectAttribute(effect,name,value){
+		let input = getInput(this.inputs,effect);
+		if(input){
+			input.attributes[name] = value;
+		}
+	}
+
 	deleteToken(){
 		this.addInput(this.outputs,{name:'destroyChild',elem:this.id,elemName:this.name});
 	}

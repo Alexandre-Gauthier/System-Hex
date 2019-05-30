@@ -775,7 +775,7 @@ let isTile = false;
 
 const iniEditor = () => {
 	space = document.querySelector('#creationSpace');
-	// stringBody = document.querySelector('#stringBody');
+	stringBody = document.querySelector('#stringBody');
 
 	space.onclick = e => {
 		if (selectedPiece) {
@@ -1208,6 +1208,18 @@ const getEffectAttributes = () => {
 	system.effects.forEach(effect => {
 		effect.attributes.forEach(attribute => {
 			arr.push([effect.name + "->" + attribute.name, "obj.getEffectAttribute('" + effect.name + "','" + attribute.name + "')"]);
+		});
+	});
+
+	return arr;
+};
+
+const getEffectsAndAttributes = () => {
+	let arr = [];
+	let results = [];
+	system.effects.forEach(effect => {
+		effect.attributes.forEach(attribute => {
+			arr.push([effect.name + "->" + attribute.name, "'" + effect.name + "','" + attribute.name + "'"]);
 		});
 	});
 
@@ -1695,6 +1707,7 @@ class Increment extends Piece {
 		}
 	}
 }
+
 class Decrement extends Piece {
 	constructor(parent) {
 		super(parent);
@@ -1713,6 +1726,7 @@ class Decrement extends Piece {
 		}
 	}
 }
+
 class ChangeVariable extends Piece {
 	constructor(parent) {
 		super(parent);
@@ -1726,6 +1740,26 @@ class ChangeVariable extends Piece {
 			this.addText(" est égal à ", "h3", this.node);
 			this.addAnchor("equal");
 			this.addCapsule("valeur", "valeur,group,math,object");
+			this.addAnchor("endLine");
+		}
+	}
+}
+
+class ChangeEffectAttribute extends Piece {
+	constructor(parent) {
+		super(parent);
+		this.node.setAttribute("tags", "valeur,math");
+		this.node.style.backgroundColor = "#c69ace";
+		this.node.style.display = "flex";
+
+		let results = getEffectsAndAttributes();
+		if (results.length > 0) {
+			this.addAnchor("changeEffectAttribute");
+			this.addSelect("select,effectAtt", results);
+			this.addText(" est égal à ", "h3", this.node);
+			this.addAnchor("separator");
+			this.addCapsule("valeur", "valeur,group,math,object");
+			this.addAnchor("endGroup");
 			this.addAnchor("endLine");
 		}
 	}
@@ -1877,6 +1911,10 @@ function outputNode(node) {
 
 		if (hasTag('randomEvent', node)) {
 			methodBody += "obj.randomPerc(";
+		}
+
+		if (hasTag('changeEffectAttribute', node)) {
+			methodBody += "obj.changeEffectAttribute(";
 		}
 
 		if (hasTag('getEffectNeighbors', node)) {
@@ -2242,6 +2280,13 @@ class Element {
 			return input.attributes[name];
 		} else {
 			return effectTemplate[effect].attributes[name];
+		}
+	}
+
+	changeEffectAttribute(effect, name, value) {
+		let input = getInput(this.inputs, effect);
+		if (input) {
+			input.attributes[name] = value;
 		}
 	}
 
