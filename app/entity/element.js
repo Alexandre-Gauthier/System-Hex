@@ -233,6 +233,10 @@ class Element{
 		return false;
 	}
 
+	getRandomNumber(min,max){
+		return Math.floor(Math.random() * (+max - +min)) + +min;
+	}
+
 	listenInput(name){
 
 	}

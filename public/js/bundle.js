@@ -775,7 +775,7 @@ let isTile = false;
 
 const iniEditor = () => {
 	space = document.querySelector('#creationSpace');
-	stringBody = document.querySelector('#stringBody');
+	// stringBody = document.querySelector('#stringBody');
 
 	space.onclick = e => {
 		if (selectedPiece) {
@@ -1633,7 +1633,7 @@ class InputNumber extends Piece {
 		this.node.style.backgroundColor = "#bed8d3";
 
 		this.node.style.display = "flex";
-		this.addInput("Nombre", "input", /^\d*\.?\d*$/);
+		this.addInput("Nombre", "input", /^[0-9-]*$/);
 	}
 }
 
@@ -1827,6 +1827,22 @@ class CreateToken extends Piece {
 	}
 }
 
+class GetRandomBetween extends Piece {
+	constructor(parent) {
+		super(parent);
+		this.node.setAttribute("tags", "block,line,action");
+		this.node.style.backgroundColor = "#b4db85";
+
+		this.addText("Nombre entre ", "h3", this.node);
+		this.addAnchor("getRandomNumber");
+		this.addInput("Nombre", "input", /^\d*\.?\d*$/);
+		this.addText(" et ", "h3", this.node);
+		this.addAnchor("separator");
+		this.addInput("Nombre", "input", /^\d*\.?\d*$/);
+		this.addAnchor("endGroup");
+	}
+}
+
 class CreateEffect extends Piece {
 	constructor(parent) {
 		super(parent);
@@ -1911,6 +1927,10 @@ function outputNode(node) {
 
 		if (hasTag('randomEvent', node)) {
 			methodBody += "obj.randomPerc(";
+		}
+
+		if (hasTag('getRandomNumber', node)) {
+			methodBody += "obj.getRandomNumber(";
 		}
 
 		if (hasTag('changeEffectAttribute', node)) {
@@ -2328,6 +2348,10 @@ class Element {
 			return true;
 		}
 		return false;
+	}
+
+	getRandomNumber(min, max) {
+		return Math.floor(Math.random() * (+max - +min)) + +min;
 	}
 
 	listenInput(name) {}

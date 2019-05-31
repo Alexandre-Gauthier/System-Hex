@@ -677,6 +677,7 @@ padding: 2px 16px;
 }
 
 #editorWindow #editorAction{
+	position:fixed;
 	width: 40px;
 }
 
@@ -745,7 +746,7 @@ padding: 2px 16px;
 
 #creationSpace{
 	flex-grow: 1;
-	margin-left:10px;
+	margin-left:40px;
 	position: relative;
 	padding: 0px 20px;
 
